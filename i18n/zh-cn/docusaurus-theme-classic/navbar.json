@@ -1,6 +1,6 @@
 {
   "title": {
-    "message": "Haochen",
+    "message": "Runqi",
     "description": "The title in the navbar"
   },
   "item.label.Blog": {
@@ -10,5 +10,9 @@
   "item.label.GitHub": {
     "message": "GitHub",
     "description": "Navbar item with label GitHub"
+  },
+  "item.label.Docs": {
+    "message": "学习笔记",
+    "description": "Navbar item with label Dos"
   }
 }

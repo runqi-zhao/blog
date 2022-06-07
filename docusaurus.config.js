@@ -1,10 +1,10 @@
 require("dotenv").config();
 module.exports = {
-  title: "Haochen",
+  title: "Runqi",
   tagline: "Learning is a Lifelong Process",
   //disableTitleTagline: true,
   //titleDelimiter: "*",
-  url: "https://haochenqi.com/",
+  url: "https://runqi.com/",
   baseUrl: "/",
   customFields: {
     // Put your custom environment here
@@ -14,28 +14,28 @@ module.exports = {
   //onBrokenLinks: "throw",
   //onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  //organizationName: "Haochen", // Usually your GitHub org/user name.
-  projectName: "Haochen-Blog", // Usually your repo name.
+  //organizationName: "zrsaber", // Usually your GitHub org/user name.
+  projectName: "blog", // Usually your repo name.
   stylesheets: ["https://fonts.font.im/css?family=Raleway:500,700"],
   themeConfig: {
     navbar: {
-      title: "Haochen",
+      title: "Runqi",
       logo: {
         alt: "My Site Logo",
-        src: "img/haochen.logo.svg",
+        src: "img/Runqi.png",
       },
       items: [
-        // {
-        //   to: "docs/",
-        //   activeBasePath: "docs",
-        //   label: "Docs",
-        //   position: "left",
-        // },
+        {
+          to: "docs/",
+          activeBasePath: "docs",
+          label: "Docs",
+          position: "left",
+        },
         { type: "localeDropdown", position: "right" },
         { to: "blog", label: "Blog", position: "right" },
 
         {
-          href: "https://github.com/HaochenQ",
+          href: "https://github.com/zrsaber",
           label: "GitHub",
           position: "right",
         },
@@ -48,12 +48,12 @@ module.exports = {
           title: "Social Media",
           items: [
             {
-              label: "Linkedin",
-              href: "https://www.linkedin.com/in/haochen-qi-a36393171/",
+              label: "Email",
+              href: "mailto:z529978097@gmail.com",
             },
             {
               label: "Facebook",
-              href: "https://www.facebook.com/haochen.qi.520",
+              href: "https://www.facebook.com/profile.php?id=100063797510792",
             },
           ],
         },
@@ -96,12 +96,12 @@ module.exports = {
             },
             {
               label: "GitHub",
-              href: "https://github.com/HaochenQ",
+              href: "https://github.com/zrsaber",
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Haochen. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Runqi. Built with Docusaurus.`,
     },
   },
   presets: [
@@ -112,7 +112,7 @@ module.exports = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           editUrl:
-            "https://github.com/facebook/docusaurus/edit/master/website/",
+            "https://github.com/zrsaber/blog/edit/master/website/",
         },
         blog: {
           path: "./blog",
