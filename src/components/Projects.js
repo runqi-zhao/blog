@@ -4,46 +4,45 @@ import Translate from "@docusaurus/Translate";
 const Projects = () => {
   const works = [
     {
-      stack: ["react", "eCommerce", "React hooks"],
+      stack: ["rust", "axum", "openGauss"],
       description:
-        "Cozy Space is an online furniture store for you to design your dream home. You can easily find your favorite piece from our various morden furnitures by using the filter function. It is built with React, React hooks(useReduce and useContext) are utlized to manage the state.",
-      title: "Cozy Space",
-      github: "https://github.com/HaochenQ/React-Furniture-Store",
-      url: "https://cozyspace.netlify.app/",
+        "邮件列表是开源项目最长使用的交流工具，但是当前的邮件列表服务在国内运营过程中存在邮件到达率、访问性方面有很多困难。使用Rust开发邮件列表服务，用户通过邮箱列表进行交互，管理员（由命令行创建）出邮箱列表，用户通过邮箱进行交流，相互进行回信。",
+      title: "使用Rust开发邮件列表服务",
+      github: "https://github.com/zrsaber/mail2list",
+      url: "https://github.com/zrsaber/mail2list",
       image: "img/furniture-store.png",
       index: 0,
     },
 
     {
-      stack: ["react", "recipe", "Restful API"],
+      stack: ["java", "apeing boot", "Restful API"],
       description:
-        "Find the recipe you need on this recipe web app, simply by typing in the keywords like 'beef soap' or 'korean food'. Follow the instructions and make food for you and your family.",
-      title: "Find Your Recipe",
-      github: "https://github.com/HaochenQ/React-Furniture-Store",
-      url: "https://recipe-app.haochenq.vercel.app/",
+        "管理员可以管理用户，并重置用户密码，可以禁用普通账号等相关操作 记录用户的登录IP、操作记录，管理员可以查询登录IP和操作记录。",
+      title: "piflow-web",
+      github: "https://github.com/cas-bigdatalab/piflow-web",
+      url: "https://github.com/zrsaber/vue-flask-ocr",
       image: "img/Recipe-hub.png",
       index: 1,
     },
     {
-      stack: ["Django", "Blog System", "Backend"],
-      description:
-        "This is a blog system where you could create and update your account, post and update your own content and view other people's posts. This project is built with Django.",
-      title: "Django Blog",
-      github: "https://github.com/HaochenQ/Django-blog",
-      url: "https://quiet-escarpment-41189.herokuapp.com/",
+      stack: ["Python", "CNN", "Backend"],
+      description:"纸质医药处方信息提取系统最为重要的是信息提取，即将医生所写文字进行识别，转化为计算机中文本格式。纸质医药处方信息提取算法主要分为文字检测与文字识别两个部分，原始图像在进行传入之后，经过CTPN神经网络的文字检测，生成文本框。在生成文本框后会进行文字识别，文字识别是基于CRNN模型的文字识别，经过文字识别后会输出识别结果。",
+      title: "纸质医药处方信息提取系统的设计与实现",
+      github: "https://github.com/zrsaber/vue-flask-ocr",
+      url: "https://github.com/zrsaber/vue-flask-ocr",
       image: "img/django-blog.png",
       index: 2,
     },
-    {
-      stack: ["Mobile APP", "React Native"],
-      description:
-        "DoneWithIt is a cross-platform mobile application built with React Native(expo). It is a place where you can make your old staff become valuable again or get good products at preferential prices.",
-      title: "Done With It",
-      github: "https://github.com/HaochenQ/DoneWithIt",
-      url: "https://expo.io/@haochen/projects/DoneWithIt",
-      image: "img/APP.jpg",
-      index: 3,
-    },
+    // {
+    //   stack: ["Mobile APP", "React Native"],
+    //   description:
+    //     "DoneWithIt is a cross-platform mobile application built with React Native(expo). It is a place where you can make your old staff become valuable again or get good products at preferential prices.",
+    //   title: "Done With It",
+    //   github: "https://github.com/HaochenQ/DoneWithIt",
+    //   url: "https://expo.io/@haochen/projects/DoneWithIt",
+    //   image: "img/APP.jpg",
+    //   index: 3,
+    // },
   ];
   return (
     <div className="projects">

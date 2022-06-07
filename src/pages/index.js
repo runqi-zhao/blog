@@ -9,7 +9,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 // import styles from "./styles.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useTrail, animated, useSpring } from "react-spring";
-import { faLinkedin, faGithub } from "@fortawesome/free-brands-svg-icons";
+import { faLinkedin, faGithub,faZhihu } from "@fortawesome/free-brands-svg-icons";
 import resume from "../../static/files/resume.pdf";
 import Project from "../components/Project";
 import Projects from "../components/Projects";
@@ -121,12 +121,12 @@ function SocialLinks({ animatedProps, ...props }) {
           </Typography>
         </Grid>
         <Grid item>
-          <a href="https://www.linkedin.com/in/haochen-qi-a36393171/">
-            <FontAwesomeIcon icon={faLinkedin} />
+          <a href="https://www.zhihu.com/people/qqi-43">
+            <FontAwesomeIcon icon={faZhihu} />
           </a>
         </Grid>
         <Grid item>
-          <a href="https://github.com/HaochenQ">
+          <a href="https://github.com/zrsaber">
             <FontAwesomeIcon icon={faGithub} />
           </a>
         </Grid>

@@ -26,7 +26,7 @@ module.exports = {
       },
       items: [
         {
-          to: "docs/",
+          to: "docs/skill",
           activeBasePath: "docs",
           label: "Docs",
           position: "left",
@@ -111,8 +111,8 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl:
-            "https://github.com/zrsaber/blog/edit/master/website/",
+          // editUrl:
+          //   "https://github.com/zrsaber/blog/edit/master/website/",
         },
         blog: {
           path: "./blog",
