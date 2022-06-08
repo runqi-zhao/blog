@@ -23,8 +23,12 @@ const sidebars = {
         type: 'generated-index',
       },
       items: [
-		    'skill/algorithm/评价算法常用方法',
+		'skill/algorithm/评价算法常用方法',
+        'skill/algorithm/递归与哈希表',
+        'skill/algorithm/排序',
+        'skill/algorithm/比较器与堆',
         'skill/algorithm/前缀树与排序总结',
+        'skill/algorithm/链表以及常见面试题',
       ],
     },
   ]
