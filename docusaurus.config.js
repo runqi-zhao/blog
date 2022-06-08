@@ -30,7 +30,7 @@ module.exports = {
     //   additionalLanguages: ['java'],
     // },
     prism: {
-      additionalLanguages: ['powershell','java','sql','cpp','c','docker','dockerfile','git','antlr4'],
+      additionalLanguages: ['powershell','java','sql','cpp','c','docker','git','antlr4'],
     },
     navbar: {
       title: "Runqi",

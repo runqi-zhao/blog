@@ -9,7 +9,7 @@ const sidebars = {
         type: 'generated-index',
       },
       items: [
-		'skill/algorithm/评价算法常用方法',
+        'skill/algorithm/评价算法常用方法',
         'skill/algorithm/递归与哈希表',
         'skill/algorithm/排序',
         'skill/algorithm/比较器与堆',
