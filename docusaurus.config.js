@@ -22,7 +22,7 @@ module.exports = {
   themeConfig: {
     announcementBar: {
       id: "feature_release", // Any value that will identify this message.
-      content: `⭐️ If you like it, give it a star on <a href="https://github.com/zrsaber/blog>GitHub</a>`,
+      content: `⭐️ If you like it, give it a star on <a href="https://github.com/zrsaber/blog">GitHub</a>`,
       backgroundColor: "#fafbfc", // Defaults to `#fff`.
       textColor: "#091E42", // Defaults to `#000`.
     },
