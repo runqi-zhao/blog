@@ -20,6 +20,12 @@ module.exports = {
   projectName: "blog", // Usually your repo name.
   stylesheets: ["https://fonts.font.im/css?family=Raleway:500,700"],
   themeConfig: {
+    announcementBar: {
+      id: "feature_release", // Any value that will identify this message.
+      content: `⭐️ If you like it, give it a star on <a href="https://github.com/zrsaber/blog>GitHub</a>`,
+      backgroundColor: "#fafbfc", // Defaults to `#fff`.
+      textColor: "#091E42", // Defaults to `#000`.
+    },
     navbar: {
       title: "Runqi",
       logo: {
