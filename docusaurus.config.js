@@ -26,6 +26,12 @@ module.exports = {
       backgroundColor: "#fafbfc", // Defaults to `#fff`.
       textColor: "#091E42", // Defaults to `#000`.
     },
+    // prism: {
+    //   additionalLanguages: ['java'],
+    // },
+    prism: {
+      additionalLanguages: ['powershell','java','sql','cpp','c','docker','dockerfile','git','antlr4'],
+    },
     navbar: {
       title: "Runqi",
       logo: {
