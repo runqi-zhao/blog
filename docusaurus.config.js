@@ -1,4 +1,6 @@
 require("dotenv").config();
+const math = require("remark-math");
+const katex = require("rehype-katex");
 module.exports = {
   title: "Runqi",
   tagline: "Learning is a Lifelong Process",
@@ -113,10 +115,15 @@ module.exports = {
           // Please change this to your repo.
           // editUrl:
           //   "https://github.com/zrsaber/blog/edit/master/website/",
+          remarkPlugins: [math],
+          rehypePlugins: [katex],
+          showLastUpdateTime: true,
         },
         blog: {
           path: "./blog",
           //routeBasePath: "/",
+          remarkPlugins: [math],
+          rehypePlugins: [katex],
           showReadingTime: true,
         },
         theme: {
@@ -124,6 +131,15 @@ module.exports = {
         },
       },
     ],
+  ],
+  stylesheets: [
+    {
+      href: 'https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css',
+      type: 'text/css',
+      integrity:
+        'sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM',
+      crossorigin: 'anonymous',
+    },
   ],
   i18n: {
     defaultLocale: "en",
