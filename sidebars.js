@@ -15,6 +15,7 @@ const sidebars = {
         'skill/algorithm/比较器与堆',
         'skill/algorithm/前缀树与排序总结',
         'skill/algorithm/链表以及常见面试题',
+		'skill/algorithm/二叉树',
       ],
     },
   ]
