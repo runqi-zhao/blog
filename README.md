@@ -1,14 +1,10 @@
 # My Website
 
-Welcom to my website [haochenqi.com](https://haochenqi.com)
-
-On my website, you can check my recent projects, read my blogs and contact me!
 
 
 
 
-
-本博客基于 [Docusaurus 2](https://v2.docusaurus.io/) JAMStack 静态网站生成器实现，作为 Bilibili（峰华前端工程师） 视频的文本版载体呈现。不定时更新前端开发相关博客，后续考虑增加全栈开发内容。
+本博客基于 [Docusaurus 2](https://v2.docusaurus.io/) JAMStack 静态网站生成器实现，不定时更新后端开发相关博客，后续考虑增加全栈开发内容。
 
 参考了许多人的样式，此处列举
 
@@ -29,7 +25,7 @@ $ git clone https://github.com/zrsaber/blog.git
 安装依赖：
 
 ```bash
-$ cd zxuqian.cn
+$ cd blog
 $ yarn install
 # 或使用 npm install，下同
 ```
