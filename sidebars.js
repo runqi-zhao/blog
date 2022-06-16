@@ -16,6 +16,7 @@ const sidebars = {
         'skill/algorithm/前缀树与排序总结',
         'skill/algorithm/链表以及常见面试题',
 		'skill/algorithm/二叉树',
+		'skill/algorithm/二叉树的递归套路',
       ],
     },
   ]
