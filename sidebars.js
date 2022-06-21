@@ -18,6 +18,7 @@ const sidebars = {
 		'skill/algorithm/二叉树',
 		'skill/algorithm/二叉树的递归套路',
 		'skill/algorithm/贪心算法',
+		'skill/algorithm/图',
       ],
     },
   ]
