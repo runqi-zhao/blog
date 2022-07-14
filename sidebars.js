@@ -21,6 +21,7 @@ const sidebars = {
 		    'skill/algorithm/图',
         'skill/algorithm/暴力递归',
         'skill/algorithm/动态规划',
+        'skill/algorithm/滑动窗口与单调栈',
       ],
     },
   ]
