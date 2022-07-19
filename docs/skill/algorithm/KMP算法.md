@@ -1,8 +1,8 @@
 ---
-id: KMP
-title: KMP
-sidebar_label: KMP
-description: KMP
+id: KMP算法
+title: KMP算法
+sidebar_label: KMP算法
+description: KMP算法
 ---
 
 这节课的笔记其实只能说是辅助作用，如果想要复习，听课最好。

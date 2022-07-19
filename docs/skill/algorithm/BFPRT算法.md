@@ -1,8 +1,8 @@
 ---
-id: BFPRT
-title: BFPRT
-sidebar_label: BFPRT
-description: BFPRT
+id: BFPRT算法
+title: BFPRT算法
+sidebar_label: BFPRT算法
+description: BFPRT算法
 ---
 
 在一个[数组](https://so.csdn.net/so/search?q=数组&spm=1001.2101.3001.7020)中找出第k大的数
