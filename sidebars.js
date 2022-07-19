@@ -23,6 +23,9 @@ const sidebars = {
         'skill/algorithm/动态规划',
         'skill/algorithm/滑动窗口与单调栈',
         'skill/algorithm/类似斐波那契数列的递归',
+        'skill/algorithm/kmp算法',
+        'skill/algorithm/BFPRT算法',
+		
       ],
     },
   ]
