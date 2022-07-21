@@ -25,6 +25,8 @@ const sidebars = {
         'skill/algorithm/类似斐波那契数列的递归',
         'skill/algorithm/kmp算法',
         'skill/algorithm/BFPRT算法',
+        'skill/algorithm/Manacher算法及其扩展',
+        'skill/algorithm/Morris遍历及其相关扩展',
 		
       ],
     },
