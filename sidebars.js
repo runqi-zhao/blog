@@ -27,6 +27,7 @@ const sidebars = {
         'skill/algorithm/BFPRT算法',
         'skill/algorithm/Manacher算法及其扩展',
         'skill/algorithm/Morris遍历及其相关扩展',
+        'skill/algorithm/线段树',
 		
       ],
     },
