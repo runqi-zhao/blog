@@ -6,7 +6,7 @@ module.exports = {
   tagline: "Learning is a Lifelong Process",
   //disableTitleTagline: true,
   //titleDelimiter: "*",
-  url: "https://runqi.com/",
+  url: "https://blog-delta-three-87.vercel.app/",
   baseUrl: "/",
   customFields: {
     // Put your custom environment here
@@ -16,13 +16,13 @@ module.exports = {
   //onBrokenLinks: "throw",
   //onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
-  //organizationName: "zrsaber", // Usually your GitHub org/user name.
+  //organizationName: "runqi-zhao", // Usually your GitHub org/user name.
   projectName: "blog", // Usually your repo name.
   stylesheets: ["https://fonts.font.im/css?family=Raleway:500,700"],
   themeConfig: {
     announcementBar: {
       id: "feature_release", // Any value that will identify this message.
-      content: `⭐️ If you like it, give it a star on <a href="https://github.com/zrsaber/blog">GitHub</a>`,
+      content: `⭐️ If you like it, give it a star on <a href="https://github.com/runqi-zhao/blog">GitHub</a>`,
       backgroundColor: "#fafbfc", // Defaults to `#fff`.
       textColor: "#091E42", // Defaults to `#000`.
     },
@@ -49,7 +49,7 @@ module.exports = {
         { to: "blog", label: "Blog", position: "right" },
 
         {
-          href: "https://github.com/zrsaber",
+          href: "https://github.com/runqi-zhao",
           label: "GitHub",
           position: "right",
         },
@@ -110,7 +110,7 @@ module.exports = {
             },
             {
               label: "GitHub",
-              href: "https://github.com/zrsaber",
+              href: "https://github.com/runqi-zhao",
             },
           ],
         },
@@ -126,7 +126,7 @@ module.exports = {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
           // editUrl:
-          //   "https://github.com/zrsaber/blog/edit/master/website/",
+          //   "https://github.com/runqi-zhao/blog/edit/master/website/",
           remarkPlugins: [math],
           rehypePlugins: [katex],
           showLastUpdateTime: true,

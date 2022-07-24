@@ -3,8 +3,8 @@ slug: Spring-注解之-RestController与-Controller的区别
 title: Spring-注解之-RestController与-Controller的区别
 author: Runqi Zhao
 author_title: Backend Developer
-author_url: https://github.com/zrsaber
-author_image_url: https://github.com/zrsaber.png
+author_url: https://github.com/runqi-zhao
+author_image_url: https://github.com/runqi-zhao.png
 tags: [java]
 ---
 

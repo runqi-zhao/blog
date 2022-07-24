@@ -18,7 +18,7 @@
 首先克隆仓库代码：
 
 ```bash
-$ git clone https://github.com/zrsaber/blog.git
+$ git clone https://github.com/runqi-zhao/blog.git
 
 ```
 

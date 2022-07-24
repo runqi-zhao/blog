@@ -7,8 +7,8 @@ slug: <%= name %>
 title: <%= name %>
 author: Runqi Zhao
 author_title: Backend Developer
-author_url: https://github.com/zrsaber
-author_image_url: https://github.com/zrsaber.png
+author_url: https://github.com/runqi-zhao
+author_image_url: https://github.com/runqi-zhao.png
 tags: []
 ---
 

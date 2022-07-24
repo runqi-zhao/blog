@@ -126,7 +126,7 @@ function SocialLinks({ animatedProps, ...props }) {
           </a>
         </Grid>
         <Grid item>
-          <a href="https://github.com/zrsaber">
+          <a href="https://github.com/runqi-zhao">
             <FontAwesomeIcon icon={faGithub} />
           </a>
         </Grid>

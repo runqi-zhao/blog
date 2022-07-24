@@ -17,7 +17,7 @@ description: Morris遍历及其相关扩展
    2. mostRight的右指针指向当前节点，mostRight.right = null, cur = cur.right
 3. 当cur==cur.right时候，停止
 
-![image-20220719173001103](https://zrsaber-blog.oss-cn-hangzhou.aliyuncs.com/img/image-20220719173001103.png)
+![image-20220719173001103](https://runqi-zhao-blog.oss-cn-hangzhou.aliyuncs.com/img/image-20220719173001103.png)
 
 
 
