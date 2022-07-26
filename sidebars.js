@@ -29,7 +29,7 @@ const sidebars = {
         'skill/algorithm/Morris遍历及其相关扩展',
         'skill/algorithm/线段树',
         'skill/algorithm/打表技巧和矩阵处理技巧',
-		
+        'skill/algorithm/数组问题',
       ],
     },
   ]
