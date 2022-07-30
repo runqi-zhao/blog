@@ -1,11 +1,11 @@
 ---
-id: Class_File_Fromat
-title: Class_File_Fromat
-sidebar_label: Class_File_Fromat
-description: Class_File_Fromat
+id: class文件格式
+title: class文件格式
+sidebar_label: class文件格式
+description: class文件格式
 ---
 
-![class文件结构](E:\blog\docs\skill\jvm\img\class文件结构.png)
+![class文件结构](https://zrsaber-blog.oss-cn-hangzhou.aliyuncs.com/img/class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84.png)
 
 Java在刚刚诞生之时曾经提出过一个非常著名的宣传口号：”一次编写，到处运行”（Write once, run anywhere、WORA，有时也作“write once, run everywhere”、WORE）。理想中，这意味着Java可以在任何设备上开发，编译成一段标准的字节码并且可以在任何安装有Java虚拟机（JVM）的设备上运行。美中不足的是JVM在各种不同的操作系统上有多种不同的实现，导致Java程序在不同的JVM虚拟机和操作系统上执行的时候有微妙的差别，所以一种应用可能需要在许多平台上进行测试，这造就了一个Java开发者的笑话：”一次编译，到处Debug”。
 
@@ -53,7 +53,7 @@ ClassFile {
 
 在常量池中每一个常量都是个常量表。在JDK1.7之前共有11中不同结构的常量表，在JDK 1.7中有额外增加了3种常量表。每个常量表都是以u1类型的标志位开始，来区分常量表的类型。
 
-![constant_pool 长度为constant_pool_count-1的表](E:\blog\docs\skill\jvm\img\constant_pool 长度为constant_pool_count-1的表.png)
+![constant_pool 长度为constant_pool_count-1的表](https://zrsaber-blog.oss-cn-hangzhou.aliyuncs.com/img/constant_pool%20%E9%95%BF%E5%BA%A6%E4%B8%BAconstant_pool_count-1%E7%9A%84%E8%A1%A8.png)
 
 JDK为我们提供一个用来分析Class字节码的工具：**javap**，利用javap工具方面查看Class文件中常量池数据。
 
@@ -69,7 +69,7 @@ JDK为我们提供一个用来分析Class字节码的工具：**javap**，利用
 
 在常量池之后是访问标志，用于识别类或接口层次的访问信息。Java定义了8种访问标志，access_flags则从8种组合而成，表示类或接口访问的类型。
 
-![access_flags](E:\blog\docs\skill\jvm\img\access_flags.png)
+![access_flags](https://zrsaber-blog.oss-cn-hangzhou.aliyuncs.com/img/access_flags.png)
 
 如0x0021 代表一个普通的public类，是0x0001 | 0x0020的结果 
 
