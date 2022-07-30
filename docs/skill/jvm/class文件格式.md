@@ -5,6 +5,8 @@ sidebar_label: class文件格式
 description: class文件格式
 ---
 
+class文件结构思维导图如下
+
 ![class文件结构](https://zrsaber-blog.oss-cn-hangzhou.aliyuncs.com/img/class%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84.png)
 
 Java在刚刚诞生之时曾经提出过一个非常著名的宣传口号：”一次编写，到处运行”（Write once, run anywhere、WORA，有时也作“write once, run everywhere”、WORE）。理想中，这意味着Java可以在任何设备上开发，编译成一段标准的字节码并且可以在任何安装有Java虚拟机（JVM）的设备上运行。美中不足的是JVM在各种不同的操作系统上有多种不同的实现，导致Java程序在不同的JVM虚拟机和操作系统上执行的时候有微妙的差别，所以一种应用可能需要在许多平台上进行测试，这造就了一个Java开发者的笑话：”一次编译，到处Debug”。
