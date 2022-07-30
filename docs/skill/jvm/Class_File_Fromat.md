@@ -1,8 +1,8 @@
 ---
-id: Class File Fromat
-title: Class File Fromat
-sidebar_label: Class File Fromat
-description: Class File Fromater
+id: Class_File_Fromat
+title: Class_File_Fromat
+sidebar_label: Class_File_Fromat
+description: Class_File_Fromat
 ---
 
 ![class文件结构](E:\blog\docs\skill\jvm\img\class文件结构.png)
