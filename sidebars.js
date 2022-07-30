@@ -33,7 +33,7 @@ const sidebars = {
       ],
     },
     {
-      label: 'JVM',
+      label: 'jvm',
       type: 'category',
       link: {
         type: 'generated-index',
