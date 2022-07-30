@@ -39,8 +39,10 @@ const sidebars = {
         type: 'generated-index',
       },
       items: [
-        'skill/jvm/jvm入门',
-        'skill/jvm/Class File Fromat',
+			'skill/jvm/jvm入门',
+			'skill/jvm/Class File Fromat',
+		],
+	},
 }
 
 module.exports = sidebars
