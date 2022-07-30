@@ -32,7 +32,15 @@ const sidebars = {
         'skill/algorithm/数组问题',
       ],
     },
-  ]
+	{
+      label: 'JVM',
+      type: 'category',
+      link: {
+        type: 'generated-index',
+      },
+      items: [
+        'skill/jvm/jvm入门',
+        'skill/jvm/Class File Fromat',
 }
 
 module.exports = sidebars
