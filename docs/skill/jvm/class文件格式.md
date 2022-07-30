@@ -242,9 +242,9 @@ volatile关键字和transient关键词不能修饰方法，方法表中访问标
 
 
 
-1. 通知虚拟机自动为静态变量赋值，只有被static关键字修饰的变量（类变量）才具有这个属性。对于非static类型的变量的赋值是在实例构造器中进行；而对于类变量，则有两种方式：在类构造器<init>方法中或者使用ConstantValue属性。
+1. 通知虚拟机自动为静态变量赋值，只有被static关键字修饰的变量（类变量）才具有这个属性。对于非static类型的变量的赋值是在实例构造器中进行；而对于类变量，则有两种方式：在类构造器`<init>`方法中或者使用ConstantValue属性。
 
-2. ```text
+   ```
    ConstantValue_attribute {
        u2 attribute_name_index;
        u4 attribute_length;
