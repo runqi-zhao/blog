@@ -14,7 +14,7 @@ lastUpdated = "Jan 02, 2006 15:04 MST"
 
 [sidebar]
 emoji = "🍥"
-subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+subtitle = "Stay foolish stay hungry"
 
 [sidebar.avatar]
 enabled = true
@@ -76,7 +76,7 @@ enabled = true
 ## Comments
 [comments]
 enabled = true
-provider = "disqus"
+provider = "waline"
 
 [comments.disqusjs]
 shortname = ""
@@ -104,12 +104,26 @@ clientSecret = ""
 autoCreateIssue = false
 
 [comments.waline]
-serverURL = ""
-lang = ""
-visitor = ""
-avatar = ""
-emoji = ["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"]
-requiredMeta = ["name", "email", "url"]
+js = "https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js"
+meta = ['nick','mail','link']                           # 评论者相关属性
+requiredMeta = ["name", "email", "url"]                        # 设置必填项，默认匿名
+# login = "force"                                         # 评论必须先登录，用于防护恶意攻击
+# placeholder = "为防恶意灌水攻击，评论前需注册并登录，望见谅~"     # 评论框占位提示符
+serverURL = "https://waline-line-git-main-zrsaber.vercel.app"                 # Waline的服务端地址（必填）
+#imageHosting =                                         # 图床api，如果允许评论框上传图片
+uploadImage = false                                     # 评论上传图片功能
+avatar = "retro"                                        # Gravatar头像
+avatarCDN = "https://sdn.geekzu.org/avatar/"            # Gravatar头像CDN地址，不建议使用loli源
+pageSize = 20                                           # 评论列表分页，每页条数
+lang = "zh-CN"                                          # 多语言支持
+visitor = true                                          # 文章访问量统计
+highlight = true                                        # 代码高亮
+# serverURL = ""
+# lang = ""
+# visitor = ""
+# avatar = ""
+# emoji = ["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"]
+# requiredMeta = ["name", "email", "url"]
 placeholder = ""
 
 [comments.waline.locale]
