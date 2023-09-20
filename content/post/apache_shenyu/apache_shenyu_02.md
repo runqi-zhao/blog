@@ -111,6 +111,36 @@ shenyu.register.serverListsd代表shenyu-admin的地址或者是其他服务的�
 
 shenyu.register.props标识需要输入的用户名以及密码。
 
+然后是怎么进行连接的，这里直接使用admin接口进行同步。
+
+这里直接看shenyu-register-http(application中可以进行映射，先将文件中的配置进行读入，TODO搞清楚为什么能够来到这个类)
+
+然后找到下面这个类：
+
+```java
+public final class RegisterUtils {
+	/**
+     * Do register.
+     *
+     * @param json the json
+     * @param url  the url
+     * @param type the type
+     * @throws IOException the io exception
+     */
+    public static void doRegister(final String json, final String url, final String type) throws IOException {
+        String result = OkHttpTools.getInstance().post(url, json);
+        if (Objects.equals(SUCCESS, result)) {
+            LOGGER.info("{} client register success: {} ", type, json);
+        } else {
+            LOGGER.error("{} client register error: {} ", type, json);
+        }
+    }
+```
+
+这个可以知道对应这里，但是怎么讲数据传输过来，虽然找到了部分源码，但是应该与spring也有关系，这里来个TODO。
+
+**暂时到这里，明天继续 明天面试加油**
+
 ok，这一句的作用讲解完毕，看下面的日志：
 
 ```shell
@@ -134,8 +164,4 @@ ok，这一句的作用讲解完毕，看下面的日志：
 client中则配置了当前服务在网关中的一些标识。 这个有很好的对应关系，不再赘述。
 
 接下来看下一句日志：
-
-```
-
-```
 
