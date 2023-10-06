@@ -10,6 +10,7 @@ comments: true
 categories:
     - Java
 tags:
+    - Apache Shenyu
     - 源码阅读
 draft: false
 
@@ -86,6 +87,8 @@ draft: false
 
 从日志上面分析，判断注入到网关上面需要经历的过程：
 
+## 服务注册
+
 首先先看第一句：
 
 ```shell
@@ -115,6 +118,12 @@ shenyu.register.props标识需要输入的用户名以及密码。
 
 这里直接看shenyu-register-http(application中可以进行映射，先将文件中的配置进行读入，TODO搞清楚为什么能够来到这个类)
 
+这里的话应该涉及到数据同步的内容吧，这里先按下不表。
+
+![](https://img-1312072469.cos.ap-nanjing.myqcloud.com/20231005232757.png)
+
+这里其实可以看到是道道HttpClientRegisterRepository中，这里肯定直接调用了对应的内容。
+
 然后找到下面这个类：
 
 ```java
@@ -139,7 +148,7 @@ public final class RegisterUtils {
 
 这个可以知道对应这里，但是怎么讲数据传输过来，虽然找到了部分源码，但是应该与spring也有关系，这里来个TODO。
 
-**暂时到这里，明天继续 明天面试加油**
+这部分使用的到的是服务注册中的内容，可以看服务注册的那篇文章。
 
 ok，这一句的作用讲解完毕，看下面的日志：
 
@@ -161,7 +170,73 @@ ok，这一句的作用讲解完毕，看下面的日志：
 #          port: 8189
 ```
 
-client中则配置了当前服务在网关中的一些标识。 这个有很好的对应关系，不再赘述。
+这里最近在编写自己的插件时，产生了一些疑问：
 
-接下来看下一句日志：
+按照shenyu的架构，在这里编写的client应该会跳转到shenyu-client下面进行调用。
 
+首先先看上面的日志，最开始第一句，用户仍然会调用到RegisterUtils中：
+
+```java
+public final class RegisterUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegisterUtils.class);
+
+    private RegisterUtils() {
+    }
+
+    /**
+     * Do register.
+     *
+     * @param json        the json
+     * @param url         the url
+     * @param type        the type
+     * @param accessToken the token
+     * @throws IOException the io exception
+     */
+    public static void doRegister(final String json, final String url, final String type, final String accessToken) throws IOException {
+        if (StringUtils.isBlank(accessToken)) {
+            LOGGER.error("{} client register error accessToken is null, please check the config : {} ", type, json);
+            return;
+        }
+        Headers headers = new Headers.Builder().add(Constants.X_ACCESS_TOKEN, accessToken).build();
+        String result = OkHttpTools.getInstance().post(url, json, headers);
+        if (Objects.equals(SUCCESS, result)) {
+            LOGGER.info("{} client register success: {} ", type, json);
+        } else {
+            LOGGER.error("{} client register error: {} ", type, json);
+        }
+    }
+    
+    /**
+     * Do register.
+     *
+     * @param json the json
+     * @param url  the url
+     * @param type the type
+     * @throws IOException the io exception
+     */
+    public static void doRegister(final String json, final String url, final String type) throws IOException {
+        String result = OkHttpTools.getInstance().post(url, json);
+        if (Objects.equals(SUCCESS, result)) {
+            LOGGER.info("{} client register success: {} ", type, json);
+        } else {
+            LOGGER.error("{} client register error: {} ", type, json);
+        }
+    }
+```
+
+这里不妨使用断点进行跳转，直接运行起来，在这个位置打上断点。
+
+![](https://img-1312072469.cos.ap-nanjing.myqcloud.com/20231005233904.png)
+
+打上断点直接到达这里，这里应该是使用spring boot中的内容，这里值得好好研究一番。
+
+这一个也是服务注册的内容，也可以看服务注册的文章。
+
+## 服务调用
+
+当我们请求服务时，会经过什么过程，这个请看服务调用的文章。
+
+## 服务同步
+
+此处如何进行服务同步，请看服务同步的那篇文章。
