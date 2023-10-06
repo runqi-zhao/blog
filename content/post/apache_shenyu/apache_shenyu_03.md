@@ -1,6 +1,6 @@
 ---
 title: "Apache Shenyu服务注册"
-description:以http为例
+description: 以http为例
 date: 2023-09-20T17:50:53+08:00
 image: https://shenyu.apache.org/zh/img/logo.svg
 math: 
