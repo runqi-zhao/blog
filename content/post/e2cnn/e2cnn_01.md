@@ -1,5 +1,5 @@
 ---
-title: ""e2cnn内容理解-群的输入类型"
+title: "e2cnn内容理解-群的输入类型"
 description: 
 date: 2023-12-03T20:56:54+08:00
 image: 
