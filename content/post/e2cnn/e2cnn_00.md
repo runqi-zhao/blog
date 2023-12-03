@@ -1,7 +1,7 @@
 ---
 title: "e2cnn内容理解-群的创建源码详解 "
 description: 
-date: 2023-12-2T16:55:17+08:00
+date: 2023-12-02T16:55:17+08:00
 image: 
 math: 
 license: 
