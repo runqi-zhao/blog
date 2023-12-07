@@ -4,7 +4,7 @@ description:
 date: 2023-12-02T16:55:17+08:00
 image: 
 math: true
-license: 
+license: Apache Licence 2.0
 hidden: false
 categories:
     - 机器学习
