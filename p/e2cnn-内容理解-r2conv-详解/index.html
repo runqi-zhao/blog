@@ -1,0 +1,1570 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="下面开始讲解对应R2Conv对应的 模块，这里的话我们还是从ReResNet中进行运行，然后拿到对应的数据，在拿到对应的数据之后，将里面的值进行传递，然后供面进行使用。
+在对应的前面三节中，我们已经创建了对应循环群，输入类型，输出类型，这个里面，是将里面内容进行利用。
+还是从ReResNet中开始看起，在我们进行初始化的时候，会运行下面语句：
+1 self._make_stem_layer(in_channels, stem_channels) 然后看这个函数里面的内容
+1 2 3 4 5 6 7 8 9 10 11 def _make_stem_layer(self, in_channels, stem_channels): &amp;#34;&amp;#34;&amp;#34;Build stem layer.&amp;#34;&amp;#34;&amp;#34; if not self.deep_stem: self.conv1 = ennTrivialConv( in_channels, stem_channels, kernel_size=7, stride=2, padding=3) self.norm1_name, norm1 = build_enn_norm_layer( stem_channels, postfix=1) self.add_module(self.norm1_name, norm1) self.relu = ennReLU(stem_channels) self.maxpool = ennMaxPool( stem_channels, kernel_size=3, stride=2, padding=1) 然后继续看ennTrivialConv这个函数
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 def ennTrivialConv(inplanes, outplanes, kernel_size=3, stride=1, padding=0, groups=1, bias=False, dilation=1): &amp;#34;&amp;#34;&amp;#34;enn convolution with trivial input feature."><title>e2cnn 内容理解-R2Conv 详解</title>
+<link rel=canonical href=https://runqizhao.cn/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-r2conv-%E8%AF%A6%E8%A7%A3/><link rel=stylesheet href=/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css><meta property="og:title" content="e2cnn 内容理解-R2Conv 详解"><meta property="og:description" content="下面开始讲解对应R2Conv对应的 模块，这里的话我们还是从ReResNet中进行运行，然后拿到对应的数据，在拿到对应的数据之后，将里面的值进行传递，然后供面进行使用。
+在对应的前面三节中，我们已经创建了对应循环群，输入类型，输出类型，这个里面，是将里面内容进行利用。
+还是从ReResNet中开始看起，在我们进行初始化的时候，会运行下面语句：
+1 self._make_stem_layer(in_channels, stem_channels) 然后看这个函数里面的内容
+1 2 3 4 5 6 7 8 9 10 11 def _make_stem_layer(self, in_channels, stem_channels): &amp;#34;&amp;#34;&amp;#34;Build stem layer.&amp;#34;&amp;#34;&amp;#34; if not self.deep_stem: self.conv1 = ennTrivialConv( in_channels, stem_channels, kernel_size=7, stride=2, padding=3) self.norm1_name, norm1 = build_enn_norm_layer( stem_channels, postfix=1) self.add_module(self.norm1_name, norm1) self.relu = ennReLU(stem_channels) self.maxpool = ennMaxPool( stem_channels, kernel_size=3, stride=2, padding=1) 然后继续看ennTrivialConv这个函数
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 def ennTrivialConv(inplanes, outplanes, kernel_size=3, stride=1, padding=0, groups=1, bias=False, dilation=1): &amp;#34;&amp;#34;&amp;#34;enn convolution with trivial input feature."><meta property="og:url" content="https://runqizhao.cn/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-r2conv-%E8%AF%A6%E8%A7%A3/"><meta property="og:site_name" content="Runqi Blog"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="机器学习"><meta property="article:tag" content="源码阅读"><meta property="article:tag" content="群论"><meta property="article:published_time" content="2023-12-04T18:47:52+08:00"><meta property="article:modified_time" content="2023-12-04T18:47:52+08:00"><meta name=twitter:title content="e2cnn 内容理解-R2Conv 详解"><meta name=twitter:description content="下面开始讲解对应R2Conv对应的 模块，这里的话我们还是从ReResNet中进行运行，然后拿到对应的数据，在拿到对应的数据之后，将里面的值进行传递，然后供面进行使用。
+在对应的前面三节中，我们已经创建了对应循环群，输入类型，输出类型，这个里面，是将里面内容进行利用。
+还是从ReResNet中开始看起，在我们进行初始化的时候，会运行下面语句：
+1 self._make_stem_layer(in_channels, stem_channels) 然后看这个函数里面的内容
+1 2 3 4 5 6 7 8 9 10 11 def _make_stem_layer(self, in_channels, stem_channels): &amp;#34;&amp;#34;&amp;#34;Build stem layer.&amp;#34;&amp;#34;&amp;#34; if not self.deep_stem: self.conv1 = ennTrivialConv( in_channels, stem_channels, kernel_size=7, stride=2, padding=3) self.norm1_name, norm1 = build_enn_norm_layer( stem_channels, postfix=1) self.add_module(self.norm1_name, norm1) self.relu = ennReLU(stem_channels) self.maxpool = ennMaxPool( stem_channels, kernel_size=3, stride=2, padding=1) 然后继续看ennTrivialConv这个函数
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 def ennTrivialConv(inplanes, outplanes, kernel_size=3, stride=1, padding=0, groups=1, bias=False, dilation=1): &amp;#34;&amp;#34;&amp;#34;enn convolution with trivial input feature."><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu9b4ee4aab7d2c9a136b427e2430a0345_27821_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>Runqi Blog</a></h1><h2 class=site-description>Stay foolish stay hungry</h2></div></header><ol class=social-menu><li><a href=https://github.com/runqi-zhao target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>Search</span></a></li><li><a href=/links/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg><span>Links</span></a></li><div class=menu-bottom-section><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg><span>Dark Mode</span></li></div></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/>机器学习</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-r2conv-%E8%AF%A6%E8%A7%A3/>e2cnn 内容理解-R2Conv 详解</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg><time class=article-time--published>Dec 04, 2023</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--reading>22 minute read</time></div></footer></div></header><section class=article-content><p>下面开始讲解对应R2Conv对应的 模块，这里的话我们还是从ReResNet中进行运行，然后拿到对应的数据，在拿到对应的数据之后，将里面的值进行传递，然后供面进行使用。</p><p>在对应的前面三节中，我们已经创建了对应循环群，输入类型，输出类型，这个里面，是将里面内容进行利用。</p><p>还是从ReResNet中开始看起，在我们进行初始化的时候，会运行下面语句：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=bp>self</span><span class=o>.</span><span class=n>_make_stem_layer</span><span class=p>(</span><span class=n>in_channels</span><span class=p>,</span> <span class=n>stem_channels</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后看这个函数里面的内容</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>_make_stem_layer</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>in_channels</span><span class=p>,</span> <span class=n>stem_channels</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;Build stem layer.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=ow>not</span> <span class=bp>self</span><span class=o>.</span><span class=n>deep_stem</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>conv1</span> <span class=o>=</span> <span class=n>ennTrivialConv</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=n>in_channels</span><span class=p>,</span> <span class=n>stem_channels</span><span class=p>,</span> <span class=n>kernel_size</span><span class=o>=</span><span class=mi>7</span><span class=p>,</span> <span class=n>stride</span><span class=o>=</span><span class=mi>2</span><span class=p>,</span> <span class=n>padding</span><span class=o>=</span><span class=mi>3</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>norm1_name</span><span class=p>,</span> <span class=n>norm1</span> <span class=o>=</span> <span class=n>build_enn_norm_layer</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=n>stem_channels</span><span class=p>,</span> <span class=n>postfix</span><span class=o>=</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>add_module</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>norm1_name</span><span class=p>,</span> <span class=n>norm1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>relu</span> <span class=o>=</span> <span class=n>ennReLU</span><span class=p>(</span><span class=n>stem_channels</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>maxpool</span> <span class=o>=</span> <span class=n>ennMaxPool</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>stem_channels</span><span class=p>,</span> <span class=n>kernel_size</span><span class=o>=</span><span class=mi>3</span><span class=p>,</span> <span class=n>stride</span><span class=o>=</span><span class=mi>2</span><span class=p>,</span> <span class=n>padding</span><span class=o>=</span><span class=mi>1</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后继续看ennTrivialConv这个函数</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>ennTrivialConv</span><span class=p>(</span><span class=n>inplanes</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                   <span class=n>outplanes</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                   <span class=n>kernel_size</span><span class=o>=</span><span class=mi>3</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                   <span class=n>stride</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                   <span class=n>padding</span><span class=o>=</span><span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                   <span class=n>groups</span><span class=o>=</span><span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                   <span class=n>bias</span><span class=o>=</span><span class=kc>False</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                   <span class=n>dilation</span><span class=o>=</span><span class=mi>1</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;enn convolution with trivial input feature.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Args:
+</span></span></span><span class=line><span class=cl><span class=s2>        in_channels (List[int]): Number of input channels per scale.
+</span></span></span><span class=line><span class=cl><span class=s2>        out_channels (int): Number of output channels (used at each scale).
+</span></span></span><span class=line><span class=cl><span class=s2>        kernel_size (int, optional): The size of kernel.
+</span></span></span><span class=line><span class=cl><span class=s2>        stride (int, optional): Stride of the convolution. Default: 1.
+</span></span></span><span class=line><span class=cl><span class=s2>        padding (int or tuple): Zero-padding added to both sides of the input.
+</span></span></span><span class=line><span class=cl><span class=s2>            Default: 0.
+</span></span></span><span class=line><span class=cl><span class=s2>        groups (int): Number of blocked connections from input.
+</span></span></span><span class=line><span class=cl><span class=s2>            channels to output channels. Default: 1.
+</span></span></span><span class=line><span class=cl><span class=s2>        bias (bool): If True, adds a learnable bias to the output.
+</span></span></span><span class=line><span class=cl><span class=s2>            Default: False.
+</span></span></span><span class=line><span class=cl><span class=s2>        dilation (int or tuple): Spacing between kernel elements. Default: 1.
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>in_type</span> <span class=o>=</span> <span class=n>build_enn_trivial_feature</span><span class=p>(</span><span class=n>inplanes</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>out_type</span> <span class=o>=</span> <span class=n>build_enn_divide_feature</span><span class=p>(</span><span class=n>outplanes</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>enn</span><span class=o>.</span><span class=n>R2Conv</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=n>in_type</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>out_type</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>kernel_size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>stride</span><span class=o>=</span><span class=n>stride</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>padding</span><span class=o>=</span><span class=n>padding</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>groups</span><span class=o>=</span><span class=n>groups</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>bias</span><span class=o>=</span><span class=n>bias</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>dilation</span><span class=o>=</span><span class=n>dilation</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>sigma</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>frequencies_cutoff</span><span class=o>=</span><span class=k>lambda</span> <span class=n>r</span><span class=p>:</span> <span class=mi>3</span> <span class=o>*</span> <span class=n>r</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里的话在前两讲中以及说明了对应的 输入类型和输出类型，这里的话直接将对应的内容进行截图，不再进行详细阐述，如果说不了解的话去看前面两节。</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312042048059.png loading=lazy></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312042048204.png loading=lazy></p><p>ok，知道了这些内容 ，下面来看本文的核心函数 ：R2Conv函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span><span class=lnt>109
+</span><span class=lnt>110
+</span><span class=lnt>111
+</span><span class=lnt>112
+</span><span class=lnt>113
+</span><span class=lnt>114
+</span><span class=lnt>115
+</span><span class=lnt>116
+</span><span class=lnt>117
+</span><span class=lnt>118
+</span><span class=lnt>119
+</span><span class=lnt>120
+</span><span class=lnt>121
+</span><span class=lnt>122
+</span><span class=lnt>123
+</span><span class=lnt>124
+</span><span class=lnt>125
+</span><span class=lnt>126
+</span><span class=lnt>127
+</span><span class=lnt>128
+</span><span class=lnt>129
+</span><span class=lnt>130
+</span><span class=lnt>131
+</span><span class=lnt>132
+</span><span class=lnt>133
+</span><span class=lnt>134
+</span><span class=lnt>135
+</span><span class=lnt>136
+</span><span class=lnt>137
+</span><span class=lnt>138
+</span><span class=lnt>139
+</span><span class=lnt>140
+</span><span class=lnt>141
+</span><span class=lnt>142
+</span><span class=lnt>143
+</span><span class=lnt>144
+</span><span class=lnt>145
+</span><span class=lnt>146
+</span><span class=lnt>147
+</span><span class=lnt>148
+</span><span class=lnt>149
+</span><span class=lnt>150
+</span><span class=lnt>151
+</span><span class=lnt>152
+</span><span class=lnt>153
+</span><span class=lnt>154
+</span><span class=lnt>155
+</span><span class=lnt>156
+</span><span class=lnt>157
+</span><span class=lnt>158
+</span><span class=lnt>159
+</span><span class=lnt>160
+</span><span class=lnt>161
+</span><span class=lnt>162
+</span><span class=lnt>163
+</span><span class=lnt>164
+</span><span class=lnt>165
+</span><span class=lnt>166
+</span><span class=lnt>167
+</span><span class=lnt>168
+</span><span class=lnt>169
+</span><span class=lnt>170
+</span><span class=lnt>171
+</span><span class=lnt>172
+</span><span class=lnt>173
+</span><span class=lnt>174
+</span><span class=lnt>175
+</span><span class=lnt>176
+</span><span class=lnt>177
+</span><span class=lnt>178
+</span><span class=lnt>179
+</span><span class=lnt>180
+</span><span class=lnt>181
+</span><span class=lnt>182
+</span><span class=lnt>183
+</span><span class=lnt>184
+</span><span class=lnt>185
+</span><span class=lnt>186
+</span><span class=lnt>187
+</span><span class=lnt>188
+</span><span class=lnt>189
+</span><span class=lnt>190
+</span><span class=lnt>191
+</span><span class=lnt>192
+</span><span class=lnt>193
+</span><span class=lnt>194
+</span><span class=lnt>195
+</span><span class=lnt>196
+</span><span class=lnt>197
+</span><span class=lnt>198
+</span><span class=lnt>199
+</span><span class=lnt>200
+</span><span class=lnt>201
+</span><span class=lnt>202
+</span><span class=lnt>203
+</span><span class=lnt>204
+</span><span class=lnt>205
+</span><span class=lnt>206
+</span><span class=lnt>207
+</span><span class=lnt>208
+</span><span class=lnt>209
+</span><span class=lnt>210
+</span><span class=lnt>211
+</span><span class=lnt>212
+</span><span class=lnt>213
+</span><span class=lnt>214
+</span><span class=lnt>215
+</span><span class=lnt>216
+</span><span class=lnt>217
+</span><span class=lnt>218
+</span><span class=lnt>219
+</span><span class=lnt>220
+</span><span class=lnt>221
+</span><span class=lnt>222
+</span><span class=lnt>223
+</span><span class=lnt>224
+</span><span class=lnt>225
+</span><span class=lnt>226
+</span><span class=lnt>227
+</span><span class=lnt>228
+</span><span class=lnt>229
+</span><span class=lnt>230
+</span><span class=lnt>231
+</span><span class=lnt>232
+</span><span class=lnt>233
+</span><span class=lnt>234
+</span><span class=lnt>235
+</span><span class=lnt>236
+</span><span class=lnt>237
+</span><span class=lnt>238
+</span><span class=lnt>239
+</span><span class=lnt>240
+</span><span class=lnt>241
+</span><span class=lnt>242
+</span><span class=lnt>243
+</span><span class=lnt>244
+</span><span class=lnt>245
+</span><span class=lnt>246
+</span><span class=lnt>247
+</span><span class=lnt>248
+</span><span class=lnt>249
+</span><span class=lnt>250
+</span><span class=lnt>251
+</span><span class=lnt>252
+</span><span class=lnt>253
+</span><span class=lnt>254
+</span><span class=lnt>255
+</span><span class=lnt>256
+</span><span class=lnt>257
+</span><span class=lnt>258
+</span><span class=lnt>259
+</span><span class=lnt>260
+</span><span class=lnt>261
+</span><span class=lnt>262
+</span><span class=lnt>263
+</span><span class=lnt>264
+</span><span class=lnt>265
+</span><span class=lnt>266
+</span><span class=lnt>267
+</span><span class=lnt>268
+</span><span class=lnt>269
+</span><span class=lnt>270
+</span><span class=lnt>271
+</span><span class=lnt>272
+</span><span class=lnt>273
+</span><span class=lnt>274
+</span><span class=lnt>275
+</span><span class=lnt>276
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>R2Conv</span><span class=p>(</span><span class=n>EquivariantModule</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>in_type</span><span class=p>:</span> <span class=n>FieldType</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>out_type</span><span class=p>:</span> <span class=n>FieldType</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>kernel_size</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>padding</span><span class=p>:</span> <span class=nb>int</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>stride</span><span class=p>:</span> <span class=nb>int</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>dilation</span><span class=p>:</span> <span class=nb>int</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>padding_mode</span><span class=p>:</span> <span class=nb>str</span> <span class=o>=</span> <span class=s1>&#39;zeros&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>groups</span><span class=p>:</span> <span class=nb>int</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>bias</span><span class=p>:</span> <span class=nb>bool</span> <span class=o>=</span> <span class=kc>True</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>basisexpansion</span><span class=p>:</span> <span class=nb>str</span> <span class=o>=</span> <span class=s1>&#39;blocks&#39;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>sigma</span><span class=p>:</span> <span class=n>Union</span><span class=p>[</span><span class=n>List</span><span class=p>[</span><span class=nb>float</span><span class=p>],</span> <span class=nb>float</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>frequencies_cutoff</span><span class=p>:</span> <span class=n>Union</span><span class=p>[</span><span class=nb>float</span><span class=p>,</span> <span class=n>Callable</span><span class=p>[[</span><span class=nb>float</span><span class=p>],</span> <span class=nb>int</span><span class=p>]]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>rings</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=nb>float</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>maximum_offset</span><span class=p>:</span> <span class=nb>int</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>recompute</span><span class=p>:</span> <span class=nb>bool</span> <span class=o>=</span> <span class=kc>False</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>basis_filter</span><span class=p>:</span> <span class=n>Callable</span><span class=p>[[</span><span class=nb>dict</span><span class=p>],</span> <span class=nb>bool</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>initialize</span><span class=p>:</span> <span class=nb>bool</span> <span class=o>=</span> <span class=kc>True</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        G-steerable planar convolution mapping between the input and output :class:`~e2cnn.nn.FieldType` s specified by
+</span></span></span><span class=line><span class=cl><span class=s2>        the parameters ``in_type`` and ``out_type``.
+</span></span></span><span class=line><span class=cl><span class=s2>        This operation is equivariant under the action of :math:`\R^2\rtimes G` where :math:`G` is the
+</span></span></span><span class=line><span class=cl><span class=s2>        :attr:`e2cnn.nn.FieldType.fibergroup` of ``in_type`` and ``out_type``.
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        Specifically, let :math:`\rho_\text</span><span class=si>{in}</span><span class=s2>: G \to \GL{\R^{c_\text</span><span class=si>{in}</span><span class=s2>}}` and
+</span></span></span><span class=line><span class=cl><span class=s2>        :math:`\rho_\text</span><span class=si>{out}</span><span class=s2>: G \to \GL{\R^{c_\text</span><span class=si>{out}</span><span class=s2>}}` be the representations specified by the input and output
+</span></span></span><span class=line><span class=cl><span class=s2>        field types.
+</span></span></span><span class=line><span class=cl><span class=s2>        Then :class:`~e2cnn.nn.R2Conv` guarantees an equivariant mapping
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        .. math::
+</span></span></span><span class=line><span class=cl><span class=s2>            \kappa \star [\mathcal</span><span class=si>{T}</span><span class=s2>^\text</span><span class=si>{in}</span><span class=s2>_{g,u} . f] = \mathcal</span><span class=si>{T}</span><span class=s2>^\text</span><span class=si>{out}</span><span class=s2>_{g,u} . [\kappa \star f] \qquad\qquad \forall g \in G, u \in \R^2
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>        where the transformation of the input and output fields are given by
+</span></span></span><span class=line><span class=cl><span class=s2> 
+</span></span></span><span class=line><span class=cl><span class=s2>        .. math::
+</span></span></span><span class=line><span class=cl><span class=s2>            [\mathcal</span><span class=si>{T}</span><span class=s2>^\text</span><span class=si>{in}</span><span class=s2>_{g,u} . f](x) &amp;= \rho_\text</span><span class=si>{in}</span><span class=s2>(g)f(g^{-1} (x - u)) \\
+</span></span></span><span class=line><span class=cl><span class=s2>            [\mathcal</span><span class=si>{T}</span><span class=s2>^\text</span><span class=si>{out}</span><span class=s2>_{g,u} . f](x) &amp;= \rho_\text</span><span class=si>{out}</span><span class=s2>(g)f(g^{-1} (x - u)) \\
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>        The equivariance of G-steerable convolutions is guaranteed by restricting the space of convolution kernels to an
+</span></span></span><span class=line><span class=cl><span class=s2>        equivariant subspace.
+</span></span></span><span class=line><span class=cl><span class=s2>        As proven in `3D Steerable CNNs &lt;https://arxiv.org/abs/1807.02547&gt;`_, this parametrizes the *most general
+</span></span></span><span class=line><span class=cl><span class=s2>        equivariant convolutional map* between the input and output fields.
+</span></span></span><span class=line><span class=cl><span class=s2>        For feature fields on :math:`\R^2` (e.g. images), the complete G-steerable kernel spaces for :math:`G \leq \O2`
+</span></span></span><span class=line><span class=cl><span class=s2>        is derived in `General E(2)-Equivariant Steerable CNNs &lt;https://arxiv.org/abs/1911.08251&gt;`_.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>        During training, in each forward pass the module expands the basis of G-steerable kernels with learned weights
+</span></span></span><span class=line><span class=cl><span class=s2>        before calling :func:`torch.nn.functional.conv2d`.
+</span></span></span><span class=line><span class=cl><span class=s2>        When :meth:`~torch.nn.Module.eval()` is called, the filter is built with the current trained weights and stored
+</span></span></span><span class=line><span class=cl><span class=s2>        for future reuse such that no overhead of expanding the kernel remains.
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        .. warning ::
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>            When :meth:`~torch.nn.Module.train()` is called, the attributes :attr:`~e2cnn.nn.R2Conv.filter` and
+</span></span></span><span class=line><span class=cl><span class=s2>            :attr:`~e2cnn.nn.R2Conv.expanded_bias` are discarded to avoid situations of mismatch with the
+</span></span></span><span class=line><span class=cl><span class=s2>            learnable expansion coefficients.
+</span></span></span><span class=line><span class=cl><span class=s2>            See also :meth:`e2cnn.nn.R2Conv.train`.
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>            This behaviour can cause problems when storing the :meth:`~torch.nn.Module.state_dict` of a model while in
+</span></span></span><span class=line><span class=cl><span class=s2>            a mode and lately loading it in a model with a different mode, as the attributes of the class change.
+</span></span></span><span class=line><span class=cl><span class=s2>            To avoid this issue, we recommend converting the model to eval mode before storing or loading the state
+</span></span></span><span class=line><span class=cl><span class=s2>            dictionary.
+</span></span></span><span class=line><span class=cl><span class=s2> 
+</span></span></span><span class=line><span class=cl><span class=s2> 
+</span></span></span><span class=line><span class=cl><span class=s2>        The learnable expansion coefficients of the this module can be initialized with the methods in
+</span></span></span><span class=line><span class=cl><span class=s2>        :mod:`e2cnn.nn.init`.
+</span></span></span><span class=line><span class=cl><span class=s2>        By default, the weights are initialized in the constructors using :func:`~e2cnn.nn.init.generalized_he_init`.
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        .. warning ::
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>            This initialization procedure can be extremely slow for wide layers.
+</span></span></span><span class=line><span class=cl><span class=s2>            In case initializing the model is not required (e.g. before loading the state dict of a pre-trained model)
+</span></span></span><span class=line><span class=cl><span class=s2>            or another initialization method is preferred (e.g. :func:`~e2cnn.nn.init.deltaorthonormal_init`), the
+</span></span></span><span class=line><span class=cl><span class=s2>            parameter ``initialize`` can be set to ``False`` to avoid unnecessary overhead.
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        The parameters ``basisexpansion``, ``sigma``, ``frequencies_cutoff``, ``rings`` and ``maximum_offset`` are
+</span></span></span><span class=line><span class=cl><span class=s2>        optional parameters used to control how the basis for the filters is built, how it is sampled on the filter
+</span></span></span><span class=line><span class=cl><span class=s2>        grid and how it is expanded to build the filter. We suggest to keep these default values.
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        Args:
+</span></span></span><span class=line><span class=cl><span class=s2>            in_type (FieldType): the type of the input field, specifying its transformation law
+</span></span></span><span class=line><span class=cl><span class=s2>            out_type (FieldType): the type of the output field, specifying its transformation law
+</span></span></span><span class=line><span class=cl><span class=s2>            kernel_size (int): the size of the (square) filter
+</span></span></span><span class=line><span class=cl><span class=s2>            padding (int, optional): implicit zero paddings on both sides of the input. Default: ``0``
+</span></span></span><span class=line><span class=cl><span class=s2>            padding_mode(str, optional): ``zeros``, ``reflect``, ``replicate`` or ``circular``. Default: ``zeros``
+</span></span></span><span class=line><span class=cl><span class=s2>            stride (int, optional): the stride of the kernel. Default: ``1``
+</span></span></span><span class=line><span class=cl><span class=s2>            dilation (int, optional): the spacing between kernel elements. Default: ``1``
+</span></span></span><span class=line><span class=cl><span class=s2>            groups (int, optional): number of blocked connections from input channels to output channels.
+</span></span></span><span class=line><span class=cl><span class=s2>                                    It allows depthwise convolution. When used, the input and output types need to be
+</span></span></span><span class=line><span class=cl><span class=s2>                                    divisible in ``groups`` groups, all equal to each other.
+</span></span></span><span class=line><span class=cl><span class=s2>                                    Default: ``1``.
+</span></span></span><span class=line><span class=cl><span class=s2>            bias (bool, optional): Whether to add a bias to the output (only to fields which contain a
+</span></span></span><span class=line><span class=cl><span class=s2>                    trivial irrep) or not. Default ``True``
+</span></span></span><span class=line><span class=cl><span class=s2>            basisexpansion (str, optional): the basis expansion algorithm to use
+</span></span></span><span class=line><span class=cl><span class=s2>            sigma (list or float, optional): width of each ring where the bases are sampled. If only one scalar
+</span></span></span><span class=line><span class=cl><span class=s2>                    is passed, it is used for all rings.
+</span></span></span><span class=line><span class=cl><span class=s2>            frequencies_cutoff (callable or float, optional): function mapping the radii of the basis elements to the
+</span></span></span><span class=line><span class=cl><span class=s2>                    maximum frequency accepted. If a float values is passed, the maximum frequency is equal to the
+</span></span></span><span class=line><span class=cl><span class=s2>                    radius times this factor. By default (``None``), a more complex policy is used.
+</span></span></span><span class=line><span class=cl><span class=s2>            rings (list, optional): radii of the rings where to sample the bases
+</span></span></span><span class=line><span class=cl><span class=s2>            maximum_offset (int, optional): number of additional (aliased) frequencies in the intertwiners for finite
+</span></span></span><span class=line><span class=cl><span class=s2>                    groups. By default (``None``), all additional frequencies allowed by the frequencies cut-off
+</span></span></span><span class=line><span class=cl><span class=s2>                    are used.
+</span></span></span><span class=line><span class=cl><span class=s2>            recompute (bool, optional): if ``True``, recomputes a new basis for the equivariant kernels.
+</span></span></span><span class=line><span class=cl><span class=s2>                    By Default (``False``), it  caches the basis built or reuse a cached one, if it is found.
+</span></span></span><span class=line><span class=cl><span class=s2>            basis_filter (callable, optional): function which takes as input a descriptor of a basis element
+</span></span></span><span class=line><span class=cl><span class=s2>                    (as a dictionary) and returns a boolean value: whether to preserve (``True``) or discard (``False``)
+</span></span></span><span class=line><span class=cl><span class=s2>                    the basis element. By default (``None``), no filtering is applied.
+</span></span></span><span class=line><span class=cl><span class=s2>            initialize (bool, optional): initialize the weights of the model. Default: ``True``
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        Attributes:
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>            ~.weights (torch.Tensor): the learnable parameters which are used to expand the kernel
+</span></span></span><span class=line><span class=cl><span class=s2>            ~.filter (torch.Tensor): the convolutional kernel obtained by expanding the parameters
+</span></span></span><span class=line><span class=cl><span class=s2>                                    in :attr:`~e2cnn.nn.R2Conv.weights`
+</span></span></span><span class=line><span class=cl><span class=s2>            ~.bias (torch.Tensor): the learnable parameters which are used to expand the bias, if ``bias=True``
+</span></span></span><span class=line><span class=cl><span class=s2>            ~.expanded_bias (torch.Tensor): the equivariant bias which is summed to the output, obtained by expanding
+</span></span></span><span class=line><span class=cl><span class=s2>                                    the parameters in :attr:`~e2cnn.nn.R2Conv.bias`
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># 输入类型和输出类型必须是一个群</span>
+</span></span><span class=line><span class=cl>        <span class=k>assert</span> <span class=n>in_type</span><span class=o>.</span><span class=n>gspace</span> <span class=o>==</span> <span class=n>out_type</span><span class=o>.</span><span class=n>gspace</span>
+</span></span><span class=line><span class=cl>        <span class=k>assert</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>in_type</span><span class=o>.</span><span class=n>gspace</span><span class=p>,</span> <span class=n>GeneralOnR2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># 初始化对应的内容</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>(</span><span class=n>R2Conv</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>space</span> <span class=o>=</span> <span class=n>in_type</span><span class=o>.</span><span class=n>gspace</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>in_type</span> <span class=o>=</span> <span class=n>in_type</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>out_type</span> <span class=o>=</span> <span class=n>out_type</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>kernel_size</span> <span class=o>=</span> <span class=n>kernel_size</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>stride</span> <span class=o>=</span> <span class=n>stride</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>dilation</span> <span class=o>=</span> <span class=n>dilation</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>padding</span> <span class=o>=</span> <span class=n>padding</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>padding_mode</span> <span class=o>=</span> <span class=n>padding_mode</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>groups</span> <span class=o>=</span> <span class=n>groups</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># 检查是padding是否是元组</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>padding</span><span class=p>,</span> <span class=nb>tuple</span><span class=p>)</span> <span class=ow>and</span> <span class=nb>len</span><span class=p>(</span><span class=n>padding</span><span class=p>)</span> <span class=o>==</span> <span class=mi>2</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>_padding</span> <span class=o>=</span> <span class=n>padding</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 检查padding是否是int，是int则直接将对应的内容直接进行赋值</span>
+</span></span><span class=line><span class=cl>        <span class=k>elif</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>padding</span><span class=p>,</span> <span class=nb>int</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=n>_padding</span> <span class=o>=</span> <span class=p>(</span><span class=n>padding</span><span class=p>,</span> <span class=n>padding</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s1>&#39;padding needs to be either an integer or a tuple containing two integers but </span><span class=si>{}</span><span class=s1> found&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>padding</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=n>padding_modes</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;zeros&#39;</span><span class=p>,</span> <span class=s1>&#39;reflect&#39;</span><span class=p>,</span> <span class=s1>&#39;replicate&#39;</span><span class=p>,</span> <span class=s1>&#39;circular&#39;</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>padding_mode</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>padding_modes</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s2>&#34;padding_mode must be one of [</span><span class=si>{}</span><span class=s2>], but got padding_mode=&#39;</span><span class=si>{}</span><span class=s2>&#39;&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>padding_modes</span><span class=p>,</span> <span class=n>padding_mode</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_reversed_padding_repeated_twice</span> <span class=o>=</span> <span class=nb>tuple</span><span class=p>(</span><span class=n>x</span> <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>reversed</span><span class=p>(</span><span class=n>_padding</span><span class=p>)</span> <span class=k>for</span> <span class=n>_</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=mi>2</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># 检查输入和输出类可以分为“groups”组，所有组都彼此相等</span>
+</span></span><span class=line><span class=cl>        <span class=c1># TODO: 搞懂这个变量的作用</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>groups</span> <span class=o>&gt;</span> <span class=mi>1</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1># Check the input and output classes can be split in `groups` groups, all equal to each other</span>
+</span></span><span class=line><span class=cl>            <span class=c1># first, check that the number of fields is divisible by `groups`</span>
+</span></span><span class=line><span class=cl>            <span class=k>assert</span> <span class=nb>len</span><span class=p>(</span><span class=n>in_type</span><span class=p>)</span> <span class=o>%</span> <span class=n>groups</span> <span class=o>==</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>            <span class=k>assert</span> <span class=nb>len</span><span class=p>(</span><span class=n>out_type</span><span class=p>)</span> <span class=o>%</span> <span class=n>groups</span> <span class=o>==</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>            <span class=n>in_size</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>in_type</span><span class=p>)</span> <span class=o>//</span> <span class=n>groups</span>
+</span></span><span class=line><span class=cl>            <span class=n>out_size</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>out_type</span><span class=p>)</span> <span class=o>//</span> <span class=n>groups</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=c1># then, check that all groups are equal to each other, i.e. have the same types in the same order</span>
+</span></span><span class=line><span class=cl>            <span class=k>assert</span> <span class=nb>all</span><span class=p>(</span><span class=n>in_type</span><span class=o>.</span><span class=n>representations</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>==</span> <span class=n>in_type</span><span class=o>.</span><span class=n>representations</span><span class=p>[</span><span class=n>i</span> <span class=o>%</span> <span class=n>in_size</span><span class=p>]</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=n>in_type</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl>            <span class=k>assert</span> <span class=nb>all</span><span class=p>(</span><span class=n>out_type</span><span class=o>.</span><span class=n>representations</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>==</span> <span class=n>out_type</span><span class=o>.</span><span class=n>representations</span><span class=p>[</span><span class=n>i</span> <span class=o>%</span> <span class=n>out_size</span><span class=p>]</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=n>out_type</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=c1># finally, retrieve the type associated to a single group in input.</span>
+</span></span><span class=line><span class=cl>            <span class=c1># this type will be used to build a smaller kernel basis and a smaller filter</span>
+</span></span><span class=line><span class=cl>            <span class=c1># as in PyTorch, to build a filter for grouped convolution, we build a filter which maps from one input</span>
+</span></span><span class=line><span class=cl>            <span class=c1># group to all output groups. Then, PyTorch&#39;s standard convolution routine interpret this filter as `groups`</span>
+</span></span><span class=line><span class=cl>            <span class=c1># different filters, each mapping an input group to an output group.</span>
+</span></span><span class=line><span class=cl>            <span class=n>in_type</span> <span class=o>=</span> <span class=n>in_type</span><span class=o>.</span><span class=n>index_select</span><span class=p>(</span><span class=nb>list</span><span class=p>(</span><span class=nb>range</span><span class=p>(</span><span class=n>in_size</span><span class=p>)))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># 这段代码检查`bias`是否为真值。如果`bias`为镇，则执行以下步骤：</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>bias</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1># bias can be applied only to trivial irreps inside the representation</span>
+</span></span><span class=line><span class=cl>            <span class=c1># to apply bias to a field we learn a bias for each trivial irreps it contains</span>
+</span></span><span class=line><span class=cl>            <span class=c1># and, then, we transform it with the change of basis matrix to be able to apply it to the whole field</span>
+</span></span><span class=line><span class=cl>            <span class=c1># this is equivalent to transform the field to its irreps through the inverse change of basis,</span>
+</span></span><span class=line><span class=cl>            <span class=c1># sum the bias only to the trivial irrep and then map it back with the change of basis</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=c1># count the number of trivial irreps</span>
+</span></span><span class=line><span class=cl>            <span class=c1># 计算具有平凡表示的数量</span>
+</span></span><span class=line><span class=cl>            <span class=n>trivials</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>            <span class=c1># 遍历out_type中每个元素r</span>
+</span></span><span class=line><span class=cl>            <span class=c1># 对于 r 中的每个 irr（表示），检查 self.out_type.fibergroup.irreps[irr] 是否为“trivial”（平凡的）。</span>
+</span></span><span class=line><span class=cl>            <span class=c1># 如果是，则将 trivials 加 1</span>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>out_type</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=k>for</span> <span class=n>irr</span> <span class=ow>in</span> <span class=n>r</span><span class=o>.</span><span class=n>irreps</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                    <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>out_type</span><span class=o>.</span><span class=n>fibergroup</span><span class=o>.</span><span class=n>irreps</span><span class=p>[</span><span class=n>irr</span><span class=p>]</span><span class=o>.</span><span class=n>is_trivial</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>                        <span class=n>trivials</span> <span class=o>+=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=c1># if there is at least 1 trivial irrep</span>
+</span></span><span class=line><span class=cl>            <span class=c1># 如果至少有一个平凡表示</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=n>trivials</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                
+</span></span><span class=line><span class=cl>                <span class=c1># matrix containing the columns of the change of basis which map from the trivial irreps to the</span>
+</span></span><span class=line><span class=cl>                <span class=c1># field representations. This matrix allows us to map the bias defined only over the trivial irreps</span>
+</span></span><span class=line><span class=cl>                <span class=c1># to a bias for the whole field more efficiently</span>
+</span></span><span class=line><span class=cl>                <span class=c1># 创建一个大小为 (self.out_type.size, trivials) 的零张量 bias_expansion，用于存储变换矩阵，该矩阵能够将平凡表示映射到字段表示中。</span>
+</span></span><span class=line><span class=cl>                <span class=n>bias_expansion</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>out_type</span><span class=o>.</span><span class=n>size</span><span class=p>,</span> <span class=n>trivials</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=c1># 通过循环遍历 self.out_type 中的每个元素 r，并且对于 r 中的每个 irr：</span>
+</span></span><span class=line><span class=cl>                <span class=c1># 检查 self.out_type.fibergroup.irreps[irr] 是否为平凡表示。</span>
+</span></span><span class=line><span class=cl>                <span class=c1># 如果是平凡表示，将 r.change_of_basis[:, pi] 赋值给 bias_expansion 的相应位置，并更新索引 c。</span>
+</span></span><span class=line><span class=cl>                <span class=n>p</span><span class=p>,</span> <span class=n>c</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>                <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>out_type</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                    <span class=n>pi</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>                    <span class=k>for</span> <span class=n>irr</span> <span class=ow>in</span> <span class=n>r</span><span class=o>.</span><span class=n>irreps</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                        <span class=n>irr</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>out_type</span><span class=o>.</span><span class=n>fibergroup</span><span class=o>.</span><span class=n>irreps</span><span class=p>[</span><span class=n>irr</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>                        <span class=k>if</span> <span class=n>irr</span><span class=o>.</span><span class=n>is_trivial</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>                            <span class=n>bias_expansion</span><span class=p>[</span><span class=n>p</span><span class=p>:</span><span class=n>p</span><span class=o>+</span><span class=n>r</span><span class=o>.</span><span class=n>size</span><span class=p>,</span> <span class=n>c</span><span class=p>]</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>tensor</span><span class=p>(</span><span class=n>r</span><span class=o>.</span><span class=n>change_of_basis</span><span class=p>[:,</span> <span class=n>pi</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>                            <span class=n>c</span> <span class=o>+=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>                        <span class=n>pi</span> <span class=o>+=</span> <span class=n>irr</span><span class=o>.</span><span class=n>size</span>
+</span></span><span class=line><span class=cl>                    <span class=n>p</span> <span class=o>+=</span> <span class=n>r</span><span class=o>.</span><span class=n>size</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=c1># 注册属性 bias_expansion 为类的缓冲区（buffer）属性，表示此属性的值不需要进行梯度计算。</span>
+</span></span><span class=line><span class=cl>                <span class=c1># 创建参数 self.bias，它是一个大小为 trivials 的张量，并将其设置为需要梯度计算。</span>
+</span></span><span class=line><span class=cl>                <span class=c1># 注册属性 expanded_bias 为类的缓冲区（buffer）属性，表示此属性的值不需要进行梯度计算，并初始化为大小为 out_type.size 的零张量。</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>register_buffer</span><span class=p>(</span><span class=s2>&#34;bias_expansion&#34;</span><span class=p>,</span> <span class=n>bias_expansion</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>bias</span> <span class=o>=</span> <span class=n>Parameter</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=n>trivials</span><span class=p>),</span> <span class=n>requires_grad</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>register_buffer</span><span class=p>(</span><span class=s2>&#34;expanded_bias&#34;</span><span class=p>,</span> <span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=n>out_type</span><span class=o>.</span><span class=n>size</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>            <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>bias</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>expanded_bias</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>bias</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>expanded_bias</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># compute the parameters of the basis</span>
+</span></span><span class=line><span class=cl>        <span class=n>grid</span><span class=p>,</span> <span class=n>basis_filter</span><span class=p>,</span> <span class=n>rings</span><span class=p>,</span> <span class=n>sigma</span><span class=p>,</span> <span class=n>maximum_frequency</span> <span class=o>=</span> <span class=n>compute_basis_params</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                                                   <span class=n>frequencies_cutoff</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                                                   <span class=n>rings</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                                                   <span class=n>sigma</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                                                   <span class=n>dilation</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                                                   <span class=n>basis_filter</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># BasisExpansion: submodule which takes care of building the filter</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_basisexpansion</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># notice that `in_type` is used instead of `self.in_type` such that it works also when `groups &gt; 1`</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>basisexpansion</span> <span class=o>==</span> <span class=s1>&#39;blocks&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1># 这里是整个核心</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_basisexpansion</span> <span class=o>=</span> <span class=n>BlocksBasisExpansion</span><span class=p>(</span><span class=n>in_type</span><span class=p>,</span> <span class=n>out_type</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                        <span class=n>basis_generator</span><span class=o>=</span><span class=bp>self</span><span class=o>.</span><span class=n>space</span><span class=o>.</span><span class=n>build_kernel_basis</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                        <span class=n>points</span><span class=o>=</span><span class=n>grid</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                        <span class=n>sigma</span><span class=o>=</span><span class=n>sigma</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                        <span class=n>rings</span><span class=o>=</span><span class=n>rings</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                        <span class=n>maximum_offset</span><span class=o>=</span><span class=n>maximum_offset</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                        <span class=n>maximum_frequency</span><span class=o>=</span><span class=n>maximum_frequency</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                        <span class=n>basis_filter</span><span class=o>=</span><span class=n>basis_filter</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                        <span class=n>recompute</span><span class=o>=</span><span class=n>recompute</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s1>&#39;Basis Expansion algorithm &#34;</span><span class=si>%s</span><span class=s1>&#34; not recognized&#39;</span> <span class=o>%</span> <span class=n>basisexpansion</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>basisexpansion</span><span class=o>.</span><span class=n>dimension</span><span class=p>()</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s1>&#39;&#39;&#39;
+</span></span></span><span class=line><span class=cl><span class=s1>                The basis for the steerable filter is empty!
+</span></span></span><span class=line><span class=cl><span class=s1>                Tune the `frequencies_cutoff`, `kernel_size`, `rings`, `sigma` or `basis_filter` parameters to allow
+</span></span></span><span class=line><span class=cl><span class=s1>                for a larger basis.
+</span></span></span><span class=line><span class=cl><span class=s1>            &#39;&#39;&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>weights</span> <span class=o>=</span> <span class=n>Parameter</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>basisexpansion</span><span class=o>.</span><span class=n>dimension</span><span class=p>()),</span> <span class=n>requires_grad</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>register_buffer</span><span class=p>(</span><span class=s2>&#34;filter&#34;</span><span class=p>,</span> <span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=n>out_type</span><span class=o>.</span><span class=n>size</span><span class=p>,</span> <span class=n>in_type</span><span class=o>.</span><span class=n>size</span><span class=p>,</span> <span class=n>kernel_size</span><span class=p>,</span> <span class=n>kernel_size</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>initialize</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=c1># by default, the weights are initialized with a generalized form of He&#39;s weight initialization</span>
+</span></span><span class=line><span class=cl>            <span class=n>init</span><span class=o>.</span><span class=n>generalized_he_init</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>weights</span><span class=o>.</span><span class=n>data</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>basisexpansion</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个函数不算短，咱们还是老规矩，一句一句看。</p><p>对应的初始化咱们这就不看了，直接看对应代码我写的注释吧。</p><p><code>if groups > 1</code>：这里的group代表是输入通道到输出通道的阻塞连接数，在这里允许 深度卷积，使用时，输入和输出类型需要可分为<code>groups</code>组，并且彼此相等。</p><p>然后，我们在这里默认是1，因此在这里，我们暂时不考虑对应的内容。这个 if分支暂时跳过。</p><p><code>if bias:</code> 这个分支在代码中解释的比较清楚 ，直接看对应的代码就好。</p><p><code>grid, basis_filter, rings, sigma, maximum_frequency = compute_basis_params(kernel_size,frequencies_cutoff,rings,sigma,dilation,basis_filter)</code>：这个函数 的作用是计算basis的变量。然后看这个函数中的细节。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span><span class=lnt>75
+</span><span class=lnt>76
+</span><span class=lnt>77
+</span><span class=lnt>78
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>compute_basis_params</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>frequencies_cutoff</span><span class=p>:</span> <span class=n>Union</span><span class=p>[</span><span class=nb>float</span><span class=p>,</span> <span class=n>Callable</span><span class=p>[[</span><span class=nb>float</span><span class=p>],</span> <span class=nb>float</span><span class=p>]]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>rings</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=nb>float</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>sigma</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=nb>float</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>dilation</span><span class=p>:</span> <span class=nb>int</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>custom_basis_filter</span><span class=p>:</span> <span class=n>Callable</span><span class=p>[[</span><span class=nb>dict</span><span class=p>],</span> <span class=nb>bool</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=p>):</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># compute the coordinates of the centers of the cells in the grid where the filter is sampled</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 计算对滤波器进行采样的网格中单元格中心的坐标</span>
+</span></span><span class=line><span class=cl>    <span class=n>grid</span> <span class=o>=</span> <span class=n>get_grid_coords</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>,</span> <span class=n>dilation</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1># 计算滤波器的最大半径</span>
+</span></span><span class=line><span class=cl>    <span class=n>max_radius</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>sqrt</span><span class=p>((</span><span class=n>grid</span> <span class=o>**</span><span class=mi>2</span><span class=p>)</span><span class=o>.</span><span class=n>sum</span><span class=p>(</span><span class=mi>0</span><span class=p>))</span><span class=o>.</span><span class=n>max</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=c1># max_radius = kernel_size // 2</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># by default, the number of rings equals half of the filter size</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>rings</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>n_rings</span> <span class=o>=</span> <span class=n>math</span><span class=o>.</span><span class=n>ceil</span><span class=p>(</span><span class=n>kernel_size</span> <span class=o>/</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=c1># if self.group.order() &gt; 0:</span>
+</span></span><span class=line><span class=cl>        <span class=c1>#     # compute the number of edges of the polygon inscribed in the filter (which is a square)</span>
+</span></span><span class=line><span class=cl>        <span class=c1>#     # whose points stay inside the filter under the action of the group</span>
+</span></span><span class=line><span class=cl>        <span class=c1>#     # the number of edges is lcm(group&#39;s order, 4)</span>
+</span></span><span class=line><span class=cl>        <span class=c1>#     n_edges = self.group.order()</span>
+</span></span><span class=line><span class=cl>        <span class=c1>#     while n_edges % 4 &gt; 0:</span>
+</span></span><span class=line><span class=cl>        <span class=c1>#         n_edges *= 2</span>
+</span></span><span class=line><span class=cl>        <span class=c1>#     # the largest ring we can sample has radius equal to the circumradius of the polygon described above</span>
+</span></span><span class=line><span class=cl>        <span class=c1>#     n_rings /= math.cos(math.pi/n_edges)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># n_rings = s // 2 + 1</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># torch.linspace(start, end, steps) 是一个 PyTorch 函数，它生成一个包含在指定范围内、包括起始值和结束值的均匀间隔的一维张量（Tensor），此处用于生成环的半径（rings）。</span>
+</span></span><span class=line><span class=cl>        <span class=c1># start 是起始值，这里为0，表示张量中第一个元素的值。</span>
+</span></span><span class=line><span class=cl>        <span class=c1># end 是结束值，即(kernel_size - 1) // 2，这个值是由卷积核大小减去1，然后整除2得到的。这个值决定了张量中最后一个元素的值。</span>
+</span></span><span class=line><span class=cl>        <span class=c1># n_rings 是生成的张量中元素的数量，即生成的环数目。</span>
+</span></span><span class=line><span class=cl>        <span class=c1># dilation 将整个生成的张量元素乘以 dilation。这个步骤将按照 dilation 的倍数来调整生成的环的半径值。</span>
+</span></span><span class=line><span class=cl>        <span class=c1># rings = torch.linspace(1 - s % 2, s // 2, n_rings)</span>
+</span></span><span class=line><span class=cl>        <span class=n>rings</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>linspace</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=p>(</span><span class=n>kernel_size</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)</span> <span class=o>//</span> <span class=mi>2</span><span class=p>,</span> <span class=n>n_rings</span><span class=p>)</span> <span class=o>*</span> <span class=n>dilation</span>
+</span></span><span class=line><span class=cl>        <span class=n>rings</span> <span class=o>=</span> <span class=n>rings</span><span class=o>.</span><span class=n>tolist</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>assert</span> <span class=nb>all</span><span class=p>([</span><span class=n>max_radius</span> <span class=o>&gt;=</span> <span class=n>r</span> <span class=o>&gt;=</span> <span class=mi>0</span> <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>rings</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>sigma</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>sigma</span> <span class=o>=</span> <span class=p>[</span><span class=mf>0.6</span><span class=p>]</span> <span class=o>*</span> <span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=n>rings</span><span class=p>)</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)</span> <span class=o>+</span> <span class=p>[</span><span class=mf>0.4</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>i</span><span class=p>,</span> <span class=n>r</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>rings</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=n>r</span> <span class=o>==</span> <span class=mf>0.</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=n>sigma</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=mf>0.005</span>
+</span></span><span class=line><span class=cl>                
+</span></span><span class=line><span class=cl>    <span class=k>elif</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>sigma</span><span class=p>,</span> <span class=nb>float</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>sigma</span> <span class=o>=</span> <span class=p>[</span><span class=n>sigma</span><span class=p>]</span> <span class=o>*</span> <span class=nb>len</span><span class=p>(</span><span class=n>rings</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>    <span class=c1># TODO - use a string name for this setting</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>frequencies_cutoff</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>frequencies_cutoff</span> <span class=o>=</span> <span class=o>-</span><span class=mf>1.</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>frequencies_cutoff</span><span class=p>,</span> <span class=nb>float</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>frequencies_cutoff</span> <span class=o>==</span> <span class=o>-</span><span class=mi>3</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>frequencies_cutoff</span> <span class=o>=</span> <span class=n>_manual_fco3</span><span class=p>(</span><span class=n>kernel_size</span> <span class=o>//</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>elif</span> <span class=n>frequencies_cutoff</span> <span class=o>==</span> <span class=o>-</span><span class=mi>2</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>frequencies_cutoff</span> <span class=o>=</span> <span class=n>_manual_fco2</span><span class=p>(</span><span class=n>kernel_size</span> <span class=o>//</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>elif</span> <span class=n>frequencies_cutoff</span> <span class=o>==</span> <span class=o>-</span><span class=mi>1</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>frequencies_cutoff</span> <span class=o>=</span> <span class=n>_manual_fco1</span><span class=p>(</span><span class=n>kernel_size</span> <span class=o>//</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>frequencies_cutoff</span> <span class=o>=</span> <span class=k>lambda</span> <span class=n>r</span><span class=p>,</span> <span class=n>fco</span><span class=o>=</span><span class=n>frequencies_cutoff</span><span class=p>:</span> <span class=n>fco</span> <span class=o>*</span> <span class=n>r</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># check if the object is a callable function</span>
+</span></span><span class=line><span class=cl>    <span class=k>assert</span> <span class=n>callable</span><span class=p>(</span><span class=n>frequencies_cutoff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>maximum_frequency</span> <span class=o>=</span> <span class=nb>int</span><span class=p>(</span><span class=nb>max</span><span class=p>(</span><span class=n>frequencies_cutoff</span><span class=p>(</span><span class=n>r</span><span class=p>)</span> <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>rings</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>fco_filter</span> <span class=o>=</span> <span class=n>bandlimiting_filter</span><span class=p>(</span><span class=n>frequencies_cutoff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>custom_basis_filter</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>basis_filter</span> <span class=o>=</span> <span class=k>lambda</span> <span class=n>d</span><span class=p>,</span> <span class=n>custom_basis_filter</span><span class=o>=</span><span class=n>custom_basis_filter</span><span class=p>,</span> <span class=n>fco_filter</span><span class=o>=</span><span class=n>fco_filter</span><span class=p>:</span> <span class=p>(</span><span class=n>custom_basis_filter</span><span class=p>(</span><span class=n>d</span><span class=p>)</span> <span class=ow>and</span> <span class=n>fco_filter</span><span class=p>(</span><span class=n>d</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>basis_filter</span> <span class=o>=</span> <span class=n>fco_filter</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>grid</span><span class=p>,</span> <span class=n>basis_filter</span><span class=p>,</span> <span class=n>rings</span><span class=p>,</span> <span class=n>sigma</span><span class=p>,</span> <span class=n>maximum_frequency</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个代码也是 一个稍微长点的代码，ok，咱们还是一行一行看。</p><p><code>grid = get_grid_coords(kernel_size, dilation)</code>这个函数计算滤波器采样网格中单元中心的坐标，首先先看 这个函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>get_grid_coords</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>dilation</span><span class=p>:</span> <span class=nb>int</span> <span class=o>=</span> <span class=mi>1</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1># 这里面就是在那个电科大的硕士论文中写的东西，根据卷积核的大小与转换函数的得到对应的标志矩阵</span>
+</span></span><span class=line><span class=cl>    <span class=n>actual_size</span> <span class=o>=</span> <span class=n>dilation</span> <span class=o>*</span> <span class=p>(</span><span class=n>kernel_size</span> <span class=o>-</span><span class=mi>1</span><span class=p>)</span> <span class=o>+</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>origin</span> <span class=o>=</span> <span class=n>actual_size</span> <span class=o>/</span> <span class=mi>2</span> <span class=o>-</span> <span class=mf>0.5</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>points</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>y</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>y</span> <span class=o>*=</span> <span class=n>dilation</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>x</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=n>x</span> <span class=o>*=</span> <span class=n>dilation</span>
+</span></span><span class=line><span class=cl>            <span class=n>p</span> <span class=o>=</span> <span class=p>(</span><span class=n>x</span> <span class=o>-</span> <span class=n>origin</span><span class=p>,</span> <span class=o>-</span><span class=n>y</span> <span class=o>+</span> <span class=n>origin</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>points</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>p</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>points</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>array</span><span class=p>(</span><span class=n>points</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>assert</span> <span class=n>points</span><span class=o>.</span><span class=n>shape</span> <span class=o>==</span> <span class=p>(</span><span class=n>kernel_size</span> <span class=o>**</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>2</span><span class=p>),</span> <span class=n>points</span><span class=o>.</span><span class=n>shape</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>points</span><span class=o>.</span><span class=n>T</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个内容其实很清楚，就是根据卷积核的大小以及转换函数生成对应的转换矩阵。具体内容可以看电科大的硕士论文中对于这个过程的描述，这里截个图。</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312042102612.png loading=lazy></p><p>然后我们看下面的代码：<code>max_radius = np.sqrt((grid **2).sum(0)).max()</code>计算对应滤波器的最大半径。</p><p><code>if rings is None:n_rings = math.ceil(kernel_size / 2)</code>这个的话如果rings这个变量不存在，则直接指定为卷积核大小的一半。</p><p><code>rings = torch.linspace(0, (kernel_size - 1) // 2, n_rings) * dilation</code>:Torch.linspace(start, end, steps) 是一个 PyTorch 函数，它生成一个包含在指定范围内、包括起始值和结束值的均匀间隔的一维张量（Tensor），此处用于生成环的半径（rings）。start 是起始值，这里为0，表示张量中第一个元素的值。end 是结束值，即(kernel_size - 1) // 2，这个值是由卷积核大小减去1，然后整除2得到的。这个值决定了张量中最后一个元素的值。n_rings 是生成的张量中元素的数量，即生成的环数目。dilation 将整个生成的张量元素乘以 dilation。这个步骤将按照 dilation 的倍数来调整生成的环的半径值。</p><p><code>rings = rings.tolist()</code>转换成对应的列表。</p><p>这里的话其实就是设置一个变量，然后接着往下面看。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>if</span> <span class=n>sigma</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>sigma</span> <span class=o>=</span> <span class=p>[</span><span class=mf>0.6</span><span class=p>]</span> <span class=o>*</span> <span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=n>rings</span><span class=p>)</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)</span> <span class=o>+</span> <span class=p>[</span><span class=mf>0.4</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>i</span><span class=p>,</span> <span class=n>r</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>rings</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>r</span> <span class=o>==</span> <span class=mf>0.</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>sigma</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=mf>0.005</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里的话还是生成对应的sigma变量，根据上面 生成rings，指定其中sigma角度。</p><p>ok，再往下面很长，但是在本次运行中，有很多没有走到，所以这里直接看运行时使用的内容，剩下的等有时间再去看吧。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>maximum_frequency</span> <span class=o>=</span> <span class=nb>int</span><span class=p>(</span><span class=nb>max</span><span class=p>(</span><span class=n>frequencies_cutoff</span><span class=p>(</span><span class=n>r</span><span class=p>)</span> <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>rings</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=n>fco_filter</span> <span class=o>=</span> <span class=n>bandlimiting_filter</span><span class=p>(</span><span class=n>frequencies_cutoff</span><span class=p>)</span>
+</span></span><span class=line><span class=cl> <span class=n>basis_filter</span> <span class=o>=</span> <span class=n>fco_filter</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个的就是取得rings中的最大值，然后进行返回。</p><p>下面的函数用于根据给定的属性来决定是否保留基础元素，这个函数也不是很重要 ，由于时间有限，先不写，标记一个TODO。</p><p>ok，这个 函数阶数，然后接着向下看。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=bp>self</span><span class=o>.</span><span class=n>_basisexpansion</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl><span class=c1># notice that `in_type` is used instead of `self.in_type` such that it works also when `groups &gt; 1`</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>basisexpansion</span> <span class=o>==</span> <span class=s1>&#39;blocks&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 这里是整个核心</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>_basisexpansion</span> <span class=o>=</span> <span class=n>BlocksBasisExpansion</span><span class=p>(</span><span class=n>in_type</span><span class=p>,</span> <span class=n>out_type</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=n>basis_generator</span><span class=o>=</span><span class=bp>self</span><span class=o>.</span><span class=n>space</span><span class=o>.</span><span class=n>build_kernel_basis</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=n>points</span><span class=o>=</span><span class=n>grid</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=n>sigma</span><span class=o>=</span><span class=n>sigma</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=n>rings</span><span class=o>=</span><span class=n>rings</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=n>maximum_offset</span><span class=o>=</span><span class=n>maximum_offset</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=n>maximum_frequency</span><span class=o>=</span><span class=n>maximum_frequency</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=n>basis_filter</span><span class=o>=</span><span class=n>basis_filter</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                                                <span class=n>recompute</span><span class=o>=</span><span class=n>recompute</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>在我们生成了对应 的内容之后，下面<code>BlocksBasisExpansion</code>就是整个函数的核心，整个函数的作用就是卷积核的设置。ok，下面看这个函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span><span class=lnt>109
+</span><span class=lnt>110
+</span><span class=lnt>111
+</span><span class=lnt>112
+</span><span class=lnt>113
+</span><span class=lnt>114
+</span><span class=lnt>115
+</span><span class=lnt>116
+</span><span class=lnt>117
+</span><span class=lnt>118
+</span><span class=lnt>119
+</span><span class=lnt>120
+</span><span class=lnt>121
+</span><span class=lnt>122
+</span><span class=lnt>123
+</span><span class=lnt>124
+</span><span class=lnt>125
+</span><span class=lnt>126
+</span><span class=lnt>127
+</span><span class=lnt>128
+</span><span class=lnt>129
+</span><span class=lnt>130
+</span><span class=lnt>131
+</span><span class=lnt>132
+</span><span class=lnt>133
+</span><span class=lnt>134
+</span><span class=lnt>135
+</span><span class=lnt>136
+</span><span class=lnt>137
+</span><span class=lnt>138
+</span><span class=lnt>139
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>BlocksBasisExpansion</span><span class=p>(</span><span class=n>BasisExpansion</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>in_type</span><span class=p>:</span> <span class=n>FieldType</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>out_type</span><span class=p>:</span> <span class=n>FieldType</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>basis_generator</span><span class=p>:</span> <span class=n>Callable</span><span class=p>[[</span><span class=n>Representation</span><span class=p>,</span> <span class=n>Representation</span><span class=p>],</span> <span class=n>Basis</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>                 <span class=n>points</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>basis_filter</span><span class=p>:</span> <span class=n>Callable</span><span class=p>[[</span><span class=nb>dict</span><span class=p>],</span> <span class=nb>bool</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>recompute</span><span class=p>:</span> <span class=nb>bool</span> <span class=o>=</span> <span class=kc>False</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=o>**</span><span class=n>kwargs</span>
+</span></span><span class=line><span class=cl>                 <span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        With this algorithm, the expansion is done on the intertwiners of the fields&#39; representations pairs in input and
+</span></span></span><span class=line><span class=cl><span class=s2>        output.
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        Args:
+</span></span></span><span class=line><span class=cl><span class=s2>            in_type (FieldType): the input field type
+</span></span></span><span class=line><span class=cl><span class=s2>            out_type (FieldType): the output field type
+</span></span></span><span class=line><span class=cl><span class=s2>            basis_generator (callable): method that generates the analytical filter basis
+</span></span></span><span class=line><span class=cl><span class=s2>            points (~numpy.ndarray): points where the analytical basis should be sampled
+</span></span></span><span class=line><span class=cl><span class=s2>            basis_filter (callable, optional): filter for the basis elements. Should take a dictionary containing an
+</span></span></span><span class=line><span class=cl><span class=s2>                                               element&#39;s attributes and return whether to keep it or not.
+</span></span></span><span class=line><span class=cl><span class=s2>            recompute (bool, optional): whether to recompute new bases or reuse, if possible, already built tensors.
+</span></span></span><span class=line><span class=cl><span class=s2>            **kwargs: keyword arguments to be passed to ```basis_generator```
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        Attributes:
+</span></span></span><span class=line><span class=cl><span class=s2>            S (int): number of points where the filters are sampled
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>        &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=k>assert</span> <span class=n>in_type</span><span class=o>.</span><span class=n>gspace</span> <span class=o>==</span> <span class=n>out_type</span><span class=o>.</span><span class=n>gspace</span>
+</span></span><span class=line><span class=cl>        <span class=k>assert</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>in_type</span><span class=o>.</span><span class=n>gspace</span><span class=p>,</span> <span class=n>GeneralOnR2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>(</span><span class=n>BlocksBasisExpansion</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_in_type</span> <span class=o>=</span> <span class=n>in_type</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_out_type</span> <span class=o>=</span> <span class=n>out_type</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_input_size</span> <span class=o>=</span> <span class=n>in_type</span><span class=o>.</span><span class=n>size</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_output_size</span> <span class=o>=</span> <span class=n>out_type</span><span class=o>.</span><span class=n>size</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>points</span> <span class=o>=</span> <span class=n>points</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># int: number of points where the filters are sampled</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>S</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>points</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>1</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># we group the basis vectors by their input and output representations</span>
+</span></span><span class=line><span class=cl>        <span class=n>_block_expansion_modules</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># iterate through all different pairs of input/output representationions</span>
+</span></span><span class=line><span class=cl>        <span class=c1># and, for each of them, build a basis</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>i_repr</span> <span class=ow>in</span> <span class=n>in_type</span><span class=o>.</span><span class=n>_unique_representations</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=n>o_repr</span> <span class=ow>in</span> <span class=n>out_type</span><span class=o>.</span><span class=n>_unique_representations</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=n>reprs_names</span> <span class=o>=</span> <span class=p>(</span><span class=n>i_repr</span><span class=o>.</span><span class=n>name</span><span class=p>,</span> <span class=n>o_repr</span><span class=o>.</span><span class=n>name</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                    <span class=n>basis</span> <span class=o>=</span> <span class=n>basis_generator</span><span class=p>(</span><span class=n>i_repr</span><span class=p>,</span> <span class=n>o_repr</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                    
+</span></span><span class=line><span class=cl>                    <span class=n>block_expansion</span> <span class=o>=</span> <span class=n>block_basisexpansion</span><span class=p>(</span><span class=n>basis</span><span class=p>,</span> <span class=n>points</span><span class=p>,</span> <span class=n>basis_filter</span><span class=p>,</span> <span class=n>recompute</span><span class=o>=</span><span class=n>recompute</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_block_expansion_modules</span><span class=p>[</span><span class=n>reprs_names</span><span class=p>]</span> <span class=o>=</span> <span class=n>block_expansion</span>
+</span></span><span class=line><span class=cl>                    
+</span></span><span class=line><span class=cl>                    <span class=c1># register the block expansion as a submodule</span>
+</span></span><span class=line><span class=cl>                    <span class=bp>self</span><span class=o>.</span><span class=n>add_module</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;block_expansion_</span><span class=si>{</span><span class=n>reprs_names</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>,</span> <span class=n>block_expansion</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                    
+</span></span><span class=line><span class=cl>                <span class=k>except</span> <span class=n>EmptyBasisException</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                    <span class=c1># print(f&#34;Empty basis at {reprs_names}&#34;)</span>
+</span></span><span class=line><span class=cl>                    <span class=k>pass</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>_block_expansion_modules</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=nb>print</span><span class=p>(</span><span class=s1>&#39;WARNING! The basis for the block expansion of the filter is empty!&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_n_pairs</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>in_type</span><span class=o>.</span><span class=n>_unique_representations</span><span class=p>)</span> <span class=o>*</span> <span class=nb>len</span><span class=p>(</span><span class=n>out_type</span><span class=o>.</span><span class=n>_unique_representations</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=c1># the list of all pairs of input/output representations which don&#39;t have an empty basis</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_representations_pairs</span> <span class=o>=</span> <span class=nb>sorted</span><span class=p>(</span><span class=nb>list</span><span class=p>(</span><span class=n>_block_expansion_modules</span><span class=o>.</span><span class=n>keys</span><span class=p>()))</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># retrieve for each representation in both input and output fields:</span>
+</span></span><span class=line><span class=cl>        <span class=c1># - the number of its occurrences,</span>
+</span></span><span class=line><span class=cl>        <span class=c1># - the indices where it occurs and</span>
+</span></span><span class=line><span class=cl>        <span class=c1># - whether its occurrences are contiguous or not</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_in_count</span><span class=p>,</span> <span class=n>_in_indices</span><span class=p>,</span> <span class=n>_in_contiguous</span> <span class=o>=</span> <span class=n>_retrieve_indices</span><span class=p>(</span><span class=n>in_type</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_out_count</span><span class=p>,</span> <span class=n>_out_indices</span><span class=p>,</span> <span class=n>_out_contiguous</span> <span class=o>=</span> <span class=n>_retrieve_indices</span><span class=p>(</span><span class=n>out_type</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># compute the attributes and an id for each basis element (and, so, of each parameter)</span>
+</span></span><span class=line><span class=cl>        <span class=c1># attributes, basis_ids = _compute_attrs_and_ids(in_type, out_type, _block_expansion_modules)</span>
+</span></span><span class=line><span class=cl>        <span class=n>basis_ids</span> <span class=o>=</span> <span class=n>_compute_attrs_and_ids</span><span class=p>(</span><span class=n>in_type</span><span class=p>,</span> <span class=n>out_type</span><span class=p>,</span> <span class=n>_block_expansion_modules</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_weights_ranges</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=n>last_weight_position</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_ids_to_basis</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_basis_to_ids</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_contiguous</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># iterate through the different group of blocks</span>
+</span></span><span class=line><span class=cl>        <span class=c1># i.e., through all input/output pairs</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>io_pair</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_representations_pairs</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_contiguous</span><span class=p>[</span><span class=n>io_pair</span><span class=p>]</span> <span class=o>=</span> <span class=n>_in_contiguous</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>0</span><span class=p>]]</span> <span class=ow>and</span> <span class=n>_out_contiguous</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>1</span><span class=p>]]</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>            <span class=c1># build the indices tensors</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>_contiguous</span><span class=p>[</span><span class=n>io_pair</span><span class=p>]:</span>
+</span></span><span class=line><span class=cl>                <span class=c1># in_indices = torch.LongTensor([</span>
+</span></span><span class=line><span class=cl>                <span class=n>in_indices</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_in_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>0</span><span class=p>]]</span><span class=o>.</span><span class=n>min</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_in_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>0</span><span class=p>]]</span><span class=o>.</span><span class=n>max</span><span class=p>()</span> <span class=o>+</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_in_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>0</span><span class=p>]]</span><span class=o>.</span><span class=n>max</span><span class=p>()</span> <span class=o>+</span> <span class=mi>1</span> <span class=o>-</span> <span class=n>_in_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>0</span><span class=p>]]</span><span class=o>.</span><span class=n>min</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>                <span class=p>]</span><span class=c1># )</span>
+</span></span><span class=line><span class=cl>                <span class=c1># out_indices = torch.LongTensor([</span>
+</span></span><span class=line><span class=cl>                <span class=n>out_indices</span> <span class=o>=</span> <span class=p>[</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_out_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>1</span><span class=p>]]</span><span class=o>.</span><span class=n>min</span><span class=p>(),</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_out_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>1</span><span class=p>]]</span><span class=o>.</span><span class=n>max</span><span class=p>()</span> <span class=o>+</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                    <span class=n>_out_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>1</span><span class=p>]]</span><span class=o>.</span><span class=n>max</span><span class=p>()</span> <span class=o>+</span> <span class=mi>1</span> <span class=o>-</span> <span class=n>_out_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>1</span><span class=p>]]</span><span class=o>.</span><span class=n>min</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>                <span class=p>]</span> <span class=c1>#)</span>
+</span></span><span class=line><span class=cl>                
+</span></span><span class=line><span class=cl>                <span class=nb>setattr</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=s1>&#39;in_indices_</span><span class=si>{}</span><span class=s1>&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>io_pair</span><span class=p>),</span> <span class=n>in_indices</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=nb>setattr</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=s1>&#39;out_indices_</span><span class=si>{}</span><span class=s1>&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>io_pair</span><span class=p>),</span> <span class=n>out_indices</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                <span class=n>out_indices</span><span class=p>,</span> <span class=n>in_indices</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>meshgrid</span><span class=p>([</span><span class=n>_out_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>1</span><span class=p>]],</span> <span class=n>_in_indices</span><span class=p>[</span><span class=n>io_pair</span><span class=p>[</span><span class=mi>0</span><span class=p>]]])</span>
+</span></span><span class=line><span class=cl>                <span class=n>in_indices</span> <span class=o>=</span> <span class=n>in_indices</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=n>out_indices</span> <span class=o>=</span> <span class=n>out_indices</span><span class=o>.</span><span class=n>reshape</span><span class=p>(</span><span class=o>-</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                
+</span></span><span class=line><span class=cl>                <span class=c1># register the indices tensors and the bases tensors as parameters of this module</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>register_buffer</span><span class=p>(</span><span class=s1>&#39;in_indices_</span><span class=si>{}</span><span class=s1>&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>io_pair</span><span class=p>),</span> <span class=n>in_indices</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>register_buffer</span><span class=p>(</span><span class=s1>&#39;out_indices_</span><span class=si>{}</span><span class=s1>&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>io_pair</span><span class=p>),</span> <span class=n>out_indices</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                
+</span></span><span class=line><span class=cl>            <span class=c1># count the actual number of parameters</span>
+</span></span><span class=line><span class=cl>            <span class=n>total_weights</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>basis_ids</span><span class=p>[</span><span class=n>io_pair</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=n>i</span><span class=p>,</span> <span class=nb>id</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>basis_ids</span><span class=p>[</span><span class=n>io_pair</span><span class=p>]):</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>_ids_to_basis</span><span class=p>[</span><span class=nb>id</span><span class=p>]</span> <span class=o>=</span> <span class=n>last_weight_position</span> <span class=o>+</span> <span class=n>i</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_basis_to_ids</span> <span class=o>+=</span> <span class=n>basis_ids</span><span class=p>[</span><span class=n>io_pair</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=c1># evaluate the indices in the global weights tensor to use for the basis belonging to this group</span>
+</span></span><span class=line><span class=cl>            <span class=bp>self</span><span class=o>.</span><span class=n>_weights_ranges</span><span class=p>[</span><span class=n>io_pair</span><span class=p>]</span> <span class=o>=</span> <span class=p>(</span><span class=n>last_weight_position</span><span class=p>,</span> <span class=n>last_weight_position</span> <span class=o>+</span> <span class=n>total_weights</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>            <span class=c1># increment the position counter</span>
+</span></span><span class=line><span class=cl>            <span class=n>last_weight_position</span> <span class=o>+=</span> <span class=n>total_weights</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个也是一个长函数，首先也是初始化变量，然后直接看这个算法中对应的核心：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl> <span class=k>for</span> <span class=n>i_repr</span> <span class=ow>in</span> <span class=n>in_type</span><span class=o>.</span><span class=n>_unique_representations</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>o_repr</span> <span class=ow>in</span> <span class=n>out_type</span><span class=o>.</span><span class=n>_unique_representations</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>reprs_names</span> <span class=o>=</span> <span class=p>(</span><span class=n>i_repr</span><span class=o>.</span><span class=n>name</span><span class=p>,</span> <span class=n>o_repr</span><span class=o>.</span><span class=n>name</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>try</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>basis</span> <span class=o>=</span> <span class=n>basis_generator</span><span class=p>(</span><span class=n>i_repr</span><span class=p>,</span> <span class=n>o_repr</span><span class=p>,</span> <span class=o>**</span><span class=n>kwargs</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>            <span class=n>block_expansion</span> <span class=o>=</span> <span class=n>block_basisexpansion</span><span class=p>(</span><span class=n>basis</span><span class=p>,</span> <span class=n>points</span><span class=p>,</span> <span class=n>basis_filter</span><span class=p>,</span> <span class=n>recompute</span><span class=o>=</span><span class=n>recompute</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>_block_expansion_modules</span><span class=p>[</span><span class=n>reprs_names</span><span class=p>]</span> <span class=o>=</span> <span class=n>block_expansion</span>
+</span></span></code></pre></td></tr></table></div></div><p>看这段代码的时候，直接看里面的函数吧。<code>block_basisexpansion</code>这个函数是本文需要重点讲解的内容。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>block_basisexpansion</span><span class=p>(</span><span class=n>basis</span><span class=p>:</span> <span class=n>Basis</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>points</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>basis_filter</span><span class=p>:</span> <span class=n>Callable</span><span class=p>[[</span><span class=nb>dict</span><span class=p>],</span> <span class=nb>bool</span><span class=p>]</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                         <span class=n>recompute</span><span class=p>:</span> <span class=nb>bool</span> <span class=o>=</span> <span class=kc>False</span>
+</span></span><span class=line><span class=cl>                         <span class=p>)</span> <span class=o>-&gt;</span> <span class=n>SingleBlockBasisExpansion</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    
+</span></span></span><span class=line><span class=cl><span class=s2>    Return an instance of :class:`~e2cnn.nn.modules.r2_conv.SingleBlockBasisExpansion`.
+</span></span></span><span class=line><span class=cl><span class=s2>    
+</span></span></span><span class=line><span class=cl><span class=s2>    This function support caching through the argument ``recompute``.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Args:
+</span></span></span><span class=line><span class=cl><span class=s2>        basis (Basis): basis defining the space of kernels
+</span></span></span><span class=line><span class=cl><span class=s2>        points (~np.ndarray): points where the analytical basis should be sampled
+</span></span></span><span class=line><span class=cl><span class=s2>        basis_filter (callable, optional): filter for the basis elements. Should take a dictionary containing an
+</span></span></span><span class=line><span class=cl><span class=s2>                                           element&#39;s attributes and return whether to keep it or not.
+</span></span></span><span class=line><span class=cl><span class=s2>        recompute (bool, optional): whether to recompute new bases (``True``) or reuse, if possible,
+</span></span></span><span class=line><span class=cl><span class=s2>                                    already built tensors (``False``, default).
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=ow>not</span> <span class=n>recompute</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=c1># compute the mask of the sampled basis containing only the elements allowed by the filter</span>
+</span></span><span class=line><span class=cl>        <span class=n>mask</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=n>basis</span><span class=p>),</span> <span class=n>dtype</span><span class=o>=</span><span class=nb>bool</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>b</span><span class=p>,</span> <span class=n>attr</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>basis</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=n>mask</span><span class=p>[</span><span class=n>b</span><span class=p>]</span> <span class=o>=</span> <span class=n>basis_filter</span><span class=p>(</span><span class=n>attr</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=n>key</span> <span class=o>=</span> <span class=p>(</span><span class=n>basis</span><span class=p>,</span> <span class=n>mask</span><span class=o>.</span><span class=n>tobytes</span><span class=p>(),</span> <span class=n>points</span><span class=o>.</span><span class=n>tobytes</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>key</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>_stored_filters</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>_stored_filters</span><span class=p>[</span><span class=n>key</span><span class=p>]</span> <span class=o>=</span> <span class=n>SingleBlockBasisExpansion</span><span class=p>(</span><span class=n>basis</span><span class=p>,</span> <span class=n>points</span><span class=p>,</span> <span class=n>basis_filter</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>_stored_filters</span><span class=p>[</span><span class=n>key</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>SingleBlockBasisExpansion</span><span class=p>(</span><span class=n>basis</span><span class=p>,</span> <span class=n>points</span><span class=p>,</span> <span class=n>basis_filter</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>咱们前面已经计算得到对应的point等内容，这些内容都传过来，由于recompute的值时False，这个时候走的是else分支，使用 的<code>SingleBlockBasisExpansion</code>函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>SingleBlockBasisExpansion</span><span class=p>(</span><span class=n>BasisExpansion</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl> 
+</span></span></code></pre></td></tr></table></div></div><p>这个函数是对给定基础的一部分进行采样，并进行一系列处理（过滤、归一化等），以便在模型中使用。<code>basis</code> 是一个代表分析基函数的对象。</p><ul><li><code>points</code> 是基函数应该被采样的点。</li><li><code>basis_filter</code> 是一个可选的回调函数，用于过滤基函数元素。它接受一个包含元素属性的字典，并返回是否保留该元素。</li><li>在初始化过程中，首先调用父类 <code>BasisExpansion</code> 的构造函数。</li><li>接下来，基于 <code>basis_filter</code> 过滤基函数，并提取属性信息。如果过滤后的基函数为空，则引发 <code>EmptyBasisException</code> 异常。</li><li>计算基函数元素的实际输出大小，以便执行归一化操作。</li><li>在网格上对基函数进行采样，并过滤掉被过滤器丢弃的基函数元素。</li><li>使用 <code>torch.Tensor</code> 创建基函数张量，并对其进行一些处理和归一化操作。</li><li>丢弃几乎全为零的基函数元素。</li><li>将最终的掩码（mask）存储为类的私有属性 <code>_mask</code>。</li><li>将符合条件的属性信息和采样后的基函数张量作为模块参数进行注册。</li></ul><p>上面的函数在经过操作之后，会存储对应的变量，这个时候里面存储的变量如下：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312050932959.png loading=lazy></p><p>上述操作的内容都会存储下来，然后存储到对应的位置 。如果说 有哪个变量不知道 什么含义的，请看上文的解释，解释的比较清楚。</p><p>ok，现在我们设置完了所有变量 ，出了对应的 循环，即<code>block_expansion</code>已经设置完成了，接着看下面的内容。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl> <span class=bp>self</span><span class=o>.</span><span class=n>_n_pairs</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>in_type</span><span class=o>.</span><span class=n>_unique_representations</span><span class=p>)</span> <span class=o>*</span> <span class=nb>len</span><span class=p>(</span><span class=n>out_type</span><span class=o>.</span><span class=n>_unique_representations</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>设置<code>_n_pairs</code>，这个的话就是将里面的输入类型的长度以及初始类型的长度进行相乘，得到对应的<code>_n_pairs</code>长度。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=bp>self</span><span class=o>.</span><span class=n>_in_count</span><span class=p>,</span> <span class=n>_in_indices</span><span class=p>,</span> <span class=n>_in_contiguous</span> <span class=o>=</span> <span class=n>_retrieve_indices</span><span class=p>(</span><span class=n>in_type</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后看<code>retreve_indices</code>这个函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>_retrieve_indices</span><span class=p>(</span><span class=nb>type</span><span class=p>:</span> <span class=n>FieldType</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>fiber_position</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>    <span class=n>_indices</span> <span class=o>=</span> <span class=n>defaultdict</span><span class=p>(</span><span class=nb>list</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>_count</span> <span class=o>=</span> <span class=n>defaultdict</span><span class=p>(</span><span class=nb>int</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>_contiguous</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=nb>repr</span> <span class=ow>in</span> <span class=nb>type</span><span class=o>.</span><span class=n>representations</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>_indices</span><span class=p>[</span><span class=nb>repr</span><span class=o>.</span><span class=n>name</span><span class=p>]</span> <span class=o>+=</span> <span class=nb>list</span><span class=p>(</span><span class=nb>range</span><span class=p>(</span><span class=n>fiber_position</span><span class=p>,</span> <span class=n>fiber_position</span> <span class=o>+</span> <span class=nb>repr</span><span class=o>.</span><span class=n>size</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=n>fiber_position</span> <span class=o>+=</span> <span class=nb>repr</span><span class=o>.</span><span class=n>size</span>
+</span></span><span class=line><span class=cl>        <span class=n>_count</span><span class=p>[</span><span class=nb>repr</span><span class=o>.</span><span class=n>name</span><span class=p>]</span> <span class=o>+=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>name</span><span class=p>,</span> <span class=n>indices</span> <span class=ow>in</span> <span class=n>_indices</span><span class=o>.</span><span class=n>items</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>        <span class=c1># _contiguous[o_name] = indices == list(range(indices[0], indices[0]+len(indices)))</span>
+</span></span><span class=line><span class=cl>        <span class=n>_contiguous</span><span class=p>[</span><span class=n>name</span><span class=p>]</span> <span class=o>=</span> <span class=n>utils</span><span class=o>.</span><span class=n>check_consecutive_numbers</span><span class=p>(</span><span class=n>indices</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>_indices</span><span class=p>[</span><span class=n>name</span><span class=p>]</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>LongTensor</span><span class=p>(</span><span class=n>indices</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>_count</span><span class=p>,</span> <span class=n>_indices</span><span class=p>,</span> <span class=n>_contiguous</span>
+</span></span></code></pre></td></tr></table></div></div><p>看这个函数 ，这个函数的作用就是根据字段类型，生成一个字典 <code>_indices</code>，其中包含了不同表示（representation）的索引列表，并检查这些索引列表是否是连续的。这些表示通常代表了某种类型的向量或数据集合在某个高维空间中的表示。</p><ol><li><p><code>fiber_position</code> 被初始化为 0，用于追踪索引的位置。</p></li><li><p>创建了 <code>_indices</code> 字典，用于存储不同表示的索引列表。</p></li><li><p>创建了 <code>_count</code> 字典，用于统计每个表示的出现次数。</p></li><li><p>创建了一个空字典 <code>_contiguous</code>，用于存储每个表示的索引列表是否是连续的。</p></li><li><p>对于给定的 <code>type.representations</code> 中的每个表示（<code>repr</code>）：</p><ul><li><p>将表示的名称作为键，将该表示的索引范围（从 <code>fiber_position</code> 到 <code>fiber_position + repr.size</code>）添加到 <code>_indices</code> 中。</p></li><li><p>将 <code>fiber_position</code> 更新为下一个表示的起始位置。</p></li><li><p>增加该表示的计数器 <code>_count</code>。</p></li></ul></li><li><p>对于 <code>_indices</code>中的每个表示名称和对应的索引列表：</p><ul><li><p>使用 <code>utils.check_consecutive_numbers</code> 函数检查索引列表是否连续，并将结果存储在 <code>_contiguous</code> 中。</p></li><li><p>将索引列表转换为 <code>torch.LongTensor</code> 类型，并将其重新赋值给 <code>_indices</code>。</p></li></ul></li><li><p>返回包含 <code>_count</code>（表示计数）、<code>_indices</code>（表示的索引列表）和 <code>_contiguous</code>（表示索引是否连续的字典）的元组。</p></li></ol><p>在处理完了这些变量之后，对应内容 就是 ：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312050954791.png loading=lazy></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312050955920.png loading=lazy></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312050955912.png loading=lazy></p><p>在了解 这些变量之后，看下面一句：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl> <span class=bp>self</span><span class=o>.</span><span class=n>_out_count</span><span class=p>,</span> <span class=n>_out_indices</span><span class=p>,</span> <span class=n>_out_contiguous</span> <span class=o>=</span> <span class=n>_retrieve_indices</span><span class=p>(</span><span class=n>out_type</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这一句的作用和上面一句的作用相同 ，这里不再进行详细赘述。</p><p>ok，接着往下看</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl> <span class=n>basis_ids</span> <span class=o>=</span> <span class=n>_compute_attrs_and_ids</span><span class=p>(</span><span class=n>in_type</span><span class=p>,</span> <span class=n>out_type</span><span class=p>,</span> <span class=n>_block_expansion_modules</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个函数的作用是计算每个基本元素的属性和 id。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>_compute_attrs_and_ids</span><span class=p>(</span><span class=n>in_type</span><span class=p>,</span> <span class=n>out_type</span><span class=p>,</span> <span class=n>block_submodules</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>basis_ids</span> <span class=o>=</span> <span class=n>defaultdict</span><span class=p>(</span><span class=k>lambda</span><span class=p>:</span> <span class=p>[])</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># iterate over all blocks</span>
+</span></span><span class=line><span class=cl>    <span class=c1># each block is associated to an input/output representations pair</span>
+</span></span><span class=line><span class=cl>    <span class=n>out_fiber_position</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>    <span class=n>out_irreps_count</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>o</span><span class=p>,</span> <span class=n>o_repr</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>out_type</span><span class=o>.</span><span class=n>representations</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>in_fiber_position</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>        <span class=n>in_irreps_count</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>i</span><span class=p>,</span> <span class=n>i_repr</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>in_type</span><span class=o>.</span><span class=n>representations</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=n>reprs_names</span> <span class=o>=</span> <span class=p>(</span><span class=n>i_repr</span><span class=o>.</span><span class=n>name</span><span class=p>,</span> <span class=n>o_repr</span><span class=o>.</span><span class=n>name</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=c1># if a basis for the space of kernels between the current pair of representations exists</span>
+</span></span><span class=line><span class=cl>            <span class=k>if</span> <span class=n>reprs_names</span> <span class=ow>in</span> <span class=n>block_submodules</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>                
+</span></span><span class=line><span class=cl>                <span class=c1># retrieve the attributes of each basis element and build a new list of</span>
+</span></span><span class=line><span class=cl>                <span class=c1># attributes adding information specific to the current block</span>
+</span></span><span class=line><span class=cl>                <span class=n>ids</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>                <span class=k>for</span> <span class=n>attr</span> <span class=ow>in</span> <span class=n>block_submodules</span><span class=p>[</span><span class=n>reprs_names</span><span class=p>]</span><span class=o>.</span><span class=n>get_basis_info</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>                    <span class=c1># build the ids of the basis vectors</span>
+</span></span><span class=line><span class=cl>                    <span class=c1># add names and indices of the input and output fields</span>
+</span></span><span class=line><span class=cl>                    <span class=nb>id</span> <span class=o>=</span> <span class=s1>&#39;(</span><span class=si>{}</span><span class=s1>-</span><span class=si>{}</span><span class=s1>,</span><span class=si>{}</span><span class=s1>-</span><span class=si>{}</span><span class=s1>)&#39;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>i_repr</span><span class=o>.</span><span class=n>name</span><span class=p>,</span> <span class=n>i</span><span class=p>,</span> <span class=n>o_repr</span><span class=o>.</span><span class=n>name</span><span class=p>,</span> <span class=n>o</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                    <span class=c1># add the original id in the block submodule</span>
+</span></span><span class=line><span class=cl>                    <span class=nb>id</span> <span class=o>+=</span> <span class=s2>&#34;_&#34;</span> <span class=o>+</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;id&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>                    
+</span></span><span class=line><span class=cl>                    <span class=n>ids</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=nb>id</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>                <span class=c1># append the ids of the basis vectors</span>
+</span></span><span class=line><span class=cl>                <span class=n>basis_ids</span><span class=p>[</span><span class=n>reprs_names</span><span class=p>]</span> <span class=o>+=</span> <span class=n>ids</span>
+</span></span><span class=line><span class=cl>            
+</span></span><span class=line><span class=cl>            <span class=n>in_fiber_position</span> <span class=o>+=</span> <span class=n>i_repr</span><span class=o>.</span><span class=n>size</span>
+</span></span><span class=line><span class=cl>            <span class=n>in_irreps_count</span> <span class=o>+=</span> <span class=nb>len</span><span class=p>(</span><span class=n>i_repr</span><span class=o>.</span><span class=n>irreps</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>out_fiber_position</span> <span class=o>+=</span> <span class=n>o_repr</span><span class=o>.</span><span class=n>size</span>
+</span></span><span class=line><span class=cl>        <span class=n>out_irreps_count</span> <span class=o>+=</span> <span class=nb>len</span><span class=p>(</span><span class=n>o_repr</span><span class=o>.</span><span class=n>irreps</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>    <span class=c1># return attributes, basis_ids</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>basis_ids</span>
+</span></span></code></pre></td></tr></table></div></div><ol><li>首先 创建一个默认值为列表的defaultdict队形，用于存储基础ids。</li><li>然后迭代输出类型的表示。</li><li>接着初始化输出表示的起始位置 和不可约的计数。</li><li>然后迭代输入类型的表示。</li><li>接着如果当前表示对存在于<code>block_submodules</code>中。</li><li>然后获取当前白哦是对应的模块的基础信息。</li><li>构建基础向量的标识符</li><li>将基础向量的标识符添加到对应表示对的 basis_ids 列表中</li><li>更新输入表示的位置和不可约表示的计数</li><li>更新输出表示的位置和不可约表示的计数</li><li>返回基础 ids</li></ol><p>这个函数的主要流程是对输入和输出类型的表示进行迭代，检查对应的表示对是否存在于 <code>block_submodules</code> 中，如果存在，则根据模块的基础信息构建基础向量的标识符，并将其存储在 <code>basis_ids</code> 中。最后返回这些基础 ids。</p><p>然后看完了这个函数 ，发现这个 函数其实并不是重点，里面不过是将一些变量进行初始化，真正的重点还在下面。</p><p>然后接着往下走，发现走到下面几句：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=bp>self</span><span class=o>.</span><span class=n>weights</span> <span class=o>=</span> <span class=n>Parameter</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>basisexpansion</span><span class=o>.</span><span class=n>dimension</span><span class=p>()),</span> <span class=n>requires_grad</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=bp>self</span><span class=o>.</span><span class=n>register_buffer</span><span class=p>(</span><span class=s2>&#34;filter&#34;</span><span class=p>,</span> <span class=n>torch</span><span class=o>.</span><span class=n>zeros</span><span class=p>(</span><span class=n>out_type</span><span class=o>.</span><span class=n>size</span><span class=p>,</span> <span class=n>in_type</span><span class=o>.</span><span class=n>size</span><span class=p>,</span> <span class=n>kernel_size</span><span class=p>,</span> <span class=n>kernel_size</span><span class=p>))</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=n>initialize</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># by default, the weights are initialized with a generalized form of He&#39;s weight initialization</span>
+</span></span><span class=line><span class=cl>    <span class=n>init</span><span class=o>.</span><span class=n>generalized_he_init</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>weights</span><span class=o>.</span><span class=n>data</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>basisexpansion</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里的其那两句相当于将里面的数据进行放入，暂时先不管对应的内容。然后看初始化，也就是看<code>generalized_he_init</code>这个函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>generalized_he_init</span><span class=p>(</span><span class=n>tensor</span><span class=p>:</span> <span class=n>torch</span><span class=o>.</span><span class=n>Tensor</span><span class=p>,</span> <span class=n>basisexpansion</span><span class=p>:</span> <span class=n>BasisExpansion</span><span class=p>,</span> <span class=n>cache</span><span class=p>:</span> <span class=nb>bool</span> <span class=o>=</span> <span class=kc>False</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    可算是找到了重点...
+</span></span></span><span class=line><span class=cl><span class=s2>    Initialize the weights of a convolutional layer with a generalized He&#39;s weight initialization method.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Because the computation of the variances can be expensive, to save time on consecutive runs of the same model,
+</span></span></span><span class=line><span class=cl><span class=s2>    it is possible to cache the tensor containing the variance of each weight, for a specific ```basisexpansion```.
+</span></span></span><span class=line><span class=cl><span class=s2>    This can be useful if a network contains multiple convolution layers of the same kind (same input and output types,
+</span></span></span><span class=line><span class=cl><span class=s2>    same kernel size, etc.) or if one needs to train the same network from scratch multiple times (e.g. to perform
+</span></span></span><span class=line><span class=cl><span class=s2>    hyper-parameter search over learning rate or to repeat an experiment with different random seeds).
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. note ::
+</span></span></span><span class=line><span class=cl><span class=s2>        The variance tensor is cached in memory and therefore is only available to the current process.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Args:
+</span></span></span><span class=line><span class=cl><span class=s2>        tensor (torch.Tensor): the tensor containing the weights
+</span></span></span><span class=line><span class=cl><span class=s2>        basisexpansion (BasisExpansion): the basis expansion method
+</span></span></span><span class=line><span class=cl><span class=s2>        cache (bool, optional): cache the variance tensor. By default, ```cache=False```
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=c1># Initialization</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>assert</span> <span class=n>tensor</span><span class=o>.</span><span class=n>shape</span> <span class=o>==</span> <span class=p>(</span><span class=n>basisexpansion</span><span class=o>.</span><span class=n>dimension</span><span class=p>(),)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>cache</span> <span class=ow>and</span> <span class=n>basisexpansion</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>cached_he_vars</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>cached_he_vars</span><span class=p>[</span><span class=n>basisexpansion</span><span class=p>]</span> <span class=o>=</span> <span class=n>_generalized_he_init_variances</span><span class=p>(</span><span class=n>basisexpansion</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>cache</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=nb>vars</span> <span class=o>=</span> <span class=n>cached_he_vars</span><span class=p>[</span><span class=n>basisexpansion</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=nb>vars</span> <span class=o>=</span> <span class=n>_generalized_he_init_variances</span><span class=p>(</span><span class=n>basisexpansion</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>tensor</span><span class=p>[:]</span> <span class=o>=</span> <span class=nb>vars</span> <span class=o>*</span> <span class=n>torch</span><span class=o>.</span><span class=n>randn_like</span><span class=p>(</span><span class=n>tensor</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个函数的作用是使用广义he权重初始化卷积层的权重，这个函数首先先判断输入的数据是否符合条件，如果不符合，则直接进行返回，然后判断是否存在对应的缓存，有的话，直接使用上次已经初始化好的变量进行初始化，没有的话，调用对应的<code>_generalized_he_init_variances</code>函数进行初始化。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>_generalized_he_init_variances</span><span class=p>(</span><span class=n>basisexpansion</span><span class=p>:</span> <span class=n>BasisExpansion</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    使用广义 He 权重初始化方法计算卷积层权重的方差。
+</span></span></span><span class=line><span class=cl><span class=s2>    Compute the variances of the weights of a convolutional layer with a generalized He&#39;s weight initialization method.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Args:
+</span></span></span><span class=line><span class=cl><span class=s2>        basisexpansion (BasisExpansion): the basis expansion method
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=nb>vars</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>ones</span><span class=p>((</span><span class=n>basisexpansion</span><span class=o>.</span><span class=n>dimension</span><span class=p>(),))</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>inputs_count</span> <span class=o>=</span> <span class=n>defaultdict</span><span class=p>(</span><span class=k>lambda</span><span class=p>:</span> <span class=nb>set</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    <span class=n>basis_count</span> <span class=o>=</span> <span class=n>defaultdict</span><span class=p>(</span><span class=nb>int</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>basis_info</span> <span class=o>=</span> <span class=nb>list</span><span class=p>(</span><span class=n>basisexpansion</span><span class=o>.</span><span class=n>get_basis_info</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>attr</span> <span class=ow>in</span> <span class=n>basis_info</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>i</span><span class=p>,</span> <span class=n>o</span> <span class=o>=</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;in_irreps_position&#34;</span><span class=p>],</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;out_irreps_position&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=n>in_irrep</span><span class=p>,</span> <span class=n>out_irrep</span> <span class=o>=</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;in_irrep&#34;</span><span class=p>],</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;out_irrep&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=n>inputs_count</span><span class=p>[</span><span class=n>o</span><span class=p>]</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>in_irrep</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>basis_count</span><span class=p>[(</span><span class=n>in_irrep</span><span class=p>,</span> <span class=n>o</span><span class=p>)]</span> <span class=o>+=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>o</span> <span class=ow>in</span> <span class=n>inputs_count</span><span class=o>.</span><span class=n>keys</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>        <span class=n>inputs_count</span><span class=p>[</span><span class=n>o</span><span class=p>]</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>inputs_count</span><span class=p>[</span><span class=n>o</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>w</span><span class=p>,</span> <span class=n>attr</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>basis_info</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=n>i</span><span class=p>,</span> <span class=n>o</span> <span class=o>=</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;in_irreps_position&#34;</span><span class=p>],</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;out_irreps_position&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=n>in_irrep</span><span class=p>,</span> <span class=n>out_irrep</span> <span class=o>=</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;in_irrep&#34;</span><span class=p>],</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;out_irrep&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>        <span class=nb>vars</span><span class=p>[</span><span class=n>w</span><span class=p>]</span> <span class=o>=</span> <span class=mf>1.</span> <span class=o>/</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=n>inputs_count</span><span class=p>[</span><span class=n>o</span><span class=p>]</span> <span class=o>*</span> <span class=n>basis_count</span><span class=p>[(</span><span class=n>in_irrep</span><span class=p>,</span> <span class=n>o</span><span class=p>)])</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nb>vars</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个函数使用广义he权重初始化方法 计算卷积层权重的方差，然后我们仍然是一行一行的看这个代码。</p><p>首先的话仍然是拿到对应的变量 ，将对应的变量进行初始化。</p><p>这里将每个初始化的变量截图：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312051351600.png loading=lazy></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312051351435.png loading=lazy></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312051351232.png loading=lazy></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312051352657.png loading=lazy></p><p>一个即兴提问：为什么都是960个维度，这个是怎么得出来的，这里标记一个TODO。</p><p>然后接着往下面看，看到第一个循环：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl> <span class=k>for</span> <span class=n>attr</span> <span class=ow>in</span> <span class=n>basis_info</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>i</span><span class=p>,</span> <span class=n>o</span> <span class=o>=</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;in_irreps_position&#34;</span><span class=p>],</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;out_irreps_position&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>in_irrep</span><span class=p>,</span> <span class=n>out_irrep</span> <span class=o>=</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;in_irrep&#34;</span><span class=p>],</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;out_irrep&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>inputs_count</span><span class=p>[</span><span class=n>o</span><span class=p>]</span><span class=o>.</span><span class=n>add</span><span class=p>(</span><span class=n>in_irrep</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>basis_count</span><span class=p>[(</span><span class=n>in_irrep</span><span class=p>,</span> <span class=n>o</span><span class=p>)]</span> <span class=o>+=</span> <span class=mi>1</span>
+</span></span></code></pre></td></tr></table></div></div><p><code>attr</code> 在每次循环中代表 <code>basis_info</code> 列表中的一个元素（或者是一个字典）。</p><p><code>i</code> 和 <code>o</code> 分别用于存储 <code>attr</code> 字典中的键 <code>"in_irreps_position"</code> 和 <code>"out_irreps_position"</code> 对应的值。</p><p><code>in_irrep</code> 和 <code>out_irrep</code> 存储了 <code>attr</code> 字典中键为 <code>"in_irrep"</code> 和 <code>"out_irrep"</code> 的对应值。</p><p><code>inputs_count[o].add(in_irrep)</code>这行代码在创建一个数据结构（可能是字典或集合），其中 <code>o</code> 是键，<code>inputs_count[o]</code> 可能是一个集合，代码尝试将 <code>in_irrep</code> 的值添加到该集合中。</p><p><code>basis_count[(in_irrep, o)] += 1</code>这行代码在一个名为 <code>basis_count</code> 的字典中记录某些键的计数。它使用了一个元组 <code>(in_irrep, o)</code> 作为键，并且将该键对应的值（假设是一个整数）增加了 1。</p><p>按照我的 理解，这里面是对其中变量进行了复制，统计其中basis的个数，共下面使用。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl> <span class=k>for</span> <span class=n>o</span> <span class=ow>in</span> <span class=n>inputs_count</span><span class=o>.</span><span class=n>keys</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=n>inputs_count</span><span class=p>[</span><span class=n>o</span><span class=p>]</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>inputs_count</span><span class=p>[</span><span class=n>o</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><p>这句话的意思是统计其中输入的 不可约表示的总数。</p><p>然后下面就是对应的卷积计算：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>for</span> <span class=n>w</span><span class=p>,</span> <span class=n>attr</span> <span class=ow>in</span> <span class=nb>enumerate</span><span class=p>(</span><span class=n>basis_info</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>i</span><span class=p>,</span> <span class=n>o</span> <span class=o>=</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;in_irreps_position&#34;</span><span class=p>],</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;out_irreps_position&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=n>in_irrep</span><span class=p>,</span> <span class=n>out_irrep</span> <span class=o>=</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;in_irrep&#34;</span><span class=p>],</span> <span class=n>attr</span><span class=p>[</span><span class=s2>&#34;out_irrep&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=nb>vars</span><span class=p>[</span><span class=n>w</span><span class=p>]</span> <span class=o>=</span> <span class=mf>1.</span> <span class=o>/</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=n>inputs_count</span><span class=p>[</span><span class=n>o</span><span class=p>]</span> <span class=o>*</span> <span class=n>basis_count</span><span class=p>[(</span><span class=n>in_irrep</span><span class=p>,</span> <span class=n>o</span><span class=p>)])</span>
+</span></span></code></pre></td></tr></table></div></div><p>这里面在进行对应位置 的方差，使用遍历的方式遍历<code>basis_info</code>中的每个基，并且获取其属性信息，对于每个基，利用输入不可约表示的 数量和输入到输出不可约表示的数量，计算权重方差，并将其存储在<code>vars</code>中。</p><p>总体而言，这个函数通过基扩展方法 <code>basisexpansion</code> 来计算卷积层权重初始化时的方差。它首先统计输入和基的信息，然后根据这些信息计算每个基对应的权重方差，并将结果作为张量返回。</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312051406107.png loading=lazy></p><p>在计算出来对应的方差之后，将其中的 值进行返回，对应的广义he就初始化完成。整个函数就完成。</p><p>看到了 这里，我最大的疑问出来了，核的定义到底是什么，为什么这里计算出对应的方差，就算是将核初始化完成了？</p><p>关于卷积神经网络的核，这里的话还是在单独写一篇文章，普及其中的概念吧。</p></section><footer class=article-footer><section class=article-tags><a href=/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/>机器学习</a>
+<a href=/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/>源码阅读</a>
+<a href=/tags/%E7%BE%A4%E8%AE%BA/>群论</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Apache Licence 2.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/katex.min.css integrity="sha256-J+iAE0sgH8QSz9hpcDxXIftnj65JEZgNhGcgReTTK9s=" crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/katex.min.js integrity="sha256-InsNdER1b2xUewP+pKCUJpkhiqwHgqiPXDlIk7GzBu4=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.15.6/dist/contrib/auto-render.min.js integrity="sha256-y39Mpg7V3D4lhBX4x6O0bUqTV4pSrfgwEfGKfxkOdgI=" crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.querySelector(`.article-content`),{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})</script></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E8%BE%93%E5%87%BA%E7%B1%BB%E5%9E%8B/><div class=article-details><h2 class=article-title>e2cnn 内容理解 - 群的输出类型</h2></div></a></article><article><a href=/p/e2cnn%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E8%BE%93%E5%85%A5%E7%B1%BB%E5%9E%8B/><div class=article-details><h2 class=article-title>e2cnn内容理解-群的输入类型</h2></div></a></article><article><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E5%88%9B%E5%BB%BA%E6%BA%90%E7%A0%81%E8%AF%A6%E8%A7%A3/><div class=article-details><h2 class=article-title>e2cnn 内容理解 - 群的创建源码详解</h2></div></a></article><article><a href=/p/conv2d%E7%9A%84%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3/><div class=article-details><h2 class=article-title>Conv2d的简单理解</h2></div></a></article></div></div></aside><script src=//unpkg.com/@waline/client@v2/dist/waline.js></script><link href=//unpkg.com/@waline/client@v2/dist/waline.css rel=stylesheet><div id=waline class=waline-container></div><style>.waline-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding);--waline-font-size:var(--article-font-size)}.waline-container .wl-count{color:var(--card-text-color-main)}</style><script>Waline.init({avatar:"retro",avatarcdn:"https://sdn.geekzu.org/avatar/",dark:'html[data-scheme="dark"]',el:"#waline",emoji:["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],highlight:!0,js:"https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js",lang:"zh-CN",locale:{admin:"Admin"},meta:["nick","mail","link"],pageSize:20,placeholder:"",requiredMeta:["name","email","url"],serverURL:"https://waline-line-git-main-zrsaber.vercel.app",uploadimage:!1,visitor:!0})</script><footer class=site-footer><section class=copyright>&copy;
+2020 -
+2023 Runqi Blog</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.21.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

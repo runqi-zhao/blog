@@ -1,0 +1,894 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="转自https://juejin.cn/post/6844904151567040519"><title>Threadlocal</title>
+<link rel=canonical href=https://runqizhao.cn/p/threadlocal/><link rel=stylesheet href=/scss/style.min.abbd69b2908fdfcd5179898beaafd374514a86538d81639ddd2c58c06ae54e40.css><meta property="og:title" content="Threadlocal"><meta property="og:description" content="转自https://juejin.cn/post/6844904151567040519"><meta property="og:url" content="https://runqizhao.cn/p/threadlocal/"><meta property="og:site_name" content="Runqi Blog"><meta property="og:type" content="article"><meta property="article:section" content="Post"><meta property="article:tag" content="多线程"><meta property="article:tag" content="源码阅读"><meta property="article:published_time" content="2023-09-26T11:07:07+08:00"><meta property="article:modified_time" content="2023-09-26T11:07:07+08:00"><meta name=twitter:title content="Threadlocal"><meta name=twitter:description content="转自https://juejin.cn/post/6844904151567040519"><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu9b4ee4aab7d2c9a136b427e2430a0345_27821_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>Runqi Blog</a></h1><h2 class=site-description>Stay foolish stay hungry</h2></div></header><ol class=social-menu><li><a href=https://github.com/runqi-zhao target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg><span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg><span>Search</span></a></li><li><a href=/links/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg><span>Links</span></a></li><div class=menu-bottom-section><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg><span>Dark Mode</span></li></div></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#什么是threadlocal>什么是ThreadLocal</a></li><li><a href=#threadlocal是如何实现的>ThreadLocal是如何实现的</a><ol><li><a href=#threadlocal数据结构>ThreadLocal数据结构</a></li><li><a href=#gc回收之后key是否为null>GC回收之后key是否为null?</a></li><li><a href=#threadlocalset方法源码详解>ThreadLocal.set()方法源码详解</a></li><li><a href=#threadlocalmap-hash算法>ThreadLocalMap Hash算法</a></li><li><a href=#threadlocalmap-hash冲突>ThreadLocalMap Hash冲突</a></li><li><a href=#threadlocalmapset详解>ThreadLocalMap.set()详解</a></li><li><a href=#threadlocalmap过期key的探测式清理流程>ThreadLocalMap过期key的探测式清理流程</a></li><li><a href=#threadlocalmap扩容机制>ThreadLocalMap扩容机制</a></li><li><a href=#threadlocalmapget详解>ThreadLocalMap.get()详解</a><ol><li><a href=#threadlocalmapget图解>ThreadLocalMap.get()图解</a></li><li><a href=#threadlocalmapget源码详解>ThreadLocalMap.get()源码详解</a></li></ol></li><li><a href=#threadlocalmap过期key的启发式清理流程>ThreadLocalMap过期key的启发式清理流程</a></li><li><a href=#inheritablethreadlocal>InheritableThreadLocal</a></li><li><a href=#threadlocal项目中使用实战>ThreadLocal项目中使用实战</a><ol><li><a href=#threadlocal使用场景>ThreadLocal使用场景</a></li><li><a href=#feign远程调用解决方案>Feign远程调用解决方案</a></li><li><a href=#线程池异步调用requestid传递>线程池异步调用，requestId传递</a></li><li><a href=#使用mq发送消息给第三方系统>使用MQ发送消息给第三方系统</a></li></ol></li></ol></li><li><a href=#总结>总结</a></li><li><a href=#参考>参考</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/java/ style=background-color:#269d8f;color:#fff>Java</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/threadlocal/>Threadlocal</a></h2><h3 class=article-subtitle>转自https://juejin.cn/post/6844904151567040519</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg><time class=article-time--published>Sep 26, 2023</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg><time class=article-time--reading>10 minute read</time></div></footer></div></header><section class=article-content><p>本篇将会详细介绍ThreadLocal线程</p><p>学习一个新知识，无非就是三步：</p><ol><li>这个是啥</li><li>怎么实现的</li><li>应用场景都有啥</li></ol><p>下面将通过这三部进行分析。</p><h2 id=什么是threadlocal>什么是ThreadLocal</h2><p>首先先上一张图吧，这张图来自于这个<a class=link href=https://juejin.cn/post/6844904151567040519 target=_blank rel=noopener>博客</a></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba8d77264d4~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=Ym8V9H.png></p><p>上面脑图很好的树立了对应的结构。</p><p>首先 说明ThreaLocal的概念：ThreadLocal 是一个本地线程副本变量工具类。主要用于将私有线程和该线程存放的副本对象做一个映射，各个线程之间的变量互不干扰。</p><p>先看一个对应ThreadLocal的演示代码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>ThreadLocalTest</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>messages</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ArrayList</span><span class=o>&lt;&gt;</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>ThreadLocal</span><span class=o>&lt;</span><span class=n>ThreadLocalTest</span><span class=o>&gt;</span><span class=w> </span><span class=n>holder</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ThreadLocal</span><span class=p>.</span><span class=na>withInitial</span><span class=p>(</span><span class=n>ThreadLocalTest</span><span class=p>::</span><span class=k>new</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>add</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>message</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>holder</span><span class=p>.</span><span class=na>get</span><span class=p>().</span><span class=na>messages</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=n>message</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=nf>clear</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>List</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>messages</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>holder</span><span class=p>.</span><span class=na>get</span><span class=p>().</span><span class=na>messages</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>holder</span><span class=p>.</span><span class=na>remove</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;size: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>holder</span><span class=p>.</span><span class=na>get</span><span class=p>().</span><span class=na>messages</span><span class=p>.</span><span class=na>size</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>messages</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocalTest</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=s>&#34;test&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=n>holder</span><span class=p>.</span><span class=na>get</span><span class=p>().</span><span class=na>messages</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocalTest</span><span class=p>.</span><span class=na>clear</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>打印的结果为：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl><span class=o>[</span>test<span class=o>]</span>
+</span></span><span class=line><span class=cl>size: <span class=m>0</span>
+</span></span></code></pre></td></tr></table></div></div><p>相当于提供线程局部变量，每个线程<code>Thread</code>拥有一份自己的<strong>副本变量</strong>，多个线程互不干扰。</p><p>ok，对其中概念有了一个基本概念，下面分析实现过程。</p><h2 id=threadlocal是如何实现的>ThreadLocal是如何实现的</h2><h3 id=threadlocal数据结构>ThreadLocal数据结构</h3><p>首先还是使用一张图进行表示：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba819625d64~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=image.png></p><p><code>Thread</code>类有一个类型为<code>ThreadLocal.ThreadLocalMap</code>的实例变量<code>threadLocals</code>，也就是说每个线程有一个自己的<code>ThreadLocalMap</code>。</p><p><code>ThreadLocalMap</code>有自己的实现，可以将其理解成将<code>ThreadLocal</code>当作一个<code>key</code>，将<code>代码中放入的值</code>但你工作<code>value</code>。</p><blockquote><p>注意，实际上<code>key</code>并不是<code>ThredLocal</code>，而是一个弱引用。</p></blockquote><p>每个线程再往<code>ThreadLocal</code>里放值的时候，都会往自己<code>ThreadLocalMap</code>里存，读也是以<code>ThreadLocal</code>作为引用，在自己的<code>map</code>里找到对应的<code>key</code>，从而实现<strong>线程隔离</strong>。</p><p><code>ThreadLocalMap</code>的底层结构并没有链表结构，仅仅使用了对应的<code>Entry</code>数组。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>static</span><span class=w> </span><span class=kd>class</span> <span class=nc>Entry</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>WeakReference</span><span class=o>&lt;</span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=cm>/** The value associated with this ThreadLocal. */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Object</span><span class=w> </span><span class=n>value</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Entry</span><span class=p>(</span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>k</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>v</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>super</span><span class=p>(</span><span class=n>k</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>v</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>之所以说是弱引用，Entry结构在进行设置的时候是继承于<code>WeakReference</code>，这个就是我们常说的弱引用类型。</p><p>现在已经确定是弱引用了，那么出现了一个问题，在<code>ThreadLocal.get()</code>的时候，发生<code>GC</code>之后，<code>key</code>是否为<code>null</code>？</p><h3 id=gc回收之后key是否为null>GC回收之后key是否为null?</h3><p>首先回顾下Java中常见的四种引用：</p><ul><li>**强引用：**直接new出来的对象，只要强引用存在，对象永远不会被回收。</li><li>**软引用：**使用SoftReference修饰的对象称为软引用，软引用指向的对象在内存要移除的时候被回收。</li><li>**弱引用：**使用WeakReference修饰的对象被称为弱引用，只要发生垃圾回收，若这个对象只被弱引用指向，那么就会被回收</li><li>**虚引用：**虚引用是最弱的引用，在 Java 中使用 PhantomReference 进行定义。虚引用中唯一的作用就是用队列接收对象即将死亡的通知</li></ul><p>下面回到上面的问题，可以使用反射的方式查看<code>GC</code>后<code>ThreadLocal</code>中数据情况：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>ThreadLocalDemo</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>NoSuchFieldException</span><span class=p>,</span><span class=w> </span><span class=n>IllegalAccessException</span><span class=p>,</span><span class=w> </span><span class=n>InterruptedException</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Thread</span><span class=w> </span><span class=n>t</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Thread</span><span class=p>(()</span><span class=o>-&gt;</span><span class=n>test</span><span class=p>(</span><span class=s>&#34;abc&#34;</span><span class=p>,</span><span class=kc>false</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>t</span><span class=p>.</span><span class=na>start</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>t</span><span class=p>.</span><span class=na>join</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;--gc后--&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Thread</span><span class=w> </span><span class=n>t2</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Thread</span><span class=p>(()</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>test</span><span class=p>(</span><span class=s>&#34;def&#34;</span><span class=p>,</span><span class=w> </span><span class=kc>true</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>t2</span><span class=p>.</span><span class=na>start</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>t2</span><span class=p>.</span><span class=na>join</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>test</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>s</span><span class=p>,</span><span class=kt>boolean</span><span class=w> </span><span class=n>isGC</span><span class=p>)</span><span class=w>  </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>new</span><span class=w> </span><span class=n>ThreadLocal</span><span class=o>&lt;&gt;</span><span class=p>().</span><span class=na>set</span><span class=p>(</span><span class=n>s</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>isGC</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>System</span><span class=p>.</span><span class=na>gc</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Thread</span><span class=w> </span><span class=n>t</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Thread</span><span class=p>.</span><span class=na>currentThread</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Class</span><span class=o>&lt;?</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>Thread</span><span class=o>&gt;</span><span class=w> </span><span class=n>clz</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>t</span><span class=p>.</span><span class=na>getClass</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Field</span><span class=w> </span><span class=n>field</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>clz</span><span class=p>.</span><span class=na>getDeclaredField</span><span class=p>(</span><span class=s>&#34;threadLocals&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>field</span><span class=p>.</span><span class=na>setAccessible</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Object</span><span class=w> </span><span class=n>threadLocalMap</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>field</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=n>t</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Class</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>tlmClass</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>threadLocalMap</span><span class=p>.</span><span class=na>getClass</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Field</span><span class=w> </span><span class=n>tableField</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tlmClass</span><span class=p>.</span><span class=na>getDeclaredField</span><span class=p>(</span><span class=s>&#34;table&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>tableField</span><span class=p>.</span><span class=na>setAccessible</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Object</span><span class=o>[]</span><span class=w> </span><span class=n>arr</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=n>Object</span><span class=o>[]</span><span class=p>)</span><span class=w> </span><span class=n>tableField</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=n>threadLocalMap</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=n>Object</span><span class=w> </span><span class=n>o</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>arr</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>o</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>Class</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>entryClass</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>o</span><span class=p>.</span><span class=na>getClass</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>Field</span><span class=w> </span><span class=n>valueField</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>entryClass</span><span class=p>.</span><span class=na>getDeclaredField</span><span class=p>(</span><span class=s>&#34;value&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>Field</span><span class=w> </span><span class=n>referenceField</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>entryClass</span><span class=p>.</span><span class=na>getSuperclass</span><span class=p>().</span><span class=na>getSuperclass</span><span class=p>().</span><span class=na>getDeclaredField</span><span class=p>(</span><span class=s>&#34;referent&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>valueField</span><span class=p>.</span><span class=na>setAccessible</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>referenceField</span><span class=p>.</span><span class=na>setAccessible</span><span class=p>(</span><span class=kc>true</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=n>String</span><span class=p>.</span><span class=na>format</span><span class=p>(</span><span class=s>&#34;弱引用key:%s,值:%s&#34;</span><span class=p>,</span><span class=w> </span><span class=n>referenceField</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=n>o</span><span class=p>),</span><span class=w> </span><span class=n>valueField</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=n>o</span><span class=p>)));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>Exception</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>e</span><span class=p>.</span><span class=na>printStackTrace</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>对应的输出如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>弱引用key:java.lang.ThreadLocal@b46dd1a,值:abc
+</span></span><span class=line><span class=cl>弱引用key:java.lang.ThreadLocal@43173215,值:<span class=o>[</span>Ljava.lang.Object<span class=p>;</span>@6738d522
+</span></span><span class=line><span class=cl>弱引用key:java.lang.ThreadLocal@1e3d527b,值:java.lang.ref.SoftReference@232ee2ab
+</span></span><span class=line><span class=cl>弱引用key:java.lang.ThreadLocal@59d3fb41,值:java.lang.ref.SoftReference@7863a49c
+</span></span><span class=line><span class=cl>--gc后--
+</span></span><span class=line><span class=cl>弱引用key:null,值:def
+</span></span></code></pre></td></tr></table></div></div><p>在进行垃圾回收的时候，会跳转到下面这部分：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/1695718654757.jpg loading=lazy alt=1695718654757></p><p>这时，里面创建的ThreadLocal并没有指向任何值，也就是没有任何引用。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=k>new</span><span class=w> </span><span class=n>ThreadLocal</span><span class=o>&lt;&gt;</span><span class=p>().</span><span class=na>set</span><span class=p>(</span><span class=n>s</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>所以这里在<code>GC</code>之后，<code>key</code>就会被回收，我们看到上面<code>debug</code>中的<code>referent=null</code>, 如果<strong>改动一下代码：</strong></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba815948bf9~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=image.png></p><p>这个问题刚开始看，如果没有过多思考，<strong>弱引用</strong>，还有<strong>垃圾回收</strong>，那么肯定会觉得是<code>null</code>。</p><p>其实是不对的，因为题目说的是在做 <code>threadlocal.get()</code> 操作，证明其实还是有<strong>强引用</strong>存在的，所以 <code>key</code> 并不为 <code>null</code>，如下图所示，<code>ThreadLocal</code>的<strong>强引用</strong>仍然是存在的。</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba81bd745e6~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=image.png></p><p>如果我们的<strong>强引用</strong>不存在的话，那么 <code>key</code> 就会被回收，也就是会出现我们 <code>value</code> 没被回收，<code>key</code> 被回收，导致 <code>value</code> 永远存在，出现<strong>内存泄漏</strong>。</p><h3 id=threadlocalset方法源码详解>ThreadLocal.set()方法源码详解</h3><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba897dc6204~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=image.png></p><p><code>ThreadLocal</code>中的<code>set</code>方法原理如上图所示，很简单，主要是判断<code>ThreadLocalMap</code>是否存在，然后使用<code>ThreadLocal</code>中的<code>set</code>方法进行数据处理。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-Java data-lang=Java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>set</span><span class=p>(</span><span class=n>T</span><span class=w> </span><span class=n>value</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Thread</span><span class=w> </span><span class=n>t</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Thread</span><span class=p>.</span><span class=na>currentThread</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>ThreadLocalMap</span><span class=w> </span><span class=n>map</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>getMap</span><span class=p>(</span><span class=n>t</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>map</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>map</span><span class=p>.</span><span class=na>set</span><span class=p>(</span><span class=k>this</span><span class=p>,</span><span class=w> </span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>else</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>createMap</span><span class=p>(</span><span class=n>t</span><span class=p>,</span><span class=w> </span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kt>void</span><span class=w> </span><span class=nf>createMap</span><span class=p>(</span><span class=n>Thread</span><span class=w> </span><span class=n>t</span><span class=p>,</span><span class=w> </span><span class=n>T</span><span class=w> </span><span class=n>firstValue</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>t</span><span class=p>.</span><span class=na>threadLocals</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ThreadLocalMap</span><span class=p>(</span><span class=k>this</span><span class=p>,</span><span class=w> </span><span class=n>firstValue</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>其中核心逻辑是在<code>ThreadLocalMap</code>中的。</p><p>下面就简单看一下<code>ThreadLocalMap</code>的逻辑。</p><p>首先说明里面ThreadLocalMap Hash算法</p><h3 id=threadlocalmap-hash算法>ThreadLocalMap Hash算法</h3><p>既然是<code>Map</code>结构，那么<code>ThreadLocalMap</code>当然也要实现自己的<code>hash</code>算法来解决散列表数组冲突问题。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>key</span><span class=p>.</span><span class=na>threadLocalHashCode</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=p>(</span><span class=n>len</span><span class=o>-</span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><code>ThreadLocalMap</code>中<code>hash</code>算法很简单，这里<code>i</code>就是当前key在散列表中对应的数组下标位置。</p><p>这里最关键的就是<code>threadLocalHashCode</code>值的计算，<code>ThreadLocal</code>中有一个属性为<code>HASH_INCREMENT = 0x61c88647</code></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>ThreadLocal</span><span class=o>&lt;</span><span class=n>T</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>threadLocalHashCode</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextHashCode</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>AtomicInteger</span><span class=w> </span><span class=n>nextHashCode</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>AtomicInteger</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>HASH_INCREMENT</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0x61c88647</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>nextHashCode</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>nextHashCode</span><span class=p>.</span><span class=na>getAndAdd</span><span class=p>(</span><span class=n>HASH_INCREMENT</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>static</span><span class=w> </span><span class=kd>class</span> <span class=nc>ThreadLocalMap</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocalMap</span><span class=p>(</span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>firstKey</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>firstValue</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>table</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Entry</span><span class=o>[</span><span class=n>INITIAL_CAPACITY</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>firstKey</span><span class=p>.</span><span class=na>threadLocalHashCode</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=p>(</span><span class=n>INITIAL_CAPACITY</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>table</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Entry</span><span class=p>(</span><span class=n>firstKey</span><span class=p>,</span><span class=w> </span><span class=n>firstValue</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>size</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>1</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>setThreshold</span><span class=p>(</span><span class=n>INITIAL_CAPACITY</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>每当创建一个<code>ThreadLocal</code>对象，这个<code>ThreadLocal.nextHashCode</code>这个值就会增长为<code>0x61c88647</code>。</p><p>这个值很特殊，这个是<strong>斐波那契数</strong>也叫<strong>黄金分割数</strong>，<code>hash</code>增量为这个数，带来的好处就是<code>hash</code>分布非常均匀。</p><h3 id=threadlocalmap-hash冲突>ThreadLocalMap Hash冲突</h3><p>虽然<code>ThreadLocalMap</code>中使用了<strong>黄金分割数</strong>来作为<code>hash</code>计算因子，大大减少了<code>Hash</code>冲突的概率，但是仍然会存在冲突。</p><p><code>HashMap</code>中解决冲突的方法是在数组上构造一个<strong>链表</strong>结构，冲突的数据挂载到链表上，如果链表长度超过一定数量则会转化成<strong>红黑树</strong>。</p><p>而<code>ThreadLocalMap</code>中并没有链表结构，所以这里不能适用<code>HashMap</code>解决冲突的方式了。</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3ba8fc715e1b~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=Ynzr5D.png></p><p>如上图所示，如果我们插入一个<code>value=27</code>的数据，通过<code>hash</code>计算后应该落入第4个槽位中，而槽位4已经有了<code>Entry</code>数据。</p><p>此时就会线性向后查找，一直找到<code>Entry</code>为<code>null</code>的槽位才会停止查找，将当前元素放入此槽位中。</p><blockquote><p>但是当碰到Entry不为null且key值相等的情况，还有<code>Entry</code>中的<code>key</code>值为<code>null</code>的情况怎么处理。</p></blockquote><p>这里还画了一个<code>Entry</code>中的<code>key</code>为<code>null</code>的数据（<strong>Entry=2的灰色块数据</strong>），因为<code>key</code>值是<strong>弱引用</strong>类型，所以会有这种数据存在。在<code>set</code>过程中，如果遇到了<code>key</code>过期的<code>Entry</code>数据，实际上是会进行一轮<strong>探测式清理</strong>操作的。</p><h3 id=threadlocalmapset详解>ThreadLocalMap.set()详解</h3><p>看完了<code>ThreadLocal</code> <strong>hash算法</strong>后，我们再来看<code>set</code>是如何实现的。</p><p>往<code>ThreadLocalMap</code>中<code>set</code>数据（<strong>新增</strong>或者<strong>更新</strong>数据）分为好几种情况，针对不同的情况我们画图来说说明。</p><p><strong>第一种情况：</strong> 通过<code>hash</code>计算后的槽位对应的<code>Entry</code>数据为空：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba95568266d~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy></p><p>这里直接将数据放到该槽位即可。</p><p><strong>第二种情况：</strong> 槽位数据不为空，<code>key</code>值与当前<code>ThreadLocal</code>通过<code>hash</code>计算获取的<code>key</code>值一致：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba8ec7d6e78~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=image.png></p><p>这里直接更新该槽位的数据。</p><p>**第三种情况：**槽位数据不为空，往后遍历过程中，在找到<code>Entry</code>为<code>null</code>的槽位之前，没有遇到<code>key</code>过期的<code>Entry</code>：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba902a2896a~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=image.png></p><p>遍历散列数组，线性往后查找，如果找到<code>Entry</code>为<code>null</code>的槽位，则将数据放入该槽位中，或者往后遍历过程中，遇到了<strong>key值相等</strong>的数据，直接更新即可。</p><p><strong>第四种情况：</strong> 槽位数据不为空，往后遍历过程中，在找到<code>Entry</code>为<code>null</code>的槽位之前，遇到<code>key</code>过期的<code>Entry</code>，如下图，往后遍历过程中，一到了<code>index=7</code>的槽位数据<code>Entry</code>的<code>key=null</code>：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba9509b36c1~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=Yu77qg.png></p><p>散列数组下标为7位置对应的<code>Entry</code>数据<code>key</code>为<code>null</code>，表明此数据<code>key</code>值已经被垃圾回收掉了，此时就会执行<code>replaceStaleEntry()</code>方法，该方法含义是<strong>替换过期数据的逻辑</strong>，以<strong>index=7</strong>位起点开始遍历，进行探测式数据清理工作。</p><p>初始化探测式清理过期数据扫描的开始位置：<code>slotToExpunge = staleSlot = 7</code></p><p>以当前<code>staleSlot</code>开始 向前迭代查找，找其他过期的数据，然后更新过期数据起始扫描下标<code>slotToExpunge</code>。<code>for</code>循环迭代，直到碰到<code>Entry</code>为<code>null</code>结束。</p><p>如果找到了过期的数据，继续向前迭代，直到遇到<code>Entry=null</code>的槽位才停止迭代，如下图所示，<strong>slotToExpunge被更新为0</strong>：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba957014857~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=YuHSMT.png></p><p>以当前节点(<code>index=7</code>)向前迭代，检测是否有过期的<code>Entry</code>数据，如果有则更新<code>slotToExpunge</code>值。碰到<code>null</code>则结束探测。以上图为例<code>slotToExpunge</code>被更新为0。</p><p>上面向前迭代的操作是为了更新探测清理过期数据的起始下标<code>slotToExpunge</code>的值，这个值在后面会讲解，它是用来判断当前过期槽位<code>staleSlot</code>之前是否还有过期元素。</p><p>接着开始以<code>staleSlot</code>位置(index=7)向后迭代，<strong>如果找到了相同key值的Entry数据：</strong></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba96c6b080d~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=YuHEJ1.png></p><p>从当前节点<code>staleSlot</code>向后查找<code>key</code>值相等的<code>Entry</code>元素，找到后更新<code>Entry</code>的值并交换<code>staleSlot</code>元素的位置(<code>staleSlot</code>位置为过期元素)，更新<code>Entry</code>数据，然后开始进行过期<code>Entry</code>的清理工作，如下图所示</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba9af057e1e~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=Yu4oWT.png></p><p><strong>向后遍历过程中，如果没有找到相同key值的Entry数据：</strong></p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba9848c608b~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=YuHMee.png></p><p>从当前节点<code>staleSlot</code>向后查找<code>key</code>值相等的<code>Entry</code>元素，直到<code>Entry</code>为<code>null</code>则停止寻找。通过上图可知，此时<code>table</code>中没有<code>key</code>值相同的<code>Entry</code>。</p><p>创建新的<code>Entry</code>，替换<code>table[stableSlot]</code>位置：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3ba9da434d2b~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=YuH3FA.png></p><p>替换完成后也是进行过期元素清理工作，清理工作主要是有两个方法：<code>expungeStaleEntry()</code>和<code>cleanSomeSlots()</code>。</p><p>接下来查看对应的源码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>set</span><span class=p>(</span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>key</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>value</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>tab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=p>.</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>key</span><span class=p>.</span><span class=na>threadLocalHashCode</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=p>(</span><span class=n>len</span><span class=o>-</span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=n>Entry</span><span class=w> </span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=n>e</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>)</span><span class=o>]</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>k</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>key</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>e</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>value</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>replaceStaleEntry</span><span class=p>(</span><span class=n>key</span><span class=p>,</span><span class=w> </span><span class=n>value</span><span class=p>,</span><span class=w> </span><span class=n>i</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Entry</span><span class=p>(</span><span class=n>key</span><span class=p>,</span><span class=w> </span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>sz</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=o>++</span><span class=n>size</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>cleanSomeSlots</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>sz</span><span class=p>)</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>sz</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=n>threshold</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>rehash</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这里会通过<code>key</code>来计算在散列表中的对应位置，然后以当前<code>key</code>对应的桶的位置向后查找，找到可以使用的桶。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>tab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=p>.</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>key</span><span class=p>.</span><span class=na>threadLocalHashCode</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=p>(</span><span class=n>len</span><span class=o>-</span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>什么情况下桶才是可以使用的呢？</p><ol><li><code>k = key</code> 说明是替换操作，可以使用</li><li>碰到一个过期的桶，执行替换逻辑，占用过期桶</li><li>查找过程中，碰到桶中<code>Entry=null</code>的情况，直接使用</li></ol><p>接着就是执行<code>for</code>循环遍历，向后查找，我们先看下<code>nextIndex()</code>、<code>prevIndex()</code>方法实现：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3baa0b7231c8~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=YZSC5j.png></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>nextIndex</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=p>((</span><span class=n>i</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>1</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>len</span><span class=p>)</span><span class=w> </span><span class=o>?</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>1</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>0</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>prevIndex</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=p>((</span><span class=n>i</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=n>0</span><span class=p>)</span><span class=w> </span><span class=o>?</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>接着看剩下<code>for</code>循环中的逻辑：</p><ol><li>遍历当前<code>key</code>值对应的桶中<code>Entry</code>数据为空，这说明散列数组这里没有数据冲突，跳出<code>for</code>循环，直接<code>set</code>数据到对应的桶中</li><li>如果<code>key</code>值对应的桶中<code>Entry</code>数据不为空<ol><li>如果<code>k = key</code>，说明当前<code>set</code>操作是一个替换操作，做替换逻辑，直接返回</li><li>如果<code>key = null</code>，说明当前桶位置的<code>Entry</code>是过期数据，执行<code>replaceStaleEntry()</code>方法(核心方法)，然后返回</li></ol></li><li><code>for</code>循环执行完毕，继续往下执行说明向后迭代的过程中遇到了<code>entry</code>为<code>null</code>的情况<ol><li>在<code>Entry</code>为<code>null</code>的桶中创建一个新的<code>Entry</code>对象</li><li>执行<code>++size</code>操作</li></ol></li><li>调用<code>cleanSomeSlots()</code>做一次启发式清理工作，清理散列数组中<code>Entry</code>的<code>key</code>过期的数据 4.1 如果清理工作完成后，未清理到任何数据，且<code>size</code>超过了阈值(数组长度的2/3)，进行<code>rehash()</code>操作 4.2 <code>rehash()</code>中会先进行一轮探测式清理，清理过期<code>key</code>，清理完成后如果<strong>size >= threshold - threshold / 4</strong>，就会执行真正的扩容逻辑(扩容逻辑往后看)</li></ol><p>接着重点看下<code>replaceStaleEntry()</code>方法，<code>replaceStaleEntry()</code>方法提供替换过期数据的功能，我们可以对应上面<strong>第四种情况</strong>的原理图来再回顾下，具体代码如下：</p><p><code>java.lang.ThreadLocal.ThreadLocalMap.replaceStaleEntry()</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>replaceStaleEntry</span><span class=p>(</span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>key</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>value</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                                       </span><span class=kt>int</span><span class=w> </span><span class=n>staleSlot</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>tab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=p>.</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>staleSlot</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>prevIndex</span><span class=p>(</span><span class=n>staleSlot</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=p>)</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>prevIndex</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>()</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>staleSlot</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=p>)</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>k</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>key</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>e</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>value</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>staleSlot</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>cleanSomeSlots</span><span class=p>(</span><span class=n>expungeStaleEntry</span><span class=p>(</span><span class=n>slotToExpunge</span><span class=p>),</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>staleSlot</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Entry</span><span class=p>(</span><span class=n>key</span><span class=p>,</span><span class=w> </span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>staleSlot</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>cleanSomeSlots</span><span class=p>(</span><span class=n>expungeStaleEntry</span><span class=p>(</span><span class=n>slotToExpunge</span><span class=p>),</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><code>slotToExpunge</code>表示开始探测式清理过期数据的开始下标，默认从当前的<code>staleSlot</code>开始。以当前的<code>staleSlot</code>开始，向前迭代查找，找到没有过期的数据，<code>for</code>循环一直碰到<code>Entry</code>为<code>null</code>才会结束。如果向前找到了过期数据，更新探测清理过期数据的开始下标为i，即<code>slotToExpunge=i</code></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>prevIndex</span><span class=p>(</span><span class=n>staleSlot</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>     </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=p>)</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>     </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>prevIndex</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>)){</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>()</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>){</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>接着开始从<code>staleSlot</code>向后查找，也是碰到<code>Entry</code>为<code>null</code>的桶结束。 如果迭代过程中，<strong>碰到k == key</strong>，这说明这里是替换逻辑，替换新数据并且交换当前<code>staleSlot</code>位置。如果<code>slotToExpunge == staleSlot</code>，这说明<code>replaceStaleEntry()</code>一开始向前查找过期数据时并未找到过期的<code>Entry</code>数据，接着向后查找过程中也未发现过期数据，修改开始探测式清理过期数据的下标为当前循环的index，即<code>slotToExpunge = i</code>。最后调用<code>cleanSomeSlots(expungeStaleEntry(slotToExpunge), len);</code>进行启发式过期数据清理。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>key</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>e</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>value</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w> 
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>staleSlot</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>cleanSomeSlots</span><span class=p>(</span><span class=n>expungeStaleEntry</span><span class=p>(</span><span class=n>slotToExpunge</span><span class=p>),</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><code>cleanSomeSlots()</code>和<code>expungeStaleEntry()</code>方法后面都会细讲，这两个是和清理相关的方法，一个是过期<code>key</code>相关<code>Entry</code>的启发式清理(<code>Heuristically scan</code>)，另一个是过期<code>key</code>相关<code>Entry</code>的探测式清理。</p><p><strong>如果k != key</strong>则会接着往下走，<code>k == null</code>说明当前遍历的<code>Entry</code>是一个过期数据，<code>slotToExpunge == staleSlot</code>说明，一开始的向前查找数据并未找到过期的<code>Entry</code>。如果条件成立，则更新<code>slotToExpunge</code> 为当前位置，这个前提是前驱节点扫描时未发现过期数据。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>staleSlot</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>往后迭代的过程中如果没有找到<code>k == key</code>的数据，且碰到<code>Entry</code>为<code>null</code>的数据，则结束当前的迭代操作。此时说明这里是一个添加的逻辑，将新的数据添加到<code>table[staleSlot]</code> 对应的<code>slot</code>中。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Entry</span><span class=p>(</span><span class=n>key</span><span class=p>,</span><span class=w> </span><span class=n>value</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>最后判断除了<code>staleSlot</code>以外，还发现了其他过期的<code>slot</code>数据，就要开启清理数据的逻辑：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>slotToExpunge</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>staleSlot</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>cleanSomeSlots</span><span class=p>(</span><span class=n>expungeStaleEntry</span><span class=p>(</span><span class=n>slotToExpunge</span><span class=p>),</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=threadlocalmap过期key的探测式清理流程>ThreadLocalMap过期key的探测式清理流程</h3><p>上面我们有提及<code>ThreadLocalMap</code>的两种过期<code>key</code>数据清理方式：<strong>探测式清理</strong>和<strong>启发式清理</strong>。</p><p>我们先讲下探测式清理，也就是<code>expungeStaleEntry</code>方法，遍历散列数组，从开始位置向后探测清理过期数据，将过期数据的<code>Entry</code>设置为<code>null</code>，沿途中碰到未过期的数据则将此数据<code>rehash</code>后重新在<code>table</code>数组中定位，如果定位的位置已经有了数据，则会将未过期的数据放到最靠近此位置的<code>Entry=null</code>的桶中，使<code>rehash</code>后的<code>Entry</code>数据距离正确的桶的位置更近一些。操作逻辑如下：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3baa1285c833~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YuH2OU.png></p><p>如上图，<code>set(27)</code> 经过hash计算后应该落到<code>index=4</code>的桶中，由于<code>index=4</code>桶已经有了数据，所以往后迭代最终数据放入到<code>index=7</code>的桶中，放入后一段时间后<code>index=5</code>中的<code>Entry</code>数据<code>key</code>变为了<code>null</code></p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3baa2cc322cb~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YuHb6K.png></p><p>如果再有其他数据<code>set</code>到<code>map</code>中，就会触发<strong>探测式清理</strong>操作。</p><p>如上图，执行<strong>探测式清理</strong>后，<code>index=5</code>的数据被清理掉，继续往后迭代，到<code>index=7</code>的元素时，经过<code>rehash</code>后发现该元素正确的<code>index=4</code>，而此位置已经已经有了数据，往后查找离<code>index=4</code>最近的<code>Entry=null</code>的节点(刚被探测式清理掉的数据：index=5)，找到后移动<code>index= 7</code>的数据到<code>index=5</code>中，此时桶的位置离正确的位置<code>index=4</code>更近了。</p><p>经过一轮探测式清理后，<code>key</code>过期的数据会被清理掉，没过期的数据经过<code>rehash</code>重定位后所处的桶位置理论上更接近<code>i= key.hashCode & (tab.len - 1)</code>的位置。这种优化会提高整个散列表查询性能。</p><p>接着看下<code>expungeStaleEntry()</code>具体流程，我们还是以先原理图后源码讲解的方式来一步步梳理：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3baa2a52731c~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=Yuf301.png></p><p>我们假设<code>expungeStaleEntry(3)</code> 来调用此方法，如上图所示，我们可以看到<code>ThreadLocalMap</code>中<code>table</code>的数据情况，接着执行清理操作：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3baa72c52453~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YufupF.png></p><p>第一步是清空当前<code>staleSlot</code>位置的数据，<code>index=3</code>位置的<code>Entry</code>变成了<code>null</code>。然后接着往后探测：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3baa8b341c89~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YufAwq.png></p><p>执行完第二步后，index=4的元素挪到index=3的槽位中。</p><p>继续往后迭代检查，碰到正常数据，计算该数据位置是否偏移，如果被偏移，则重新计算<code>slot</code>位置，目的是让正常数据尽可能存放在正确位置或离正确位置更近的位置</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3baa9503bd8d~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YuWjTP.png></p><p>在往后迭代的过程中碰到空的槽位，终止探测，这样一轮探测式清理工作就完成了，接着我们继续看看具体<strong>实现源代码</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=nf>expungeStaleEntry</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>staleSlot</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>tab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=p>.</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>staleSlot</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>size</span><span class=o>--</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>staleSlot</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=p>)</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>k</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>e</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>size</span><span class=o>--</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kt>int</span><span class=w> </span><span class=n>h</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>k</span><span class=p>.</span><span class=na>threadLocalHashCode</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=p>(</span><span class=n>len</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>h</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>i</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=n>tab</span><span class=o>[</span><span class=n>h</span><span class=o>]</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>h</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>h</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>tab</span><span class=o>[</span><span class=n>h</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=n>i</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这里我们还是以<code>staleSlot=3</code> 来做示例说明，首先是将<code>tab[staleSlot]</code>槽位的数据清空，然后设置<code>size--</code> 接着以<code>staleSlot</code>位置往后迭代，如果遇到<code>k==null</code>的过期数据，也是清空该槽位数据，然后<code>size--</code></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>k</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>e</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>size</span><span class=o>--</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w> 
+</span></span></span></code></pre></td></tr></table></div></div><p>如果<code>key</code>没有过期，重新计算当前<code>key</code>的下标位置是不是当前槽位下标位置，如果不是，那么说明产生了<code>hash</code>冲突，此时以新计算出来正确的槽位位置往后迭代，找到最近一个可以存放<code>entry</code>的位置。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span><span class=lnt>9
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kt>int</span><span class=w> </span><span class=n>h</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>k</span><span class=p>.</span><span class=na>threadLocalHashCode</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=p>(</span><span class=n>len</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>h</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>i</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=n>tab</span><span class=o>[</span><span class=n>h</span><span class=o>]</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>h</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>h</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tab</span><span class=o>[</span><span class=n>h</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这里是处理正常的产生<code>Hash</code>冲突的数据，经过迭代后，有过<code>Hash</code>冲突数据的<code>Entry</code>位置会更靠近正确位置，这样的话，查询的时候 效率才会更高。</p><h3 id=threadlocalmap扩容机制>ThreadLocalMap扩容机制</h3><p>在<code>ThreadLocalMap.set()</code>方法的最后，如果执行完启发式清理工作后，未清理到任何数据，且当前散列数组中<code>Entry</code>的数量已经达到了列表的扩容阈值<code>(len*2/3)</code>，就开始执行<code>rehash()</code>逻辑：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>cleanSomeSlots</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>sz</span><span class=p>)</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>sz</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=n>threshold</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>rehash</span><span class=p>();</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>接着看下<code>rehash()</code>具体实现：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>rehash</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>expungeStaleEntries</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>size</span><span class=w> </span><span class=o>&gt;=</span><span class=w> </span><span class=n>threshold</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>threshold</span><span class=w> </span><span class=o>/</span><span class=w> </span><span class=n>4</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>resize</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>expungeStaleEntries</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>tab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=p>.</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>j</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w> </span><span class=n>j</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>len</span><span class=p>;</span><span class=w> </span><span class=n>j</span><span class=o>++</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Entry</span><span class=w> </span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>j</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>()</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>expungeStaleEntry</span><span class=p>(</span><span class=n>j</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这里首先是会进行探测式清理工作，从<code>table</code>的起始位置往后清理，上面有分析清理的详细流程。清理完成之后，<code>table</code>中可能有一些<code>key</code>为<code>null</code>的<code>Entry</code>数据被清理掉，所以此时通过判断<code>size >= threshold - threshold / 4</code> 也就是<code>size >= threshold* 3/4</code> 来决定是否扩容。</p><p>我们还记得上面进行<code>rehash()</code>的阈值是<code>size >= threshold</code>，所以当面试官套路我们<code>ThreadLocalMap</code>扩容机制的时候 我们一定要说清楚这两个步骤：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/171f3baaa9f7fb5f~tplv-t2oaga2asx-zoom-in-crop-mark%3A1512%3A0%3A0%3A0.awebp loading=lazy alt=YuqwPs.png></p><p>接着看看具体的<code>resize()</code>方法，为了方便演示，我们以<code>oldTab.len=8</code>来举例：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3baad1dec348~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=Yu2QOI.png></p><p>扩容后的<code>tab</code>的大小为<code>oldLen * 2</code>，然后遍历老的散列表，重新计算<code>hash</code>位置，然后放到新的<code>tab</code>数组中，如果出现<code>hash</code>冲突则往后寻找最近的<code>entry</code>为<code>null</code>的槽位，遍历完成之后，<code>oldTab</code>中所有的<code>entry</code>数据都已经放入到新的<code>tab</code>中了。重新计算<code>tab</code>下次扩容的<strong>阈值</strong>，具体代码如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>resize</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>oldTab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>oldLen</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>oldTab</span><span class=p>.</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>newLen</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>oldLen</span><span class=w> </span><span class=o>*</span><span class=w> </span><span class=n>2</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>newTab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Entry</span><span class=o>[</span><span class=n>newLen</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>count</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>j</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w> </span><span class=n>j</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>oldLen</span><span class=p>;</span><span class=w> </span><span class=o>++</span><span class=n>j</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Entry</span><span class=w> </span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>oldTab</span><span class=o>[</span><span class=n>j</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>k</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>e</span><span class=p>.</span><span class=na>value</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=kt>int</span><span class=w> </span><span class=n>h</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>k</span><span class=p>.</span><span class=na>threadLocalHashCode</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=p>(</span><span class=n>newLen</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=n>newTab</span><span class=o>[</span><span class=n>h</span><span class=o>]</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>h</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>h</span><span class=p>,</span><span class=w> </span><span class=n>newLen</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>newTab</span><span class=o>[</span><span class=n>h</span><span class=o>]</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>count</span><span class=o>++</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>setThreshold</span><span class=p>(</span><span class=n>newLen</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>size</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>count</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>table</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>newTab</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=threadlocalmapget详解>ThreadLocalMap.get()详解</h3><p>上面已经看完了<code>set()</code>方法的源码，其中包括<code>set</code>数据、清理数据、优化数据桶的位置等操作，接着看看<code>get()</code>操作的原理。</p><h4 id=threadlocalmapget图解>ThreadLocalMap.get()图解</h4><p><strong>第一种情况：</strong> 通过查找<code>key</code>值计算出散列表中<code>slot</code>位置，然后该<code>slot</code>位置中的<code>Entry.key</code>和查找的<code>key</code>一致，则直接返回：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3baaed5b6b60~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YuWfdx.png></p><p><strong>第二种情况：</strong> <code>slot</code>位置中的<code>Entry.key</code>和要查找的<code>key</code>不一致：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3bab054f8f50~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YuWyz4.png></p><p>我们以<code>get(ThreadLocal1)</code>为例，通过<code>hash</code>计算后，正确的<code>slot</code>位置应该是4，而<code>index=4</code>的槽位已经有了数据，且<code>key</code>值不等于<code>ThreadLocal1</code>，所以需要继续往后迭代查找。</p><p>迭代到<code>index=5</code>的数据时，此时<code>Entry.key=null</code>，触发一次探测式数据回收操作，执行<code>expungeStaleEntry()</code>方法，执行完后，<code>index 5,8</code>的数据都会被回收，而<code>index 6,7</code>的数据都会前移，此时继续往后迭代，到<code>index = 6</code>的时候即找到了<code>key</code>值相等的<code>Entry</code>数据，如下图所示：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3bab26c905a5~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YuW8JS.png></p><h4 id=threadlocalmapget源码详解>ThreadLocalMap.get()源码详解</h4><p><code>java.lang.ThreadLocal.ThreadLocalMap.getEntry()</code>:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=n>java复制代码private</span><span class=w> </span><span class=n>Entry</span><span class=w> </span><span class=nf>getEntry</span><span class=p>(</span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>key</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>key</span><span class=p>.</span><span class=na>threadLocalHashCode</span><span class=w> </span><span class=o>&amp;</span><span class=w> </span><span class=p>(</span><span class=n>table</span><span class=p>.</span><span class=na>length</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=w> </span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>()</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>key</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>else</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>getEntryAfterMiss</span><span class=p>(</span><span class=n>key</span><span class=p>,</span><span class=w> </span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>e</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>private</span><span class=w> </span><span class=n>Entry</span><span class=w> </span><span class=nf>getEntryAfterMiss</span><span class=p>(</span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>key</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>Entry</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>tab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=p>.</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocal</span><span class=o>&lt;?&gt;</span><span class=w> </span><span class=n>k</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>key</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>e</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>k</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>expungeStaleEntry</span><span class=p>(</span><span class=n>i</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>else</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=threadlocalmap过期key的启发式清理流程>ThreadLocalMap过期key的启发式清理流程</h3><p>上面多次提及到<code>ThreadLocalMap</code>过期可以的两种清理方式：<strong>探测式清理(expungeStaleEntry())</strong>、<strong>启发式清理(cleanSomeSlots())</strong></p><p>探测式清理是以当前<code>Entry</code> 往后清理，遇到值为<code>null</code>则结束清理，属于<strong>线性探测清理</strong>。</p><p>而启发式清理被作者定义为：<strong>Heuristically scan some cells looking for stale entries</strong>.</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f49d18669ff50~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YK5HJ0.png></p><p>具体代码如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>boolean</span><span class=w> </span><span class=nf>cleanSomeSlots</span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>n</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>boolean</span><span class=w> </span><span class=n>removed</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>false</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Entry</span><span class=o>[]</span><span class=w> </span><span class=n>tab</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>table</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>int</span><span class=w> </span><span class=n>len</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=p>.</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>do</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextIndex</span><span class=p>(</span><span class=n>i</span><span class=p>,</span><span class=w> </span><span class=n>len</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Entry</span><span class=w> </span><span class=n>e</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>tab</span><span class=o>[</span><span class=n>i</span><span class=o>]</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>e</span><span class=p>.</span><span class=na>get</span><span class=p>()</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>n</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>len</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>removed</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=kc>true</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>expungeStaleEntry</span><span class=p>(</span><span class=n>i</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w> </span><span class=k>while</span><span class=w> </span><span class=p>(</span><span class=w> </span><span class=p>(</span><span class=n>n</span><span class=w> </span><span class=o>&gt;&gt;&gt;=</span><span class=w> </span><span class=n>1</span><span class=p>)</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=n>0</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=n>removed</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=inheritablethreadlocal>InheritableThreadLocal</h3><p>我们使用<code>ThreadLocal</code>的时候，在异步场景下是无法给子线程共享父线程中创建的线程副本数据的。</p><p>为了解决这个问题，JDK中还有一个<code>InheritableThreadLocal</code>类，我们来看一个例子：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>InheritableThreadLocalDemo</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>main</span><span class=p>(</span><span class=n>String</span><span class=o>[]</span><span class=w> </span><span class=n>args</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocal</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>threadLocal</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ThreadLocal</span><span class=o>&lt;&gt;</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ThreadLocal</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>inheritableThreadLocal</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>InheritableThreadLocal</span><span class=o>&lt;&gt;</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>threadLocal</span><span class=p>.</span><span class=na>set</span><span class=p>(</span><span class=s>&#34;父类数据:threadLocal&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>inheritableThreadLocal</span><span class=p>.</span><span class=na>set</span><span class=p>(</span><span class=s>&#34;父类数据:inheritableThreadLocal&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>new</span><span class=w> </span><span class=n>Thread</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>Runnable</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>run</span><span class=p>()</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;子线程获取父类threadLocal数据：&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>threadLocal</span><span class=p>.</span><span class=na>get</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>System</span><span class=p>.</span><span class=na>out</span><span class=p>.</span><span class=na>println</span><span class=p>(</span><span class=s>&#34;子线程获取父类inheritableThreadLocal数据：&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>inheritableThreadLocal</span><span class=p>.</span><span class=na>get</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}).</span><span class=na>start</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>打印结果：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=n>java复制代码子线程获取父类threadLocal数据</span><span class=err>：</span><span class=kc>null</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=n>子线程获取父类inheritableThreadLocal数据</span><span class=err>：</span><span class=n>父类数据</span><span class=p>:</span><span class=n>inheritableThreadLocal</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>实现原理是子线程是通过在父线程中通过调用<code>new Thread()</code>方法来创建子线程，<code>Thread#init</code>方法在<code>Thread</code>的构造方法中被调用。在<code>init</code>方法中拷贝父线程数据到子线程中：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>init</span><span class=p>(</span><span class=n>ThreadGroup</span><span class=w> </span><span class=n>g</span><span class=p>,</span><span class=w> </span><span class=n>Runnable</span><span class=w> </span><span class=n>target</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>name</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                      </span><span class=kt>long</span><span class=w> </span><span class=n>stackSize</span><span class=p>,</span><span class=w> </span><span class=n>AccessControlContext</span><span class=w> </span><span class=n>acc</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                      </span><span class=kt>boolean</span><span class=w> </span><span class=n>inheritThreadLocals</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>name</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>throw</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>NullPointerException</span><span class=p>(</span><span class=s>&#34;name cannot be null&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>inheritThreadLocals</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>parent</span><span class=p>.</span><span class=na>inheritableThreadLocals</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>this</span><span class=p>.</span><span class=na>inheritableThreadLocals</span><span class=w> </span><span class=o>=</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>ThreadLocal</span><span class=p>.</span><span class=na>createInheritedMap</span><span class=p>(</span><span class=n>parent</span><span class=p>.</span><span class=na>inheritableThreadLocals</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>this</span><span class=p>.</span><span class=na>stackSize</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>stackSize</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>tid</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>nextThreadID</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>但<code>InheritableThreadLocal</code>仍然有缺陷，一般我们做异步化处理都是使用的线程池，而<code>InheritableThreadLocal</code>是在<code>new Thread</code>中的<code>init()</code>方法给赋值的，而线程池是线程复用的逻辑，所以这里会存在问题。</p><p>当然，有问题出现就会有解决问题的方案，阿里巴巴开源了一个<code>TransmittableThreadLocal</code>组件就可以解决这个问题，这里就不再延伸，感兴趣的可自行查阅资料。</p><h3 id=threadlocal项目中使用实战>ThreadLocal项目中使用实战</h3><h4 id=threadlocal使用场景>ThreadLocal使用场景</h4><p>我们现在项目中日志记录用的是<code>ELK+Logstash</code>，最后在<code>Kibana</code>中进行展示和检索。</p><p>现在都是分布式系统统一对外提供服务，项目间调用的关系可以通过traceId来关联，但是不同项目之间如何传递<code>traceId</code>呢？</p><p>这里我们使用<code>org.slf4j.MDC</code>来实现此功能，内部就是通过<code>ThreadLocal</code>来实现的，具体实现如下：</p><p>当前端发送请求到<strong>服务A</strong>时，<strong>服务A</strong>会生成一个类似<code>UUID</code>的<code>traceId</code>字符串，将此字符串放入当前线程的<code>ThreadLocal</code>中，在调用<strong>服务B</strong>的时候，将<code>traceId</code>写入到请求的<code>Header</code>中，<strong>服务B</strong>在接收请求时会先判断请求的<code>Header</code>中是否有<code>traceId</code>，如果存在则写入自己线程的<code>ThreadLocal</code>中。</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3bb27f41cec0~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=YeMO3t.png></p><p>图中的<code>requestId</code>即为我们各个系统链路关联的<code>traceId</code>，系统间互相调用，通过这个<code>requestId</code>即可找到对应链路，这里还有会有一些其他场景：</p><p><img src=https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2020/5/8/171f3bb290c4d1d1~tplv-t2oaga2asx-zoom-in-crop-mark:1512:0:0:0.awebp loading=lazy alt=Ym3861.png></p><p>针对于这些场景，我们都可以有相应的解决方案，如下所示</p><h4 id=feign远程调用解决方案>Feign远程调用解决方案</h4><p><strong>服务发送请求：</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@Component</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=nd>@Slf4j</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>FeignInvokeInterceptor</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>RequestInterceptor</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>apply</span><span class=p>(</span><span class=n>RequestTemplate</span><span class=w> </span><span class=n>template</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>requestId</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>MDC</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=s>&#34;requestId&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>StringUtils</span><span class=p>.</span><span class=na>isNotBlank</span><span class=p>(</span><span class=n>requestId</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>template</span><span class=p>.</span><span class=na>header</span><span class=p>(</span><span class=s>&#34;requestId&#34;</span><span class=p>,</span><span class=w> </span><span class=n>requestId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p><strong>服务接收请求：</strong></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@Slf4j</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=nd>@Component</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>LogInterceptor</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>HandlerInterceptorAdapter</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>afterCompletion</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>arg0</span><span class=p>,</span><span class=w> </span><span class=n>HttpServletResponse</span><span class=w> </span><span class=n>arg1</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>arg2</span><span class=p>,</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=n>arg3</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>MDC</span><span class=p>.</span><span class=na>remove</span><span class=p>(</span><span class=s>&#34;requestId&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>postHandle</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>arg0</span><span class=p>,</span><span class=w> </span><span class=n>HttpServletResponse</span><span class=w> </span><span class=n>arg1</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>arg2</span><span class=p>,</span><span class=w> </span><span class=n>ModelAndView</span><span class=w> </span><span class=n>arg3</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>boolean</span><span class=w> </span><span class=nf>preHandle</span><span class=p>(</span><span class=n>HttpServletRequest</span><span class=w> </span><span class=n>request</span><span class=p>,</span><span class=w> </span><span class=n>HttpServletResponse</span><span class=w> </span><span class=n>response</span><span class=p>,</span><span class=w> </span><span class=n>Object</span><span class=w> </span><span class=n>handler</span><span class=p>)</span><span class=w> </span><span class=kd>throws</span><span class=w> </span><span class=n>Exception</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>String</span><span class=w> </span><span class=n>requestId</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>request</span><span class=p>.</span><span class=na>getHeader</span><span class=p>(</span><span class=n>BaseConstant</span><span class=p>.</span><span class=na>REQUEST_ID_KEY</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>StringUtils</span><span class=p>.</span><span class=na>isBlank</span><span class=p>(</span><span class=n>requestId</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>requestId</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>UUID</span><span class=p>.</span><span class=na>randomUUID</span><span class=p>().</span><span class=na>toString</span><span class=p>().</span><span class=na>replace</span><span class=p>(</span><span class=s>&#34;-&#34;</span><span class=p>,</span><span class=w> </span><span class=s>&#34;&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>MDC</span><span class=p>.</span><span class=na>put</span><span class=p>(</span><span class=s>&#34;requestId&#34;</span><span class=p>,</span><span class=w> </span><span class=n>requestId</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=kc>true</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h4 id=线程池异步调用requestid传递>线程池异步调用，requestId传递</h4><p>因为<code>MDC</code>是基于<code>ThreadLocal</code>去实现的，异步过程中，子线程并没有办法获取到父线程<code>ThreadLocal</code>存储的数据，所以这里可以自定义线程池执行器，修改其中的<code>run()</code>方法：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>MyThreadPoolTaskExecutor</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>ThreadPoolTaskExecutor</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>execute</span><span class=p>(</span><span class=n>Runnable</span><span class=w> </span><span class=n>runnable</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>context</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>MDC</span><span class=p>.</span><span class=na>getCopyOfContextMap</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>super</span><span class=p>.</span><span class=na>execute</span><span class=p>(()</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>run</span><span class=p>(</span><span class=n>runnable</span><span class=p>,</span><span class=w> </span><span class=n>context</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kt>void</span><span class=w> </span><span class=nf>run</span><span class=p>(</span><span class=n>Runnable</span><span class=w> </span><span class=n>runnable</span><span class=p>,</span><span class=w> </span><span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>context</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>context</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>MDC</span><span class=p>.</span><span class=na>setContextMap</span><span class=p>(</span><span class=n>context</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>runnable</span><span class=p>.</span><span class=na>run</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>finally</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>MDC</span><span class=p>.</span><span class=na>remove</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h4 id=使用mq发送消息给第三方系统>使用MQ发送消息给第三方系统</h4><p>在MQ发送的消息体中自定义属性<code>requestId</code>，接收方消费消息后，自己解析<code>requestId</code>使用即可。</p><h2 id=总结>总结</h2><p>这个请看参考 刚开始添加了自己的理解 后面完全懵了 直接抄</p><p>其实谁到底，就是set、get、扩容的设置</p><p>set的四种情况</p><p>从此引出探测是清理</p><p>然后明白如何散列</p><p>然后明白对应的set方法</p><p>然后明白对应的应用</p><h2 id=参考>参考</h2><ul><li><a class=link href=https://juejin.cn/post/6844904151567040519 target=_blank rel=noopener>https://juejin.cn/post/6844904151567040519</a></li></ul></section><footer class=article-footer><section class=article-tags><a href=/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/>多线程</a>
+<a href=/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/>源码阅读</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg><span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article class=has-image><a href=/p/%E6%9C%8D%E5%8A%A1%E5%90%8C%E6%AD%A5/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>服务同步</h2></div></a></article><article class=has-image><a href=/p/%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>服务调用</h2></div></a></article><article><a href=/p/springboot%E6%98%AF%E5%A6%82%E4%BD%95%E8%AF%BB%E5%88%B0yaml%E6%96%87%E6%A1%A3%E7%9A%84/><div class=article-details><h2 class=article-title>SpringBoot是如何读到yaml文档的</h2></div></a></article><article class=has-image><a href=/p/apache-shenyu%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>Apache Shenyu服务注册</h2></div></a></article><article class=has-image><a href=/p/%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>请求处理流程</h2></div></a></article></div></div></aside><script src=//unpkg.com/@waline/client@v2/dist/waline.js></script><link href=//unpkg.com/@waline/client@v2/dist/waline.css rel=stylesheet><div id=waline class=waline-container></div><style>.waline-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding);--waline-font-size:var(--article-font-size)}.waline-container .wl-count{color:var(--card-text-color-main)}</style><script>Waline.init({avatar:"retro",avatarcdn:"https://sdn.geekzu.org/avatar/",dark:'html[data-scheme="dark"]',el:"#waline",emoji:["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],highlight:!0,js:"https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js",lang:"zh-CN",locale:{admin:"Admin"},meta:["nick","mail","link"],pageSize:20,placeholder:"",requiredMeta:["name","email","url"],serverURL:"https://waline-line-git-main-zrsaber.vercel.app",uploadimage:!1,visitor:!0})</script><footer class=site-footer><section class=copyright>&copy;
+2020 -
+2023 Runqi Blog</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.21.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
