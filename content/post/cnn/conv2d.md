@@ -485,7 +485,7 @@ if self.bias is not None:
 
 得到了对应的内容，然后我们看官网中有这么 一个公式：
 $$
-out(N_{i},C_{out_{j}}) = bias(C_{out_{j}}) + \sum_{k = 0}^{C_m - 1} weight(C_{out},k) \star input(N_{i},k)
+out(N_{i},C_{out_{j}}) = bias(C_{out_{j}}) + \sum_{k = 0}^{C_m - 1} weight(C_{out_{j}},k) \star input(N_{i},k)
 $$
 其实上面的过程，就是这个公式的计算。
 
