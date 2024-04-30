@@ -203,6 +203,11 @@ protected void handle(final String beanName, final T bean) {
 这的函数的作用是将拿到类对应的反射，而不是类本身
 
 > 这里利用一个TODO：反射的好处是什么，为什么不直接使用对应的对象。
+>
+> 
+> **提高代码的复用率，外部调用方便**
+
+
 
 再看下面：
 

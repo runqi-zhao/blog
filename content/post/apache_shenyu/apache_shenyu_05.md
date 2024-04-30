@@ -1,6 +1,6 @@
 ---
 title: "服务同步"
-description: 以websocket为例
+description: websocket
 date: 2023-09-23T18:59:19+08:00
 image: https://shenyu.apache.org/zh/img/logo.svg
 math: 
