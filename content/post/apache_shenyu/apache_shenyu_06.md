@@ -1,5 +1,5 @@
 ---
-title: "服务同步"
+title: "服务同步-hhtp长轮询"
 description: http长轮询
 date: 2024-04-29T18:59:19+08:00
 image: https://shenyu.apache.org/zh/img/logo.svg
