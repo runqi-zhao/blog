@@ -5,6 +5,10 @@ date: 2024-05-12T23:21:52+08:00
 image: 
 math: 
 license: 
+categories:
+    - 计算机基础
+tags:
+    - 计算机网络
 hidden: false
 comments: true
 draft: false
