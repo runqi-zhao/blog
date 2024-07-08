@@ -1,0 +1,393 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='上一个内容之中，我们已经解释了 对应e2cnn的创建，现在我们解释对应的输入类型的创建。 首先我们要知道，我们现在已经创建了一个循环群，创建完成循环群之后里面已经有对应的平凡表示，这些内容都有了之后，下面会使用 上一讲中已经创建的内容，构建群的如数类型$\\rho_{in}$。 本文使用的是ReDet的ReResNet进行说明，因此，里面会出现对应的内容 。 首先，在我们创建完成对应的循环群 之后，会使用下面代码创建对应的输入类型 ： 1 2 3 4 5 6 self.in_type = build_enn_trivial_feature(3) def build_enn_trivial_feature(planes): """build a enn trivial feature map with the specified number of channels.""" return enn.FieldType(gspace, planes * [gspace.trivial_repr]) gspace是我们上一讲中创建的类型，trivial_repr是对应“琐碎表示”，这个的话可以看论文之中的解释，在这里我们依然使用的是上面对应已经创建好的循环群中的第一个元素，这里是有理论支撑的，但是里面的内容确实不简单，先按下不表。 然后接下来将会使用FieldType，可以说，这个是本文的重头戏，这个理解好了，输入类型就理解好了。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 class FieldType: def __init__(self, gspace: GSpace, representations: List[Representation]): r""" An ``FieldType`` can be interpreted as the *data type* of a feature space.'><title>e2cnn内容理解-群的输入类型</title>
+<link rel=canonical href=https://runqizhao.cn/p/e2cnn%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E8%BE%93%E5%85%A5%E7%B1%BB%E5%9E%8B/><link rel=stylesheet href=/scss/style.min.8e60baf4cd3fc55968717a6e39762f4d28ed7ef6007566b6c7970ad0fe907198.css><meta property='og:title' content="e2cnn内容理解-群的输入类型"><meta property='og:description' content='上一个内容之中，我们已经解释了 对应e2cnn的创建，现在我们解释对应的输入类型的创建。 首先我们要知道，我们现在已经创建了一个循环群，创建完成循环群之后里面已经有对应的平凡表示，这些内容都有了之后，下面会使用 上一讲中已经创建的内容，构建群的如数类型$\\rho_{in}$。 本文使用的是ReDet的ReResNet进行说明，因此，里面会出现对应的内容 。 首先，在我们创建完成对应的循环群 之后，会使用下面代码创建对应的输入类型 ： 1 2 3 4 5 6 self.in_type = build_enn_trivial_feature(3) def build_enn_trivial_feature(planes): """build a enn trivial feature map with the specified number of channels.""" return enn.FieldType(gspace, planes * [gspace.trivial_repr]) gspace是我们上一讲中创建的类型，trivial_repr是对应“琐碎表示”，这个的话可以看论文之中的解释，在这里我们依然使用的是上面对应已经创建好的循环群中的第一个元素，这里是有理论支撑的，但是里面的内容确实不简单，先按下不表。 然后接下来将会使用FieldType，可以说，这个是本文的重头戏，这个理解好了，输入类型就理解好了。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 class FieldType: def __init__(self, gspace: GSpace, representations: List[Representation]): r""" An ``FieldType`` can be interpreted as the *data type* of a feature space.'><meta property='og:url' content='https://runqizhao.cn/p/e2cnn%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E8%BE%93%E5%85%A5%E7%B1%BB%E5%9E%8B/'><meta property='og:site_name' content='Runqi Blog'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='机器学习'><meta property='article:tag' content='源码阅读'><meta property='article:tag' content='群论'><meta property='article:published_time' content='2023-12-03T20:56:54+08:00'><meta property='article:modified_time' content='2023-12-03T20:56:54+08:00'><meta name=twitter:title content="e2cnn内容理解-群的输入类型"><meta name=twitter:description content='上一个内容之中，我们已经解释了 对应e2cnn的创建，现在我们解释对应的输入类型的创建。 首先我们要知道，我们现在已经创建了一个循环群，创建完成循环群之后里面已经有对应的平凡表示，这些内容都有了之后，下面会使用 上一讲中已经创建的内容，构建群的如数类型$\\rho_{in}$。 本文使用的是ReDet的ReResNet进行说明，因此，里面会出现对应的内容 。 首先，在我们创建完成对应的循环群 之后，会使用下面代码创建对应的输入类型 ： 1 2 3 4 5 6 self.in_type = build_enn_trivial_feature(3) def build_enn_trivial_feature(planes): """build a enn trivial feature map with the specified number of channels.""" return enn.FieldType(gspace, planes * [gspace.trivial_repr]) gspace是我们上一讲中创建的类型，trivial_repr是对应“琐碎表示”，这个的话可以看论文之中的解释，在这里我们依然使用的是上面对应已经创建好的循环群中的第一个元素，这里是有理论支撑的，但是里面的内容确实不简单，先按下不表。 然后接下来将会使用FieldType，可以说，这个是本文的重头戏，这个理解好了，输入类型就理解好了。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 class FieldType: def __init__(self, gspace: GSpace, representations: List[Representation]): r""" An ``FieldType`` can be interpreted as the *data type* of a feature space.'><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu9b4ee4aab7d2c9a136b427e2430a0345_27821_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>Runqi Blog</a></h1><h2 class=site-description>Stay foolish stay hungry</h2></div></header><ol class=menu-social><li><a href=https://github.com/runqi-zhao target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/links/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>Links</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/>机器学习</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/e2cnn%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E8%BE%93%E5%85%A5%E7%B1%BB%E5%9E%8B/>e2cnn内容理解-群的输入类型</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Dec 03, 2023</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>6 minute read</time></div></footer></div></header><section class=article-content><p>上一个内容之中，我们已经解释了 对应e2cnn的创建，现在我们解释对应的输入类型的创建。</p><p>首先我们要知道，我们现在已经创建了一个循环群，创建完成循环群之后里面已经有对应的平凡表示，这些内容都有了之后，下面会使用 上一讲中已经创建的内容，构建群的如数类型$\rho_{in}$。</p><p>本文使用的是ReDet的ReResNet进行说明，因此，里面会出现对应的内容 。</p><p>首先，在我们创建完成对应的循环群 之后，会使用下面代码创建对应的输入类型 ：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=bp>self</span><span class=o>.</span><span class=n>in_type</span> <span class=o>=</span> <span class=n>build_enn_trivial_feature</span><span class=p>(</span><span class=mi>3</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>build_enn_trivial_feature</span><span class=p>(</span><span class=n>planes</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;build a enn trivial feature map with the specified number of
+</span></span></span><span class=line><span class=cl><span class=s2>    channels.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>enn</span><span class=o>.</span><span class=n>FieldType</span><span class=p>(</span><span class=n>gspace</span><span class=p>,</span> <span class=n>planes</span> <span class=o>*</span> <span class=p>[</span><span class=n>gspace</span><span class=o>.</span><span class=n>trivial_repr</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><p>gspace是我们上一讲中创建的类型，trivial_repr是对应“琐碎表示”，这个的话可以看论文之中的解释，在这里我们依然使用的是上面对应已经创建好的循环群中的第一个元素，这里是有理论支撑的，但是里面的内容确实不简单，先按下不表。</p><p>然后接下来将会使用FieldType，可以说，这个是本文的重头戏，这个理解好了，输入类型就理解好了。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span><span class=lnt>73
+</span><span class=lnt>74
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>FieldType</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>gspace</span><span class=p>:</span> <span class=n>GSpace</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                 <span class=n>representations</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=n>Representation</span><span class=p>]):</span>
+</span></span><span class=line><span class=cl>        <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        An ``FieldType`` can be interpreted as the *data type* of a feature space. It describes:
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        - the base space on which a feature field is living and its symmetries considered
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        - the transformation law of feature fields under the action of the fiber group
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        The former is formalize by a choice of ``gspace`` while the latter is determined by a choice of group
+</span></span></span><span class=line><span class=cl><span class=s2>        representations (``representations``), passed as a list of :class:`~e2cnn.group.Representation` instances.
+</span></span></span><span class=line><span class=cl><span class=s2>        Each single representation in this list corresponds to one independent feature field contained in the feature
+</span></span></span><span class=line><span class=cl><span class=s2>        space.
+</span></span></span><span class=line><span class=cl><span class=s2>        The input ``representations`` need to belong to ``gspace``&#39;s fiber group
+</span></span></span><span class=line><span class=cl><span class=s2>        (:attr:`e2cnn.gspaces.GSpace.fibergroup`).
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        .. note ::
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>            Mathematically, this class describes a *(trivial) vector bundle*, *associated* to the symmetry group
+</span></span></span><span class=line><span class=cl><span class=s2>            :math:`(\R^D, +) \rtimes G`.
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>            Given a *principal bundle* :math:`\pi: (\R^D, +) \rtimes G \to \R^D, tg \mapsto tG`
+</span></span></span><span class=line><span class=cl><span class=s2>            with fiber group :math:`G`, an *associated vector bundle* has the same base space
+</span></span></span><span class=line><span class=cl><span class=s2>            :math:`\R^D` but its fibers are vector spaces like :math:`\mathbb</span><span class=si>{R}</span><span class=s2>^c`.
+</span></span></span><span class=line><span class=cl><span class=s2>            Moreover, these vector spaces are associated to a :math:`c`-dimensional representation :math:`\rho` of the
+</span></span></span><span class=line><span class=cl><span class=s2>            fiber group :math:`G` and transform accordingly.
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>            The representation :math:`\rho` is defined as the *direct sum* of the representations :math:`\{\rho_i\}_i`
+</span></span></span><span class=line><span class=cl><span class=s2>            in ``representations``. See also :func:`~e2cnn.group.directsum`.
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        Args:
+</span></span></span><span class=line><span class=cl><span class=s2>            gspace (GSpace): the space where the feature fields live and its symmetries
+</span></span></span><span class=line><span class=cl><span class=s2>            representations (list): a list of :class:`~e2cnn.group.Representation` s of the ``gspace``&#39;s fiber group,
+</span></span></span><span class=line><span class=cl><span class=s2>                            determining the transformation laws of the feature fields
+</span></span></span><span class=line><span class=cl><span class=s2>        
+</span></span></span><span class=line><span class=cl><span class=s2>        Attributes:
+</span></span></span><span class=line><span class=cl><span class=s2>            ~.gspace (GSpace)
+</span></span></span><span class=line><span class=cl><span class=s2>            ~.representations (list)
+</span></span></span><span class=line><span class=cl><span class=s2>            ~.size (int): dimensionality of the feature space described by the :class:`~e2cnn.nn.FieldType`.
+</span></span></span><span class=line><span class=cl><span class=s2>                          It corresponds to the sum of the dimensionalities of the individual feature fields or
+</span></span></span><span class=line><span class=cl><span class=s2>                          group representations (:attr:`e2cnn.group.Representation.size`).
+</span></span></span><span class=line><span class=cl><span class=s2> 
+</span></span></span><span class=line><span class=cl><span class=s2>            
+</span></span></span><span class=line><span class=cl><span class=s2>        &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>assert</span> <span class=nb>len</span><span class=p>(</span><span class=n>representations</span><span class=p>)</span> <span class=o>&gt;</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=nb>repr</span> <span class=ow>in</span> <span class=n>representations</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>assert</span> <span class=nb>repr</span><span class=o>.</span><span class=n>group</span> <span class=o>==</span> <span class=n>gspace</span><span class=o>.</span><span class=n>fibergroup</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># GSpace: Space where data lives and its (abstract) symmetries</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>gspace</span> <span class=o>=</span> <span class=n>gspace</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># list: List of representations of each feature field composing the feature space of this type</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>representations</span> <span class=o>=</span> <span class=n>representations</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1># int: size of the field associated to this type.</span>
+</span></span><span class=line><span class=cl>        <span class=c1># as the representation associated to the field is the direct sum of the representations</span>
+</span></span><span class=line><span class=cl>        <span class=c1># in :attr:`e2cnn.nn.fieldtype.representations`, its size is the sum of each of these</span>
+</span></span><span class=line><span class=cl>        <span class=c1># representations&#39; size</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>size</span> <span class=o>=</span> <span class=nb>sum</span><span class=p>([</span><span class=nb>repr</span><span class=o>.</span><span class=n>size</span> <span class=k>for</span> <span class=nb>repr</span> <span class=ow>in</span> <span class=n>representations</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_unique_representations</span> <span class=o>=</span> <span class=nb>set</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>representations</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_representation</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_field_start</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_field_end</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_hash</span> <span class=o>=</span> <span class=nb>hash</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>gspace</span><span class=o>.</span><span class=n>name</span> <span class=o>+</span> <span class=s1>&#39;: {&#39;</span> <span class=o>+</span> <span class=s1>&#39;, &#39;</span><span class=o>.</span><span class=n>join</span><span class=p>([</span><span class=n>r</span><span class=o>.</span><span class=n>name</span> <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>representations</span><span class=p>])</span> <span class=o>+</span> <span class=s1>&#39;}&#39;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>一个 ``FieldType` 可以解释为一个特征空间的<em>数据类型</em>。它描述</p><ul><li><p>特征域所处的基础空间及其对称性</p></li><li><p>特征场在纤维群作用下的变换规律</p><p>前者是通过选择 &ldquo;特征空间 &ldquo;来形式化的，而后者则是由选择群来决定的 表征（<code>representations</code>），以 :class:<code>~e2cnn.group.Representation</code> 实例列表的形式传递。
+该列表中的每个表示法都对应于特征空间中的一个独立特征字段空间。</p></li></ul><p>上面是作者给的 解释，其实看的还是云里雾里。</p><p>还是老规矩，一行一行代码查看，首先的话还是先进性初始化。</p><p>初始化完成之后，下面这一步进行哈希操作：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=bp>self</span><span class=o>.</span><span class=n>_hash</span> <span class=o>=</span> <span class=nb>hash</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>gspace</span><span class=o>.</span><span class=n>name</span> <span class=o>+</span> <span class=s1>&#39;: {&#39;</span> <span class=o>+</span> <span class=s1>&#39;, &#39;</span><span class=o>.</span><span class=n>join</span><span class=p>([</span><span class=n>r</span><span class=o>.</span><span class=n>name</span> <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>representations</span><span class=p>])</span> <span class=o>+</span> <span class=s1>&#39;}&#39;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>通过将 <code>gspace.name</code> 和 <code>representations</code> 中每个表示的名称连接起来，并计算哈希值来表示 <code>FieldType</code> 的唯一性。</p><p>这里第一个坑点来了，从程序上面来看，我们初始化完成之后，输入类型就已经创建结束，但是我们看论文中的解释：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/20231203212843.png loading=lazy></p><p>这里的话论文中是这么说的：在第 5 行，我们定义了输入 $\rho_{in}$ 的字段类型，指定它包含 3 个标量字段，由平凡表示$\psi $ 描述（例如 RGB 图像，另见第 3.2 节）。</p><p>然后我们卡一下官网的解释，在官网中进行解释的时候，使用对应一个例子解释，可以直接看对应的<a class=link href=https://quva-lab.github.io/e2cnn/api/e2cnn.nn.html#field-type target=_blank rel=noopener>连接</a>。</p><p>结合这个例子可以看到，在官网中，依旧是进行直积操作，因此，说到底，这个输入类型的创建就将你设置的通道进行直积操作 ，就是将对应内容拼接在一起，为了验证这个想法，我们下面看一个例子。</p><p>现在假设我们输入的是一个图像，输入的是3通道 ，现在调用下面的语句：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=bp>self</span><span class=o>.</span><span class=n>in_type</span> <span class=o>=</span> <span class=n>build_enn_trivial_feature</span><span class=p>(</span><span class=mi>3</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>在这一条调用 完成之后，相当于我们现在设置的输入通道是3通道（一个RGB图像）。现在我们看函数里面的具体内容：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>build_enn_trivial_feature</span><span class=p>(</span><span class=n>planes</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;build a enn trivial feature map with the specified number of
+</span></span></span><span class=line><span class=cl><span class=s2>    channels.&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>enn</span><span class=o>.</span><span class=n>FieldType</span><span class=p>(</span><span class=n>gspace</span><span class=p>,</span> <span class=n>planes</span> <span class=o>*</span> <span class=p>[</span><span class=n>gspace</span><span class=o>.</span><span class=n>trivial_repr</span><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><p>通过函数里面的具体内容可知，在进行创建的时候，使用到了我们上篇文章创建的gspace，但是在上一篇中，我们在进行创建的时候没有使用trival_rper函数，因此，则会里面我们跳到对应的函数中，查看这个函数对应的变量。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=nd>@property</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>trivial_repr</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>e2cnn</span><span class=o>.</span><span class=n>group</span><span class=o>.</span><span class=n>Representation</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    The trivial representation of the fiber group of this space.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. seealso::
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>        :attr:`e2cnn.group.Group.trivial_representation`
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>fibergroup</span><span class=o>.</span><span class=n>trivial_representation</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后我们看了这里面对应的内容，根据上面注释的解释，这里是该空间纤维群的平凡表示，然后为了彻底搞懂这个内容，跳到这个函数里面查看里面的内容：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl> <span class=nd>@property</span>
+</span></span><span class=line><span class=cl><span class=nd>@abstractmethod</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>trivial_representation</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=n>e2cnn</span><span class=o>.</span><span class=n>group</span><span class=o>.</span><span class=n>IrreducibleRepresentation</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>    Builds the trivial representation of the group.
+</span></span></span><span class=line><span class=cl><span class=s2>    The trivial representation is a 1-dimensional representation which maps any element to 1,
+</span></span></span><span class=line><span class=cl><span class=s2>    i.e. :math:`\forall g \in G,\ \rho(g) = 1`.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Returns:
+</span></span></span><span class=line><span class=cl><span class=s2>        the trivial representation of the group
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>pass</span>
+</span></span></code></pre></td></tr></table></div></div><p>在这个函数里面，我们构建群的平凡表示，这个平凡 表示是一种以为表示，可以将任何元素映射为1，例如
+$$
+\forall g \in G,\ \rho(g) = 1
+$$
+总结一下上面函数，相当于我们创建了群中的元素都是1，然后再创建完成之后，直接与其中的通道相乘，设置成对应的输入类型。因此，在这个里面 ，应该是3个相同的变量 。</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312041519976.png loading=lazy></p><p>从这里面可以看出，不过是将对应1映射到对应的维度上面，然后将里面每个内容都复制对应的三份，然后直接更新对应的representation与representations，然后直接进行返回，然后这里用出现了新东西，里面的fields_star与fileds_end没有出现，这里的话我们还是通过源码进行调试，找到生成对应值的函数。</p><p>但是单点调试了很久，都没有跳到对应的程序里面，这里是不是出现了问题？</p><p>TODO：这里是一个 带及觉得 点。</p><p>ok，先不纠结这个问题，然后我们直接将里面的内容进行 对应的直积操作，在进行的时候，我们刚开始使用的是$1 \times 1$大小的核心，因此这里的直积是将里面的内容进行拼接，然后进行返回。</p><p>这里说一下直积的公式：
+$$
+\rho_{in} = irrpe_0 \oplus irrpe_0 \oplus irrpe_0 =\left[\begin{array}{ccc}
+irrpe_0 & 0 & 0 \
+0 & irrpe_0 & 0 \
+0 & 0 & irrpe_0
+\end{array}\right]
+$$</p><p>因此，上面的内容就是将里面的内容进行拼接。从数据返回来看，也是将里面内容进行拼接。</p><p>但是里面的代码确实没有找到 ，我现在直接跳转到对应直积和函数，然后向上找到其中对应的断点。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>directsum</span><span class=p>(</span><span class=n>reprs</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=n>e2cnn</span><span class=o>.</span><span class=n>group</span><span class=o>.</span><span class=n>Representation</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>              <span class=n>change_of_basis</span><span class=p>:</span> <span class=n>np</span><span class=o>.</span><span class=n>ndarray</span> <span class=o>=</span> <span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>              <span class=n>name</span><span class=p>:</span> <span class=nb>str</span> <span class=o>=</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>              <span class=p>)</span> <span class=o>-&gt;</span> <span class=n>e2cnn</span><span class=o>.</span><span class=n>group</span><span class=o>.</span><span class=n>Representation</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Compute the *direct sum* of a list of representations of a group.
+</span></span></span><span class=line><span class=cl><span class=s2>    
+</span></span></span><span class=line><span class=cl><span class=s2>    The direct sum of two representations is defined as follow:
+</span></span></span><span class=line><span class=cl><span class=s2>    
+</span></span></span><span class=line><span class=cl><span class=s2>    .. math::
+</span></span></span><span class=line><span class=cl><span class=s2>        \rho_1(g) \oplus \rho_2(g) = \begin</span><span class=si>{bmatrix}</span><span class=s2> \rho_1(g) &amp; 0 \\ 0 &amp; \rho_2(g) \end</span><span class=si>{bmatrix}</span><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    
+</span></span></span><span class=line><span class=cl><span class=s2>    This can be generalized to multiple representations as:
+</span></span></span><span class=line><span class=cl><span class=s2>    
+</span></span></span><span class=line><span class=cl><span class=s2>    .. math::
+</span></span></span><span class=line><span class=cl><span class=s2>        \bigoplus_{i=1}^I \rho_i(g) = (\rho_1(g) \oplus (\rho_2(g) \oplus (\rho_3(g) \oplus \dots = \begin</span><span class=si>{bmatrix}</span><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>            \rho_1(g) &amp;         0 &amp;  \dots &amp;      0 \\
+</span></span></span><span class=line><span class=cl><span class=s2>                    0 &amp; \rho_2(g) &amp;  \dots &amp; \vdots \\
+</span></span></span><span class=line><span class=cl><span class=s2>               \vdots &amp;    \vdots &amp; \ddots &amp;      0 \\
+</span></span></span><span class=line><span class=cl><span class=s2>                    0 &amp;     \dots &amp;      0 &amp; \rho_I(g) \\
+</span></span></span><span class=line><span class=cl><span class=s2>        \end</span><span class=si>{bmatrix}</span><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. note::
+</span></span></span><span class=line><span class=cl><span class=s2>        All the input representations need to belong to the same group.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Args:
+</span></span></span><span class=line><span class=cl><span class=s2>        reprs (list): the list of representations to sum.
+</span></span></span><span class=line><span class=cl><span class=s2>        change_of_basis (~numpy.ndarray, optional): an invertible square matrix to use as change of basis after computing the direct sum.
+</span></span></span><span class=line><span class=cl><span class=s2>                By default (``None``), an identity matrix is used, such that only the direct sum is evaluated.
+</span></span></span><span class=line><span class=cl><span class=s2>        name (str, optional): a name for the new representation.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Returns:
+</span></span></span><span class=line><span class=cl><span class=s2>        the direct sum
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>group</span> <span class=o>=</span> <span class=n>reprs</span><span class=p>[</span><span class=mi>0</span><span class=p>]</span><span class=o>.</span><span class=n>group</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>reprs</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>assert</span> <span class=n>group</span> <span class=o>==</span> <span class=n>r</span><span class=o>.</span><span class=n>group</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>name</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>name</span> <span class=o>=</span> <span class=s2>&#34;_&#34;</span><span class=o>.</span><span class=n>join</span><span class=p>([</span><span class=sa>f</span><span class=s2>&#34;[</span><span class=si>{</span><span class=n>r</span><span class=o>.</span><span class=n>name</span><span class=si>}</span><span class=s2>]&#34;</span> <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>reprs</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>irreps</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>reprs</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>irreps</span> <span class=o>+=</span> <span class=n>r</span><span class=o>.</span><span class=n>irreps</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>size</span> <span class=o>=</span> <span class=nb>sum</span><span class=p>([</span><span class=n>r</span><span class=o>.</span><span class=n>size</span> <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>reprs</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>cob</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>zeros</span><span class=p>((</span><span class=n>size</span><span class=p>,</span> <span class=n>size</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=n>cob_inv</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>zeros</span><span class=p>((</span><span class=n>size</span><span class=p>,</span> <span class=n>size</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=n>p</span> <span class=o>=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>reprs</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>cob</span><span class=p>[</span><span class=n>p</span><span class=p>:</span><span class=n>p</span> <span class=o>+</span> <span class=n>r</span><span class=o>.</span><span class=n>size</span><span class=p>,</span> <span class=n>p</span><span class=p>:</span><span class=n>p</span> <span class=o>+</span> <span class=n>r</span><span class=o>.</span><span class=n>size</span><span class=p>]</span> <span class=o>=</span> <span class=n>r</span><span class=o>.</span><span class=n>change_of_basis</span>
+</span></span><span class=line><span class=cl>        <span class=n>cob_inv</span><span class=p>[</span><span class=n>p</span><span class=p>:</span><span class=n>p</span> <span class=o>+</span> <span class=n>r</span><span class=o>.</span><span class=n>size</span><span class=p>,</span> <span class=n>p</span><span class=p>:</span><span class=n>p</span> <span class=o>+</span> <span class=n>r</span><span class=o>.</span><span class=n>size</span><span class=p>]</span> <span class=o>=</span> <span class=n>r</span><span class=o>.</span><span class=n>change_of_basis_inv</span>
+</span></span><span class=line><span class=cl>        <span class=n>p</span> <span class=o>+=</span> <span class=n>r</span><span class=o>.</span><span class=n>size</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>change_of_basis</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>change_of_basis</span> <span class=o>=</span> <span class=n>change_of_basis</span> <span class=o>@</span> <span class=n>cob</span>
+</span></span><span class=line><span class=cl>        <span class=n>change_of_basis_inv</span> <span class=o>=</span> <span class=n>sp</span><span class=o>.</span><span class=n>linalg</span><span class=o>.</span><span class=n>inv</span><span class=p>(</span><span class=n>change_of_basis</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>change_of_basis</span> <span class=o>=</span> <span class=n>cob</span>
+</span></span><span class=line><span class=cl>        <span class=n>change_of_basis_inv</span> <span class=o>=</span> <span class=n>cob_inv</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>supported_nonlinearities</span> <span class=o>=</span> <span class=nb>set</span><span class=o>.</span><span class=n>intersection</span><span class=p>(</span><span class=o>*</span><span class=p>[</span><span class=n>r</span><span class=o>.</span><span class=n>supported_nonlinearities</span> <span class=k>for</span> <span class=n>r</span> <span class=ow>in</span> <span class=n>reprs</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>Representation</span><span class=p>(</span><span class=n>group</span><span class=p>,</span> <span class=n>name</span><span class=p>,</span> <span class=n>irreps</span><span class=p>,</span> <span class=n>change_of_basis</span><span class=p>,</span> <span class=n>supported_nonlinearities</span><span class=p>,</span> <span class=n>change_of_basis_inv</span><span class=o>=</span><span class=n>change_of_basis_inv</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>从程序上面来看，就是将里面的内容进行拼接，然后返回对应的值。</p><h2 id=总结><a href=#%e6%80%bb%e7%bb%93>#</a>
+总结</h2><p>输入的 内容就是将里面的内容直接进行拼接操作，然后进行返回。</p></section><footer class=article-footer><section class=article-tags><a href=/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/>机器学习</a>
+<a href=/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/>源码阅读</a>
+<a href=/tags/%E7%BE%A4%E8%AE%BA/>群论</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Apache Licence 2.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})</script></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-r2conv-%E8%AF%A6%E8%A7%A3/><div class=article-details><h2 class=article-title>e2cnn 内容理解-R2Conv 详解</h2></div></a></article><article><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E8%BE%93%E5%87%BA%E7%B1%BB%E5%9E%8B/><div class=article-details><h2 class=article-title>e2cnn 内容理解 - 群的输出类型</h2></div></a></article><article><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E5%88%9B%E5%BB%BA%E6%BA%90%E7%A0%81%E8%AF%A6%E8%A7%A3/><div class=article-details><h2 class=article-title>e2cnn 内容理解 - 群的创建源码详解</h2></div></a></article><article><a href=/p/conv2d%E7%9A%84%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3/><div class=article-details><h2 class=article-title>Conv2d的简单理解</h2></div></a></article></div></div></aside><script src=//unpkg.com/@waline/client@v2/dist/waline.js></script><link href=//unpkg.com/@waline/client@v2/dist/waline.css rel=stylesheet><div id=waline class=waline-container></div><style>.waline-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding);--waline-font-size:var(--article-font-size)}.waline-container .wl-count{color:var(--card-text-color-main)}</style><script>Waline.init({avatar:"retro",avatarcdn:"https://sdn.geekzu.org/avatar/",dark:'html[data-scheme="dark"]',el:"#waline",emoji:["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],highlight:!0,js:"https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js",lang:"zh-CN",locale:{admin:"Admin",placeholder:null},meta:["nick","mail","link"],pageSize:20,placeholder:"",requiredMeta:["name","email","url"],serverURL:"https://waline-line-git-main-zrsaber.vercel.app",uploadimage:!1,visitor:!0})</script><footer class=site-footer><section class=copyright>&copy;
+2020 -
+2024 Runqi Blog</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.25.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

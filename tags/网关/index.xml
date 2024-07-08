@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>网关 on Runqi Blog</title><link>https://runqizhao.cn/tags/%E7%BD%91%E5%85%B3/</link><description>Recent content in 网关 on Runqi Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 20 Aug 2023 16:55:17 +0800</lastBuildDate><atom:link href="https://runqizhao.cn/tags/%E7%BD%91%E5%85%B3/index.xml" rel="self" type="application/rss+xml"/><item><title>API网关基本概念</title><link>https://runqizhao.cn/p/api%E7%BD%91%E5%85%B3%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/</link><pubDate>Sun, 20 Aug 2023 16:55:17 +0800</pubDate><guid>https://runqizhao.cn/p/api%E7%BD%91%E5%85%B3%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/</guid><description>&lt;img src="https://shenyu.apache.org/zh/img/logo.svg" alt="Featured image of post API网关基本概念" />&lt;h2 id="什么是网关">
+&lt;a href="#%e4%bb%80%e4%b9%88%e6%98%af%e7%bd%91%e5%85%b3">#&lt;/a>
+什么是网关
+&lt;/h2>&lt;p>微服务背景下，一个系统被拆分多个服务，但是像安全认证，流量控制，日志，监控等功能是每个服务都需要的，那么每个服务都需要进行单独实现，这使得我们做了很多重复的内容，没有一个全局的视图。&lt;/p>
+&lt;p>因此，出现了网管这个概念，这里借用JavaGuide画的图进行展示：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/api-gateway-overview.png"
+loading="lazy"
+alt="网关示意图"
+>&lt;/p>
+&lt;p>一般情况下， 网关可以为我们提供请求转发、安全认证 （身份/权限认证）、流量控制、负载均衡、降级绒杜纳、日志、监控、参数检验、协议转换等功能。&lt;/p>
+&lt;p>总的来说，网关就实现了两件事：&lt;strong>请求转发+请求过滤&lt;/strong>。&lt;/p>
+&lt;p>当热按，咱们就是说网管在进行部署的时候可以进行负载均衡，以保证达到高可用，避免单点的风险。&lt;/p>
+&lt;h2 id="网关的功能">
+&lt;a href="#%e7%bd%91%e5%85%b3%e7%9a%84%e5%8a%9f%e8%83%bd">#&lt;/a>
+网关的功能
+&lt;/h2>&lt;p>绝大多数网关可以做到一下几种功能：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>请求转发&lt;/strong>：将强求转发到目标为服务上面&lt;/li>
+&lt;li>&lt;strong>负载均衡&lt;/strong>：根据各个微服务示例的负载均衡情况或者具体的复杂均衡策略对请求实现动态的负载均衡。&lt;/li>
+&lt;li>&lt;strong>安全认证&lt;/strong>：对用户请求进行身份验证并且仅允许可信客户端访问API，并且还能狗使用类似RBAC等方式来进行授权。&lt;/li>
+&lt;li>&lt;strong>参数校验&lt;/strong>：支持参数映射与检验逻辑。&lt;/li>
+&lt;li>&lt;strong>日志记录&lt;/strong>：方便用户进行排查。&lt;/li>
+&lt;li>&lt;strong>监控警告&lt;/strong>：从业务指标、机器指标、JVM指标等方面进行监控并提供配套的告警机制。&lt;/li>
+&lt;li>&lt;strong>熔断降级&lt;/strong>：试试监控请求的统计信息，达到配置的失败阈值后，自动熔断，返回默认值。&lt;/li>
+&lt;li>&lt;strong>响应缓存&lt;/strong>：当用户请求获取的是一些静态的或更新不频繁的数据时，一段时间内多次请求获取到的数据很可能是一样的。对于这种情况可以将响应缓存起来。这样用户请求可以直接在网关层得到响应数据，无需再去访问业务服务，减轻业务服务的负担。&lt;/li>
+&lt;li>&lt;strong>响应聚合&lt;/strong>：某些情况下用户请求要获取的响应内容可能会来自于多个业务服务。网关作为业务服务的调用方，可以把多个服务的响应整合起来，再一并返回给用户。&lt;/li>
+&lt;li>&lt;strong>灰度发布&lt;/strong>：将请求动态分流到不同的服务版本（最基本的一种灰度发布）。&lt;/li>
+&lt;li>&lt;strong>异常处理&lt;/strong>：对于业务服务返回的异常响应，可以在网关层在返回给用户之前做转换处理。这样可以把一些业务侧返回的异常细节隐藏，转换成用户友好的错误提示返回。&lt;/li>
+&lt;li>&lt;strong>API 文档：&lt;/strong> 如果计划将 API 暴露给组织以外的开发人员，那么必须考虑使用 API 文档，例如 Swagger 或 OpenAPI。&lt;/li>
+&lt;li>&lt;strong>协议转换&lt;/strong>：通过协议转换整合后台基于 REST、AMQP、Dubbo 等不同风格和实现技术的微服务，面向 Web Mobile、开放平台等特定客户端提供统一服务。&lt;/li>
+&lt;/ul>
+&lt;h2 id="本系列主角">
+&lt;a href="#%e6%9c%ac%e7%b3%bb%e5%88%97%e4%b8%bb%e8%a7%92">#&lt;/a>
+本系列主角
+&lt;/h2>&lt;p>本次主要是在oosp与glcc参与到Apache Shenyu里面为契机，对Apache Shenyu进行系统性的学习，对于里面的内容进行整理，同时对里面插件进行学习，直接记录到个人博客上面，希望自己日后能够发现最开始看的不足。&lt;/p>
+&lt;p>在介绍主角之前， 肯定要对常见的网关插件有一定的了解，即常听说的Spring Cloud与 Netflix Zuul。&lt;/p>
+&lt;h3 id="netflix-zuul">
+&lt;a href="#netflix-zuul">#&lt;/a>
+Netflix Zuul
+&lt;/h3>&lt;p>Zuul 是 Netflix 开发的一款提供动态路由、监控、弹性、安全的网关服务，基于 Java 技术栈开发，可以和 Eureka、Ribbon、Hystrix 等组件配合使用。&lt;/p>
+&lt;p>Zuul 核心架构如下：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/zuul-core-architecture.webp"
+loading="lazy"
+alt="Zuul 核心架构"
+>&lt;/p>
+&lt;p>Zuul 主要通过过滤器（类似于 AOP）来过滤请求，从而实现网关必备的各种功能。&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/zuul-request-lifecycle.webp"
+loading="lazy"
+alt="Zuul 请求声明周期"
+>&lt;/p>
+&lt;p>我们可以自定义过滤器来处理请求，并且，Zuul 生态本身就有很多现成的过滤器供我们使用。&lt;/p>
+&lt;h3 id="spring-cloud">
+&lt;a href="#spring-cloud">#&lt;/a>
+Spring Cloud
+&lt;/h3>&lt;p>SpringCloud Gateway 属于 Spring Cloud 生态系统中的网关，其诞生的目标是为了替代老牌网关 &lt;strong>Zuul&lt;/strong>。准确点来说，应该是 Zuul 1.x。SpringCloud Gateway 起步要比 Zuul 2.x 更早。&lt;/p>
+&lt;p>为了提升网关的性能，SpringCloud Gateway 基于 Spring WebFlux 。Spring WebFlux 使用 Reactor 库来实现响应式编程模型，底层基于 Netty 实现同步非阻塞的 I/O。&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/springcloud-gateway-%2520demo.png"
+loading="lazy"
+>&lt;/p>
+&lt;p>Spring Cloud Gateway 不仅提供统一的路由方式，并且基于 Filter 链的方式提供了网关基本的功能，例如：安全，监控/指标，限流。&lt;/p>
+&lt;p>Spring Cloud Gateway 和 Zuul 2.x 的差别不大，也是通过过滤器来处理请求。不过，目前更加推荐使用 Spring Cloud Gateway 而非 Zuul，Spring Cloud 生态对其支持更加友好。&lt;/p>
+&lt;h4 id="spring-cloud-gateway-的工作流程">
+&lt;a href="#spring-cloud-gateway-%e7%9a%84%e5%b7%a5%e4%bd%9c%e6%b5%81%e7%a8%8b">#&lt;/a>
+Spring Cloud Gateway 的工作流程？
+&lt;/h4>&lt;p>Spring Cloud Gateway 的工作流程如下图所示：&lt;/p>
+&lt;p>&lt;img src="https://static.spring.io/blog/fombico/20220826/spring-cloud-gateway-diagram.png"
+loading="lazy"
+alt="Spring Cloud Gateway diagram"
+>&lt;/p>
+&lt;p>具体流程如下：&lt;/p>
+&lt;ol>
+&lt;li>路由断言：客户端的请求到达网关后，先经过Gateway Handler Mapping处理，这里会做断言（Predicate）判断，看下符合哪个路径规则，这个路由映射后端的某个服务。&lt;/li>
+&lt;li>请求过滤：然后请求到达 Gateway Web Handler，这里面有很多过滤器，组成过滤器链（Filter Chain），这些过滤器可以对请求进行拦截和修改，比如添加请求头、参数校验等等，有点像净化污水。然后将请求转发到实际的后端服务。这些过滤器逻辑上可以称作 Pre-Filters，Pre 可以理解为“在&amp;hellip;之前”。&lt;/li>
+&lt;li>&lt;strong>服务处理&lt;/strong>：后端服务会对请求进行处理。&lt;/li>
+&lt;li>&lt;strong>响应过滤&lt;/strong>：后端处理完结果后，返回给 Gateway 的过滤器再次做处理，逻辑上可以称作 Post-Filters，Post 可以理解为“在&amp;hellip;之后”。&lt;/li>
+&lt;li>&lt;strong>响应返回&lt;/strong>：响应经过过滤处理后，返回给客户端。&lt;/li>
+&lt;/ol>
+&lt;p>总结：客户端的请求先通过匹配规则找到合适的路由，就能映射到具体的服务。然后请求经过过滤器处理后转发给具体的服务，服务处理后，再次经过过滤器处理，最后返回给客户端。&lt;/p>
+&lt;h4 id="spring-cloud-gateway-的断言是什么">
+&lt;a href="#spring-cloud-gateway-%e7%9a%84%e6%96%ad%e8%a8%80%e6%98%af%e4%bb%80%e4%b9%88">#&lt;/a>
+Spring Cloud Gateway 的断言是什么？
+&lt;/h4>&lt;p>断言（Predicate）这个词听起来极其深奥，它是一种编程术语，我们生活中根本就不会用它。说白了它就是对一个表达式进行 if 判断，结果为真或假，如果为真则做这件事，否则做那件事。&lt;/p>
+&lt;p>在 Gateway 中，如果客户端发送的请求满足了断言的条件，则映射到指定的路由器，就能转发到指定的服务上进行处理。&lt;/p>
+&lt;p>断言配置的示例如下，配置了两个路由规则，有一个 predicates 断言配置，当请求 url 中包含 &lt;code>api/thirdparty&lt;/code>，就匹配到了第一个路由 &lt;code>route_thirdparty&lt;/code>。&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/spring-cloud-gateway-predicate-example.png"
+loading="lazy"
+alt="断言配置示例"
+>&lt;/p>
+&lt;p>常见的断言规则如下：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/spring-cloud-gateway-predicate-rules.png"
+loading="lazy"
+alt="Spring Cloud GateWay 路由断言规则"
+>&lt;/p>
+&lt;h4 id="spring-cloud-gateway-的路由和断言是什么关系">
+&lt;a href="#spring-cloud-gateway-%e7%9a%84%e8%b7%af%e7%94%b1%e5%92%8c%e6%96%ad%e8%a8%80%e6%98%af%e4%bb%80%e4%b9%88%e5%85%b3%e7%b3%bb">#&lt;/a>
+Spring Cloud Gateway 的路由和断言是什么关系？
+&lt;/h4>&lt;p>Route 路由和 Predicate 断言的对应关系如下：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/spring-cloud-gateway-predicate-route.png"
+loading="lazy"
+alt="路由和断言的对应关系"
+>&lt;/p>
+&lt;p>&lt;strong>一对多&lt;/strong>：一个路由规则可以包含多个断言。如上图中路由 Route1 配置了三个断言 Predicate。&lt;/p>
+&lt;p>&lt;strong>同时满足&lt;/strong>：如果一个路由规则中有多个断言，则需要同时满足才能匹配。如上图中路由 Route2 配置了两个断言，客户端发送的请求必须同时满足这两个断言，才能匹配路由 Route2。&lt;/p>
+&lt;p>&lt;strong>第一个匹配成功&lt;/strong>：如果一个请求可以匹配多个路由，则映射第一个匹配成功的路由。如上图所示，客户端发送的请求满足 Route3 和 Route4 的断言，但是 Route3 的配置在配置文件中靠前，所以只会匹配 Route3。&lt;/p>
+&lt;h4 id="spring-cloud-gateway-如何实现动态路由">
+&lt;a href="#spring-cloud-gateway-%e5%a6%82%e4%bd%95%e5%ae%9e%e7%8e%b0%e5%8a%a8%e6%80%81%e8%b7%af%e7%94%b1">#&lt;/a>
+Spring Cloud Gateway 如何实现动态路由？
+&lt;/h4>&lt;p>在使用 Spring Cloud Gateway 的时候，官方文档提供的方案总是基于配置文件或代码配置的方式。&lt;/p>
+&lt;p>Spring Cloud Gateway 作为微服务的入口，需要尽量避免重启，而现在配置更改需要重启服务不能满足实际生产过程中的动态刷新、实时变更的业务需求，所以我们需要在 Spring Cloud Gateway 运行时动态配置网关。&lt;/p>
+&lt;p>实现动态路由的方式有很多种，其中一种推荐的方式是基于 Nacos 注册中心来做。 Spring Cloud Gateway可以从注册中心获取服务的元数据（例如服务名称、路径等），然后根据这些信息自动生成路由规则。这样，当你添加、移除或更新服务实例时，网关会自动感知并相应地调整路由规则，无需手动维护路由配置。&lt;/p>
+&lt;p>其实这些复杂的步骤并不需要我们手动实现，通过 Nacos Server 和 Spring Cloud Alibaba Nacos Config 即可实现配置的动态变更，[官方文档地址][https://github.com/alibaba/spring-cloud-alibaba/wiki/Nacos-config]&lt;/p>
+&lt;p>当然，在shenyu种，我们可以自己进行选择：选择Eureka或者Nacos。&lt;/p>
+&lt;p>这个具体远离暂时不细究，标记TODO点。&lt;/p>
+&lt;h4 id="spring-cloud-gateway-的过滤器有哪些">
+&lt;a href="#spring-cloud-gateway-%e7%9a%84%e8%bf%87%e6%bb%a4%e5%99%a8%e6%9c%89%e5%93%aa%e4%ba%9b">#&lt;/a>
+Spring Cloud Gateway 的过滤器有哪些？
+&lt;/h4>&lt;p>过滤器 Filter 按照请求和响应可以分为两种：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Pre 类型&lt;/strong>：在请求被转发到微服务之前，对请求进行拦截和修改，例如参数校验、权限校验、流量监控、日志输出以及协议转换等操作。&lt;/li>
+&lt;li>&lt;strong>Post 类型&lt;/strong>：微服务处理完请求后，返回响应给网关，网关可以再次进行处理，例如修改响应内容或响应头、日志输出、流量监控等。&lt;/li>
+&lt;/ul>
+&lt;p>另外一种分类是按照过滤器 Filter 作用的范围进行划分：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>GatewayFilter&lt;/strong>：局部过滤器，应用在单个路由或一组路由上的过滤器。标红色表示比较常用的过滤器。&lt;/li>
+&lt;li>&lt;strong>GlobalFilter&lt;/strong>：全局过滤器，应用在所有路由上的过滤器。&lt;/li>
+&lt;/ul>
+&lt;h5 id="局部过滤器">
+&lt;a href="#%e5%b1%80%e9%83%a8%e8%bf%87%e6%bb%a4%e5%99%a8">#&lt;/a>
+局部过滤器
+&lt;/h5>&lt;p>常见的局部过滤器如下图所示：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/spring-cloud-gateway-gatewayfilters.png"
+loading="lazy"
+alt="img"
+>&lt;/p>
+&lt;p>具体怎么用呢？这里有个示例，如果 URL 匹配成功，则去掉 URL 中的 “api”。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">filters&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c">#过滤器&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">RewritePath=/api/(?&amp;lt;segment&amp;gt;.*),/$\{segment}&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># 将跳转路径中包含的 “api” 替换成空&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h5 id="全局过滤器">
+&lt;a href="#%e5%85%a8%e5%b1%80%e8%bf%87%e6%bb%a4%e5%99%a8">#&lt;/a>
+全局过滤器
+&lt;/h5>&lt;p>常见的全局过滤器如下图所示：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/spring-cloud-gateway-globalfilters.png"
+loading="lazy"
+alt="img"
+>&lt;/p>
+&lt;p>全局过滤器最常见的用法是进行负载均衡。配置如下所示：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">spring&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">cloud&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">gateway&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">routes&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">id&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">route_member&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># 第三方微服务路由规则&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">uri&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">lb://passjava-member&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># 负载均衡，将请求转发到注册中心注册的 passjava-member 服务&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">predicates&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># 断言&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">Path=/api/member/**&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># 如果前端请求路径包含 api/member，则应用这条路由规则&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">filters&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c">#过滤器&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">RewritePath=/api/(?&amp;lt;segment&amp;gt;.*),/$\{segment}&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="c"># 将跳转路径中包含的api替换成空&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>这里有个关键字 &lt;code>lb&lt;/code>，用到了全局过滤器 &lt;code>LoadBalancerClientFilter&lt;/code>，当匹配到这个路由后，会将请求转发到 passjava-member 服务，且支持负载均衡转发，也就是先将 passjava-member 解析成实际的微服务的 host 和 port，然后再转发给实际的微服务。&lt;/p>
+&lt;h4 id="支持限流">
+&lt;a href="#%e6%94%af%e6%8c%81%e9%99%90%e6%b5%81">#&lt;/a>
+支持限流
+&lt;/h4>&lt;p>Spring Cloud Gateway 自带了限流过滤器，对应的接口是 &lt;code>RateLimiter&lt;/code>，&lt;code>RateLimiter&lt;/code> 接口只有一个实现类 &lt;code>RedisRateLimiter&lt;/code> （基于 Redis + Lua 实现的限流），提供的限流功能比较简易且不易使用。&lt;/p>
+&lt;h4 id="全局异常处理">
+&lt;a href="#%e5%85%a8%e5%b1%80%e5%bc%82%e5%b8%b8%e5%a4%84%e7%90%86">#&lt;/a>
+全局异常处理
+&lt;/h4>&lt;p>在 SpringBoot 项目中，我们捕获全局异常只需要在项目中配置 &lt;code>@RestControllerAdvice&lt;/code>和 &lt;code>@ExceptionHandler&lt;/code>就可以了。不过，这种方式在 Spring Cloud Gateway 下不适用。&lt;/p>
+&lt;p>Spring Cloud Gateway 提供了多种全局处理的方式，比较常用的一种是实现&lt;code>ErrorWebExceptionHandler&lt;/code>并重写其中的&lt;code>handle&lt;/code>方法。&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@Order&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">-&lt;/span>&lt;span class="n">1&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@Component&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nd">@RequiredArgsConstructor&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">class&lt;/span> &lt;span class="nc">GlobalErrorWebExceptionHandler&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">implements&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">ErrorWebExceptionHandler&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">private&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kd">final&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">ObjectMapper&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">objectMapper&lt;/span>&lt;span class="p">;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nd">@Override&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="kd">public&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Mono&lt;/span>&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">Void&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="nf">handle&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ServerWebExchange&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">exchange&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">Throwable&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">ex&lt;/span>&lt;span class="p">)&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c1">// ...&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="参考">
+&lt;a href="#%e5%8f%82%e8%80%83">#&lt;/a>
+参考
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://javaguide.cn/distributed-system/spring-cloud-gateway-questions.html#spring-cloud-gateway-%E6%94%AF%E6%8C%81%E9%99%90%E6%B5%81%E5%90%97" target="_blank" rel="noopener"
+>https://javaguide.cn/distributed-system/spring-cloud-gateway-questions.html#spring-cloud-gateway-%E6%94%AF%E6%8C%81%E9%99%90%E6%B5%81%E5%90%97&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://cloud.spring.io/spring-cloud-gateway/reference/html/" target="_blank" rel="noopener"
+>https://cloud.spring.io/spring-cloud-gateway/reference/html/&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://spring.io/blog/2022/08/26/creating-a-custom-spring-cloud-gateway-filter" target="_blank" rel="noopener"
+>https://spring.io/blog/2022/08/26/creating-a-custom-spring-cloud-gateway-filter&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://zhuanlan.zhihu.com/p/347028665" target="_blank" rel="noopener"
+>https://zhuanlan.zhihu.com/p/347028665&lt;/a>&lt;/li>
+&lt;/ul></description></item></channel></rss>

@@ -1,0 +1,666 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="以http插件为例"><title>服务调用</title>
+<link rel=canonical href=https://runqizhao.cn/p/%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/><link rel=stylesheet href=/scss/style.min.8e60baf4cd3fc55968717a6e39762f4d28ed7ef6007566b6c7970ad0fe907198.css><meta property='og:title' content="服务调用"><meta property='og:description' content="以http插件为例"><meta property='og:url' content='https://runqizhao.cn/p/%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/'><meta property='og:site_name' content='Runqi Blog'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='Apache Shenyu'><meta property='article:tag' content='源码阅读'><meta property='article:published_time' content='2023-09-22T18:59:19+08:00'><meta property='article:modified_time' content='2023-09-22T18:59:19+08:00'><meta property='og:image' content='https://shenyu.apache.org/zh/img/logo.svg'><meta name=twitter:title content="服务调用"><meta name=twitter:description content="以http插件为例"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content='https://shenyu.apache.org/zh/img/logo.svg'><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu9b4ee4aab7d2c9a136b427e2430a0345_27821_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>Runqi Blog</a></h1><h2 class=site-description>Stay foolish stay hungry</h2></div></header><ol class=menu-social><li><a href=https://github.com/runqi-zhao target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/links/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>Links</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#项目介绍>项目介绍</a></li><li><a href=#服务调用>服务调用</a><ol><li><a href=#请求接收>请求接收</a></li><li><a href=#规则匹配>规则匹配</a></li><li><a href=#执行divide插件>执行divide插件</a></li><li><a href=#发起请求>发起请求</a></li><li><a href=#处理相应结果>处理相应结果</a></li></ol></li><li><a href=#总结>总结</a></li><li><a href=#参考>参考</a></li></ol></nav></div></section></aside><main class="main full-width"><article class="has-image main-article"><header class=article-header><div class=article-image><a href=/p/%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy alt="Featured image of post 服务调用"></a></div><div class=article-details><header class=article-category><a href=/categories/java/ style=background-color:#269d8f;color:#fff>Java</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/>服务调用</a></h2><h3 class=article-subtitle>以http插件为例</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Sep 22, 2023</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>7 minute read</time></div></footer></div></header><section class=article-content><h2 id=项目介绍><a href=#%e9%a1%b9%e7%9b%ae%e4%bb%8b%e7%bb%8d>#</a>
+项目介绍</h2><p>Apache ShenYu 是一个 <strong>高性能，多协议，易扩展，响应式的API网关</strong></p><p>兼容各种主流框架体系，支持热插拔，用户可以定制化开发，满足用户各种场景的现状和未来需求，经历过大规模场景的锤炼</p><p><a class=link href=https://shenyu.apache.org/zh/docs/index/ target=_blank rel=noopener>ShenYu 官网</a></p><p><a class=link href=https://github.com/apache/shenyu target=_blank rel=noopener>Github 地址</a></p><h2 id=服务调用><a href=#%e6%9c%8d%e5%8a%a1%e8%b0%83%e7%94%a8>#</a>
+服务调用</h2><p>本文仍然采用http插件为例，一个直连请求如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>GET http://localhost:8189/order/findById?id<span class=o>=</span><span class=m>100</span>
+</span></span><span class=line><span class=cl>Accept: application/json
+</span></span></code></pre></td></tr></table></div></div><p>经过<code>Shenyu</code>网关之后，请求如下：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-shell data-lang=shell><span class=line><span class=cl>GET http://localhost:9195/http/order/findById?id<span class=o>=</span><span class=m>100</span>
+</span></span><span class=line><span class=cl>Accept: application/json
+</span></span></code></pre></td></tr></table></div></div><p>通过<code>Shenyu</code>网关代理后的服务能够请求到之前的服务，在这里起作用的就是<code>divide</code>插件。类继承关系如下：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/20231006192149.png loading=lazy></p><ul><li>ShenyuPlugin：顶层接口，定义接口方法；</li><li>AbstractShenyuPlugin：抽象类，实现插件共有逻辑；</li><li>DividePlugin：Divide插件。</li></ul><h3 id=请求接收><a href=#%e8%af%b7%e6%b1%82%e6%8e%a5%e6%94%b6>#</a>
+请求接收</h3><p>通过<code>Shenyu</code>网关代理后，请求入口是<code>ShenyuWebHandler</code>，它实现了<code>org.springframework.web.server.WebHandler</code></p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=kd>public</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=kd>class</span> <span class=nc>ShenyuWebHandler</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>WebHandler</span><span class=p>,</span><span class=w> </span><span class=n>ApplicationListener</span><span class=o>&lt;</span><span class=n>SortPluginEvent</span><span class=o>&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>//......</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>     * 处理web请求
+</span></span></span><span class=line><span class=cl><span class=cm>     */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>Void</span><span class=o>&gt;</span><span class=w> </span><span class=nf>handle</span><span class=p>(</span><span class=nd>@NonNull</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 执行默认插件链</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>Void</span><span class=o>&gt;</span><span class=w> </span><span class=n>execute</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>DefaultShenyuPluginChain</span><span class=p>(</span><span class=n>plugins</span><span class=p>).</span><span class=na>execute</span><span class=p>(</span><span class=n>exchange</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>scheduled</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>execute</span><span class=p>.</span><span class=na>subscribeOn</span><span class=p>(</span><span class=n>scheduler</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>execute</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    
+</span></span></span><span class=line><span class=cl><span class=w>     </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>class</span> <span class=nc>DefaultShenyuPluginChain</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>ShenyuPluginChain</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=kd>private</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>index</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>private</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>ShenyuPlugin</span><span class=o>&gt;</span><span class=w> </span><span class=n>plugins</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>         * Instantiates a new Default shenyu plugin chain.
+</span></span></span><span class=line><span class=cl><span class=cm>         *
+</span></span></span><span class=line><span class=cl><span class=cm>         * @param plugins the plugins
+</span></span></span><span class=line><span class=cl><span class=cm>         */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=c1>//实例化默认插件链</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>DefaultShenyuPluginChain</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>ShenyuPlugin</span><span class=o>&gt;</span><span class=w> </span><span class=n>plugins</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>this</span><span class=p>.</span><span class=na>plugins</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>plugins</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=cm>/**
+</span></span></span><span class=line><span class=cl><span class=cm>         * Delegate to the next {@code WebFilter} in the chain.
+</span></span></span><span class=line><span class=cl><span class=cm>         *
+</span></span></span><span class=line><span class=cl><span class=cm>         * @param exchange the current server exchange
+</span></span></span><span class=line><span class=cl><span class=cm>         * @return {@code Mono&lt;Void&gt;} to indicate when request handling is complete
+</span></span></span><span class=line><span class=cl><span class=cm>         */</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>         </span><span class=c1>//执行每个插件</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>public</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>Void</span><span class=o>&gt;</span><span class=w> </span><span class=nf>execute</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>Mono</span><span class=p>.</span><span class=na>defer</span><span class=p>(()</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=k>this</span><span class=p>.</span><span class=na>index</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>plugins</span><span class=p>.</span><span class=na>size</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=c1>//获取当前执行插件</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>ShenyuPlugin</span><span class=w> </span><span class=n>plugin</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>plugins</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=k>this</span><span class=p>.</span><span class=na>index</span><span class=o>++</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=c1>//是否跳过当前插件</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=kt>boolean</span><span class=w> </span><span class=n>skip</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>plugin</span><span class=p>.</span><span class=na>skip</span><span class=p>(</span><span class=n>exchange</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>skip</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                        </span><span class=c1>//如果跳过就执行下一个</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                        </span><span class=k>return</span><span class=w> </span><span class=k>this</span><span class=p>.</span><span class=na>execute</span><span class=p>(</span><span class=n>exchange</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=c1>//执行当前插件</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=k>return</span><span class=w> </span><span class=n>plugin</span><span class=p>.</span><span class=na>execute</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=k>this</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>Mono</span><span class=p>.</span><span class=na>empty</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>});</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这里顺便说一嘴，<code>shenyu-ingerss-controller</code>的目的就是启用插件，将对应的selectordata、ruledata以及metadata进行传入，直接到达请求接收这里，不需要使用服务注册等内容。</p><h3 id=规则匹配><a href=#%e8%a7%84%e5%88%99%e5%8c%b9%e9%85%8d>#</a>
+规则匹配</h3><p>org.apache.shenyu.plugin.base.AbstractShenyuPlugin#execute()</p><p>在<code>execute()</code>方法中执行选择器和规则的匹配逻辑。</p><ul><li>匹配选择器；</li><li>匹配规则；</li><li>执行插件。</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>public</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>Void</span><span class=o>&gt;</span><span class=w> </span><span class=nf>execute</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>ShenyuPluginChain</span><span class=w> </span><span class=n>chain</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 插件名称</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>String</span><span class=w> </span><span class=n>pluginName</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>named</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 插件信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>PluginData</span><span class=w> </span><span class=n>pluginData</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>BaseDataCache</span><span class=p>.</span><span class=na>getInstance</span><span class=p>().</span><span class=na>obtainPluginData</span><span class=p>(</span><span class=n>pluginName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>pluginData</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=w> </span><span class=o>&amp;&amp;</span><span class=w> </span><span class=n>pluginData</span><span class=p>.</span><span class=na>getEnabled</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 选择器信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=n>Collection</span><span class=o>&lt;</span><span class=n>SelectorData</span><span class=o>&gt;</span><span class=w> </span><span class=n>selectors</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>BaseDataCache</span><span class=p>.</span><span class=na>getInstance</span><span class=p>().</span><span class=na>obtainSelectorData</span><span class=p>(</span><span class=n>pluginName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>CollectionUtils</span><span class=p>.</span><span class=na>isEmpty</span><span class=p>(</span><span class=n>selectors</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>handleSelectorIfNull</span><span class=p>(</span><span class=n>pluginName</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>chain</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 匹配选择器</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>SelectorData</span><span class=w> </span><span class=n>selectorData</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>matchSelector</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>selectors</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>Objects</span><span class=p>.</span><span class=na>isNull</span><span class=p>(</span><span class=n>selectorData</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>handleSelectorIfNull</span><span class=p>(</span><span class=n>pluginName</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>chain</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>selectorLog</span><span class=p>(</span><span class=n>selectorData</span><span class=p>,</span><span class=w> </span><span class=n>pluginName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 规则信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>List</span><span class=o>&lt;</span><span class=n>RuleData</span><span class=o>&gt;</span><span class=w> </span><span class=n>rules</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>BaseDataCache</span><span class=p>.</span><span class=na>getInstance</span><span class=p>().</span><span class=na>obtainRuleData</span><span class=p>(</span><span class=n>selectorData</span><span class=p>.</span><span class=na>getId</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>CollectionUtils</span><span class=p>.</span><span class=na>isEmpty</span><span class=p>(</span><span class=n>rules</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>handleRuleIfNull</span><span class=p>(</span><span class=n>pluginName</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>chain</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 匹配规则</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>RuleData</span><span class=w> </span><span class=n>rule</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>selectorData</span><span class=p>.</span><span class=na>getType</span><span class=p>()</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=n>SelectorTypeEnum</span><span class=p>.</span><span class=na>FULL_FLOW</span><span class=p>.</span><span class=na>getCode</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>//get last</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>rule</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>rules</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=n>rules</span><span class=p>.</span><span class=na>size</span><span class=p>()</span><span class=w> </span><span class=o>-</span><span class=w> </span><span class=n>1</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>rule</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>matchRule</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>rules</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>Objects</span><span class=p>.</span><span class=na>isNull</span><span class=p>(</span><span class=n>rule</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>handleRuleIfNull</span><span class=p>(</span><span class=n>pluginName</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>chain</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ruleLog</span><span class=p>(</span><span class=n>rule</span><span class=p>,</span><span class=w> </span><span class=n>pluginName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 执行插件</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>doExecute</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>chain</span><span class=p>,</span><span class=w> </span><span class=n>selectorData</span><span class=p>,</span><span class=w> </span><span class=n>rule</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=n>chain</span><span class=p>.</span><span class=na>execute</span><span class=p>(</span><span class=n>exchange</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=执行divide插件><a href=#%e6%89%a7%e8%a1%8cdivide%e6%8f%92%e4%bb%b6>#</a>
+执行divide插件</h3><p>org.apache.shenyu.plugin.divide.DividePlugin#doExecute()</p><p>在<code>doExecute()</code>方法中执行<code>divide</code>插件的具体逻辑：</p><ul><li>校验<code>header</code>大小；</li><li>校验<code>request</code>大小；</li><li>获取服务列表；</li><li>实现负载均衡；</li><li>设置请求<code>url</code>，超时时间，重试策略。</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>protected</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>Void</span><span class=o>&gt;</span><span class=w> </span><span class=nf>doExecute</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>ShenyuPluginChain</span><span class=w> </span><span class=n>chain</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>SelectorData</span><span class=w> </span><span class=n>selector</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>RuleData</span><span class=w> </span><span class=n>rule</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 获取上下文信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>ShenyuContext</span><span class=w> </span><span class=n>shenyuContext</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>CONTEXT</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>assert</span><span class=w> </span><span class=n>shenyuContext</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 获取规则的handle属性</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>DivideRuleHandle</span><span class=w> </span><span class=n>ruleHandle</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>DividePluginDataHandler</span><span class=p>.</span><span class=na>CACHED_HANDLE</span><span class=p>.</span><span class=na>get</span><span class=p>().</span><span class=na>obtainHandle</span><span class=p>(</span><span class=n>CacheKeyUtils</span><span class=p>.</span><span class=na>INST</span><span class=p>.</span><span class=na>getKey</span><span class=p>(</span><span class=n>rule</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kt>long</span><span class=w> </span><span class=n>headerSize</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 校验header大小</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=n>List</span><span class=o>&lt;</span><span class=n>String</span><span class=o>&gt;</span><span class=w> </span><span class=n>multiHeader</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getRequest</span><span class=p>().</span><span class=na>getHeaders</span><span class=p>().</span><span class=na>values</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>value</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>multiHeader</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>headerSize</span><span class=w> </span><span class=o>+=</span><span class=w> </span><span class=n>value</span><span class=p>.</span><span class=na>getBytes</span><span class=p>(</span><span class=n>StandardCharsets</span><span class=p>.</span><span class=na>UTF_8</span><span class=p>).</span><span class=na>length</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>headerSize</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=n>ruleHandle</span><span class=p>.</span><span class=na>getHeaderMaxSize</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>LOG</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=s>&#34;request header is too large&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Object</span><span class=w> </span><span class=n>error</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ShenyuResultWrap</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>ShenyuResultEnum</span><span class=p>.</span><span class=na>REQUEST_HEADER_TOO_LARGE</span><span class=p>,</span><span class=w> </span><span class=kc>null</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>WebFluxResultUtils</span><span class=p>.</span><span class=na>result</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>error</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 校验request大小</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>exchange</span><span class=p>.</span><span class=na>getRequest</span><span class=p>().</span><span class=na>getHeaders</span><span class=p>().</span><span class=na>getContentLength</span><span class=p>()</span><span class=w> </span><span class=o>&gt;</span><span class=w> </span><span class=n>ruleHandle</span><span class=p>.</span><span class=na>getRequestMaxSize</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>LOG</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=s>&#34;request entity is too large&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Object</span><span class=w> </span><span class=n>error</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ShenyuResultWrap</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>ShenyuResultEnum</span><span class=p>.</span><span class=na>REQUEST_ENTITY_TOO_LARGE</span><span class=p>,</span><span class=w> </span><span class=kc>null</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>WebFluxResultUtils</span><span class=p>.</span><span class=na>result</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>error</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 获取服务列表upstreamList</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>List</span><span class=o>&lt;</span><span class=n>Upstream</span><span class=o>&gt;</span><span class=w> </span><span class=n>upstreamList</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>UpstreamCacheManager</span><span class=p>.</span><span class=na>getInstance</span><span class=p>().</span><span class=na>findUpstreamListBySelectorId</span><span class=p>(</span><span class=n>selector</span><span class=p>.</span><span class=na>getId</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>CollectionUtils</span><span class=p>.</span><span class=na>isEmpty</span><span class=p>(</span><span class=n>upstreamList</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>LOG</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=s>&#34;divide upstream configuration error： {}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>rule</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Object</span><span class=w> </span><span class=n>error</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ShenyuResultWrap</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>ShenyuResultEnum</span><span class=p>.</span><span class=na>CANNOT_FIND_HEALTHY_UPSTREAM_URL</span><span class=p>,</span><span class=w> </span><span class=kc>null</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>WebFluxResultUtils</span><span class=p>.</span><span class=na>result</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>error</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 请求ip</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>String</span><span class=w> </span><span class=n>ip</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Objects</span><span class=p>.</span><span class=na>requireNonNull</span><span class=p>(</span><span class=n>exchange</span><span class=p>.</span><span class=na>getRequest</span><span class=p>().</span><span class=na>getRemoteAddress</span><span class=p>()).</span><span class=na>getAddress</span><span class=p>().</span><span class=na>getHostAddress</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 实现负载均衡</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>Upstream</span><span class=w> </span><span class=n>upstream</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>LoadBalancerFactory</span><span class=p>.</span><span class=na>selector</span><span class=p>(</span><span class=n>upstreamList</span><span class=p>,</span><span class=w> </span><span class=n>ruleHandle</span><span class=p>.</span><span class=na>getLoadBalance</span><span class=p>(),</span><span class=w> </span><span class=n>ip</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>Objects</span><span class=p>.</span><span class=na>isNull</span><span class=p>(</span><span class=n>upstream</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>LOG</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=s>&#34;divide has no upstream&#34;</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Object</span><span class=w> </span><span class=n>error</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ShenyuResultWrap</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>ShenyuResultEnum</span><span class=p>.</span><span class=na>CANNOT_FIND_HEALTHY_UPSTREAM_URL</span><span class=p>,</span><span class=w> </span><span class=kc>null</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>WebFluxResultUtils</span><span class=p>.</span><span class=na>result</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>error</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 设置url</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>String</span><span class=w> </span><span class=n>domain</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>upstream</span><span class=p>.</span><span class=na>buildDomain</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>HTTP_DOMAIN</span><span class=p>,</span><span class=w> </span><span class=n>domain</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 设置超时时间</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>HTTP_TIME_OUT</span><span class=p>,</span><span class=w> </span><span class=n>ruleHandle</span><span class=p>.</span><span class=na>getTimeout</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>HTTP_RETRY</span><span class=p>,</span><span class=w> </span><span class=n>ruleHandle</span><span class=p>.</span><span class=na>getRetry</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 设置重试策略</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>RETRY_STRATEGY</span><span class=p>,</span><span class=w> </span><span class=n>ruleHandle</span><span class=p>.</span><span class=na>getRetryStrategy</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>LOAD_BALANCE</span><span class=p>,</span><span class=w> </span><span class=n>ruleHandle</span><span class=p>.</span><span class=na>getLoadBalance</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>DIVIDE_SELECTOR_ID</span><span class=p>,</span><span class=w> </span><span class=n>selector</span><span class=p>.</span><span class=na>getId</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=n>chain</span><span class=p>.</span><span class=na>execute</span><span class=p>(</span><span class=n>exchange</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>这里说一句，<code>dubbo</code>插件这个内容一定要进行查看，<code>dubbo</code>插件这里面还是有点东西的，顺便还能学习一下<code>dubbo</code>。</p><h3 id=发起请求><a href=#%e5%8f%91%e8%b5%b7%e8%af%b7%e6%b1%82>#</a>
+发起请求</h3><p>默认由<code>WebClientPlugin</code>向<code>http</code>服务发起调用请求，类继承关系如下：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/20231006194106.png loading=lazy></p><ul><li>ShenyuPlugin：顶层插件，定义插件方法；</li><li>AbstractHttpClientPlugin：抽象类，实现请求调用的公共逻辑；</li><li>WebClientPlugin：通过<code>WebClient</code>发起请求；</li><li>NettyHttpClientPlugin：通过<code>Netty</code>发起请求。</li></ul><p>发起请求调用：</p><p>org.apache.shenyu.plugin.httpclient.AbstractHttpClientPlugin#execute()</p><p>在<code>execute()</code>方法中发起请求调用：</p><ul><li>获取指定的超时时间，重试次数</li><li>发起请求</li><li>根据指定的重试策略进行失败后重试操作</li></ul><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>public</span><span class=w> </span><span class=kd>abstract</span><span class=w> </span><span class=kd>class</span> <span class=nc>AbstractHttpClientPlugin</span><span class=o>&lt;</span><span class=n>R</span><span class=o>&gt;</span><span class=w> </span><span class=kd>implements</span><span class=w> </span><span class=n>ShenyuPlugin</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>protected</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>Logger</span><span class=w> </span><span class=n>LOG</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>LoggerFactory</span><span class=p>.</span><span class=na>getLogger</span><span class=p>(</span><span class=n>AbstractHttpClientPlugin</span><span class=p>.</span><span class=na>class</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>Void</span><span class=o>&gt;</span><span class=w> </span><span class=nf>execute</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>ShenyuPluginChain</span><span class=w> </span><span class=n>chain</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 获取上下文信息</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=n>ShenyuContext</span><span class=w> </span><span class=n>shenyuContext</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>CONTEXT</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>assert</span><span class=w> </span><span class=n>shenyuContext</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 获取uri</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=n>URI</span><span class=w> </span><span class=n>uri</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>HTTP_URI</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>Objects</span><span class=p>.</span><span class=na>isNull</span><span class=p>(</span><span class=n>uri</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Object</span><span class=w> </span><span class=n>error</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ShenyuResultWrap</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>ShenyuResultEnum</span><span class=p>.</span><span class=na>CANNOT_FIND_URL</span><span class=p>,</span><span class=w> </span><span class=kc>null</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>WebFluxResultUtils</span><span class=p>.</span><span class=na>result</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>error</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 获取指定的超时时间</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=kt>long</span><span class=w> </span><span class=n>timeout</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=kt>long</span><span class=p>)</span><span class=w> </span><span class=n>Optional</span><span class=p>.</span><span class=na>ofNullable</span><span class=p>(</span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>HTTP_TIME_OUT</span><span class=p>)).</span><span class=na>orElse</span><span class=p>(</span><span class=n>3000L</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=n>Duration</span><span class=w> </span><span class=n>duration</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Duration</span><span class=p>.</span><span class=na>ofMillis</span><span class=p>(</span><span class=n>timeout</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 获取指定重试次数</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>retryTimes</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=p>)</span><span class=w> </span><span class=n>Optional</span><span class=p>.</span><span class=na>ofNullable</span><span class=p>(</span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>HTTP_RETRY</span><span class=p>)).</span><span class=na>orElse</span><span class=p>(</span><span class=n>0</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 获取指定的重试策略</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>retryStrategy</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=p>(</span><span class=n>String</span><span class=p>)</span><span class=w> </span><span class=n>Optional</span><span class=p>.</span><span class=na>ofNullable</span><span class=p>(</span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>RETRY_STRATEGY</span><span class=p>)).</span><span class=na>orElseGet</span><span class=p>(</span><span class=n>RetryEnum</span><span class=p>.</span><span class=na>CURRENT</span><span class=p>::</span><span class=n>getName</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>LOG</span><span class=p>.</span><span class=na>info</span><span class=p>(</span><span class=s>&#34;The request urlPath is {}, retryTimes is {}, retryStrategy is {}&#34;</span><span class=p>,</span><span class=w> </span><span class=n>uri</span><span class=p>.</span><span class=na>toASCIIString</span><span class=p>(),</span><span class=w> </span><span class=n>retryTimes</span><span class=p>,</span><span class=w> </span><span class=n>retryStrategy</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 构建header</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=n>HttpHeaders</span><span class=w> </span><span class=n>httpHeaders</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>buildHttpHeaders</span><span class=p>(</span><span class=n>exchange</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 发起请求</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>R</span><span class=o>&gt;</span><span class=w> </span><span class=n>response</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>doRequest</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getRequest</span><span class=p>().</span><span class=na>getMethodValue</span><span class=p>(),</span><span class=w> </span><span class=n>uri</span><span class=p>,</span><span class=w> </span><span class=n>httpHeaders</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getRequest</span><span class=p>().</span><span class=na>getBody</span><span class=p>())</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=na>timeout</span><span class=p>(</span><span class=n>duration</span><span class=p>,</span><span class=w> </span><span class=n>Mono</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>TimeoutException</span><span class=p>(</span><span class=s>&#34;Response took longer than timeout: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>duration</span><span class=p>)))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=na>doOnError</span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>LOG</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=n>e</span><span class=p>.</span><span class=na>getMessage</span><span class=p>(),</span><span class=w> </span><span class=n>e</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 重试策略CURRENT，对当前服务进行重试</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>RetryEnum</span><span class=p>.</span><span class=na>CURRENT</span><span class=p>.</span><span class=na>getName</span><span class=p>().</span><span class=na>equals</span><span class=p>(</span><span class=n>retryStrategy</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>//old version of DividePlugin and SpringCloudPlugin will run on this</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>response</span><span class=p>.</span><span class=na>retryWhen</span><span class=p>(</span><span class=n>Retry</span><span class=p>.</span><span class=na>anyOf</span><span class=p>(</span><span class=n>TimeoutException</span><span class=p>.</span><span class=na>class</span><span class=p>,</span><span class=w> </span><span class=n>ConnectTimeoutException</span><span class=p>.</span><span class=na>class</span><span class=p>,</span><span class=w> </span><span class=n>ReadTimeoutException</span><span class=p>.</span><span class=na>class</span><span class=p>,</span><span class=w> </span><span class=n>IllegalStateException</span><span class=p>.</span><span class=na>class</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>.</span><span class=na>retryMax</span><span class=p>(</span><span class=n>retryTimes</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>.</span><span class=na>backoff</span><span class=p>(</span><span class=n>Backoff</span><span class=p>.</span><span class=na>exponential</span><span class=p>(</span><span class=n>Duration</span><span class=p>.</span><span class=na>ofMillis</span><span class=p>(</span><span class=n>200</span><span class=p>),</span><span class=w> </span><span class=n>Duration</span><span class=p>.</span><span class=na>ofSeconds</span><span class=p>(</span><span class=n>20</span><span class=p>),</span><span class=w> </span><span class=n>2</span><span class=p>,</span><span class=w> </span><span class=kc>true</span><span class=p>)))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>.</span><span class=na>onErrorMap</span><span class=p>(</span><span class=n>TimeoutException</span><span class=p>.</span><span class=na>class</span><span class=p>,</span><span class=w> </span><span class=n>th</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ResponseStatusException</span><span class=p>(</span><span class=n>HttpStatus</span><span class=p>.</span><span class=na>GATEWAY_TIMEOUT</span><span class=p>,</span><span class=w> </span><span class=n>th</span><span class=p>.</span><span class=na>getMessage</span><span class=p>(),</span><span class=w> </span><span class=n>th</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>.</span><span class=na>flatMap</span><span class=p>((</span><span class=n>Function</span><span class=o>&lt;</span><span class=n>Object</span><span class=p>,</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;?</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>Void</span><span class=o>&gt;&gt;</span><span class=p>)</span><span class=w> </span><span class=n>o</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>chain</span><span class=p>.</span><span class=na>execute</span><span class=p>(</span><span class=n>exchange</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 对其他服务进行重试</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 排除已经调用过的服务</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=kd>final</span><span class=w> </span><span class=n>Set</span><span class=o>&lt;</span><span class=n>URI</span><span class=o>&gt;</span><span class=w> </span><span class=n>exclude</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Sets</span><span class=p>.</span><span class=na>newHashSet</span><span class=p>(</span><span class=n>uri</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 请求重试</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>resend</span><span class=p>(</span><span class=n>response</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>duration</span><span class=p>,</span><span class=w> </span><span class=n>httpHeaders</span><span class=p>,</span><span class=w> </span><span class=n>exclude</span><span class=p>,</span><span class=w> </span><span class=n>retryTimes</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=na>onErrorMap</span><span class=p>(</span><span class=n>TimeoutException</span><span class=p>.</span><span class=na>class</span><span class=p>,</span><span class=w> </span><span class=n>th</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>ResponseStatusException</span><span class=p>(</span><span class=n>HttpStatus</span><span class=p>.</span><span class=na>GATEWAY_TIMEOUT</span><span class=p>,</span><span class=w> </span><span class=n>th</span><span class=p>.</span><span class=na>getMessage</span><span class=p>(),</span><span class=w> </span><span class=n>th</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=na>flatMap</span><span class=p>((</span><span class=n>Function</span><span class=o>&lt;</span><span class=n>Object</span><span class=p>,</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;?</span><span class=w> </span><span class=kd>extends</span><span class=w> </span><span class=n>Void</span><span class=o>&gt;&gt;</span><span class=p>)</span><span class=w> </span><span class=n>o</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>chain</span><span class=p>.</span><span class=na>execute</span><span class=p>(</span><span class=n>exchange</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>R</span><span class=o>&gt;</span><span class=w> </span><span class=nf>resend</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>R</span><span class=o>&gt;</span><span class=w> </span><span class=n>clientResponse</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=n>Duration</span><span class=w> </span><span class=n>duration</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=n>HttpHeaders</span><span class=w> </span><span class=n>httpHeaders</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=n>Set</span><span class=o>&lt;</span><span class=n>URI</span><span class=o>&gt;</span><span class=w> </span><span class=n>exclude</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=kt>int</span><span class=w> </span><span class=n>retryTimes</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>R</span><span class=o>&gt;</span><span class=w> </span><span class=n>result</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>clientResponse</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 根据指定的重试次数进行重试</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=kt>int</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>0</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=w> </span><span class=o>&lt;</span><span class=w> </span><span class=n>retryTimes</span><span class=p>;</span><span class=w> </span><span class=n>i</span><span class=o>++</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>result</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>resend</span><span class=p>(</span><span class=n>result</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>duration</span><span class=p>,</span><span class=w> </span><span class=n>httpHeaders</span><span class=p>,</span><span class=w> </span><span class=n>exclude</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>result</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>R</span><span class=o>&gt;</span><span class=w> </span><span class=nf>resend</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>R</span><span class=o>&gt;</span><span class=w> </span><span class=n>response</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=n>Duration</span><span class=w> </span><span class=n>duration</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=n>HttpHeaders</span><span class=w> </span><span class=n>httpHeaders</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                           </span><span class=kd>final</span><span class=w> </span><span class=n>Set</span><span class=o>&lt;</span><span class=n>URI</span><span class=o>&gt;</span><span class=w> </span><span class=n>exclude</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>response</span><span class=p>.</span><span class=na>onErrorResume</span><span class=p>(</span><span class=n>th</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>selectorId</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>DIVIDE_SELECTOR_ID</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>loadBalance</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>LOAD_BALANCE</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>//查询可用服务</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>final</span><span class=w> </span><span class=n>List</span><span class=o>&lt;</span><span class=n>Upstream</span><span class=o>&gt;</span><span class=w> </span><span class=n>upstreamList</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>UpstreamCacheManager</span><span class=p>.</span><span class=na>getInstance</span><span class=p>().</span><span class=na>findUpstreamListBySelectorId</span><span class=p>(</span><span class=n>selectorId</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>.</span><span class=na>stream</span><span class=p>().</span><span class=na>filter</span><span class=p>(</span><span class=n>data</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                        </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>trimUri</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>data</span><span class=p>.</span><span class=na>getUrl</span><span class=p>().</span><span class=na>trim</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                        </span><span class=k>for</span><span class=w> </span><span class=p>(</span><span class=n>URI</span><span class=w> </span><span class=n>needToExclude</span><span class=w> </span><span class=p>:</span><span class=w> </span><span class=n>exclude</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                            </span><span class=c1>// exclude already called</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                            </span><span class=k>if</span><span class=w> </span><span class=p>((</span><span class=n>needToExclude</span><span class=p>.</span><span class=na>getHost</span><span class=p>()</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=s>&#34;:&#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>needToExclude</span><span class=p>.</span><span class=na>getPort</span><span class=p>()).</span><span class=na>equals</span><span class=p>(</span><span class=n>trimUri</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                                </span><span class=k>return</span><span class=w> </span><span class=kc>false</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                        </span><span class=k>return</span><span class=w> </span><span class=kc>true</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>}).</span><span class=na>collect</span><span class=p>(</span><span class=n>Collectors</span><span class=p>.</span><span class=na>toList</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>CollectionUtils</span><span class=p>.</span><span class=na>isEmpty</span><span class=p>(</span><span class=n>upstreamList</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=c1>// no need to retry anymore</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>Mono</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>ShenyuException</span><span class=p>(</span><span class=n>ShenyuResultEnum</span><span class=p>.</span><span class=na>CANNOT_FIND_HEALTHY_UPSTREAM_URL_AFTER_FAILOVER</span><span class=p>.</span><span class=na>getMsg</span><span class=p>()));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 请求ip</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>ip</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Objects</span><span class=p>.</span><span class=na>requireNonNull</span><span class=p>(</span><span class=n>exchange</span><span class=p>.</span><span class=na>getRequest</span><span class=p>().</span><span class=na>getRemoteAddress</span><span class=p>()).</span><span class=na>getAddress</span><span class=p>().</span><span class=na>getHostAddress</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 实现负载均衡</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>final</span><span class=w> </span><span class=n>Upstream</span><span class=w> </span><span class=n>upstream</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>LoadBalancerFactory</span><span class=p>.</span><span class=na>selector</span><span class=p>(</span><span class=n>upstreamList</span><span class=p>,</span><span class=w> </span><span class=n>loadBalance</span><span class=p>,</span><span class=w> </span><span class=n>ip</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>Objects</span><span class=p>.</span><span class=na>isNull</span><span class=p>(</span><span class=n>upstream</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=c1>// no need to retry anymore</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>Mono</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>ShenyuException</span><span class=p>(</span><span class=n>ShenyuResultEnum</span><span class=p>.</span><span class=na>CANNOT_FIND_HEALTHY_UPSTREAM_URL_AFTER_FAILOVER</span><span class=p>.</span><span class=na>getMsg</span><span class=p>()));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>final</span><span class=w> </span><span class=n>URI</span><span class=w> </span><span class=n>newUri</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>RequestUrlUtils</span><span class=p>.</span><span class=na>buildRequestUri</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>upstream</span><span class=p>.</span><span class=na>buildDomain</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=c1>// 排除已经调用的uri</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>exclude</span><span class=p>.</span><span class=na>add</span><span class=p>(</span><span class=n>newUri</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>             </span><span class=c1>// 进行再次调用</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>doRequest</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getRequest</span><span class=p>().</span><span class=na>getMethodValue</span><span class=p>(),</span><span class=w> </span><span class=n>newUri</span><span class=p>,</span><span class=w> </span><span class=n>httpHeaders</span><span class=p>,</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getRequest</span><span class=p>().</span><span class=na>getBody</span><span class=p>())</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>.</span><span class=na>timeout</span><span class=p>(</span><span class=n>duration</span><span class=p>,</span><span class=w> </span><span class=n>Mono</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=k>new</span><span class=w> </span><span class=n>TimeoutException</span><span class=p>(</span><span class=s>&#34;Response took longer than timeout: &#34;</span><span class=w> </span><span class=o>+</span><span class=w> </span><span class=n>duration</span><span class=p>)))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=p>.</span><span class=na>doOnError</span><span class=p>(</span><span class=n>e</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>LOG</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=n>e</span><span class=p>.</span><span class=na>getMessage</span><span class=p>(),</span><span class=w> </span><span class=n>e</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>});</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>//......</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>org.apache.shenyu.plugin.httpclient.WebClientPlugin#doRequest()</p><p>在<code>doRequest()</code>方法中通过<code>webClient</code>发起真正的请求调用。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>protected</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>ClientResponse</span><span class=o>&gt;</span><span class=w> </span><span class=nf>doRequest</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>httpMethod</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>URI</span><span class=w> </span><span class=n>uri</span><span class=p>,</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                                         </span><span class=kd>final</span><span class=w> </span><span class=n>HttpHeaders</span><span class=w> </span><span class=n>httpHeaders</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>Flux</span><span class=o>&lt;</span><span class=n>DataBuffer</span><span class=o>&gt;</span><span class=w> </span><span class=n>body</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=n>webClient</span><span class=p>.</span><span class=na>method</span><span class=p>(</span><span class=n>HttpMethod</span><span class=p>.</span><span class=na>valueOf</span><span class=p>(</span><span class=n>httpMethod</span><span class=p>)).</span><span class=na>uri</span><span class=p>(</span><span class=n>uri</span><span class=p>)</span><span class=w> </span><span class=c1>//请求uri</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>.</span><span class=na>headers</span><span class=p>(</span><span class=n>headers</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>headers</span><span class=p>.</span><span class=na>addAll</span><span class=p>(</span><span class=n>httpHeaders</span><span class=p>))</span><span class=w> </span><span class=c1>// 请求header</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>.</span><span class=na>body</span><span class=p>(</span><span class=n>BodyInserters</span><span class=p>.</span><span class=na>fromDataBuffers</span><span class=p>(</span><span class=n>body</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>.</span><span class=na>exchange</span><span class=p>()</span><span class=w> </span><span class=c1>// 发起请求</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>.</span><span class=na>doOnSuccess</span><span class=p>(</span><span class=n>res</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>res</span><span class=p>.</span><span class=na>statusCode</span><span class=p>().</span><span class=na>is2xxSuccessful</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=c1>// 成功</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>CLIENT_RESPONSE_RESULT_TYPE</span><span class=p>,</span><span class=w> </span><span class=n>ResultEnum</span><span class=p>.</span><span class=na>SUCCESS</span><span class=p>.</span><span class=na>getName</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w> </span><span class=k>else</span><span class=w> </span><span class=p>{</span><span class=w> </span><span class=c1>// 失败</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                    </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>CLIENT_RESPONSE_RESULT_TYPE</span><span class=p>,</span><span class=w> </span><span class=n>ResultEnum</span><span class=p>.</span><span class=na>ERROR</span><span class=p>.</span><span class=na>getName</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>exchange</span><span class=p>.</span><span class=na>getResponse</span><span class=p>().</span><span class=na>setStatusCode</span><span class=p>(</span><span class=n>res</span><span class=p>.</span><span class=na>statusCode</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttributes</span><span class=p>().</span><span class=na>put</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>CLIENT_RESPONSE_ATTR</span><span class=p>,</span><span class=w> </span><span class=n>res</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>});</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><h3 id=处理相应结果><a href=#%e5%a4%84%e7%90%86%e7%9b%b8%e5%ba%94%e7%bb%93%e6%9e%9c>#</a>
+处理相应结果</h3><p>org.apache.shenyu.plugin.response.ResponsePlugin#execute()</p><p>响应结果由<code>ResponsePlugin</code>插件处理。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>public</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>Void</span><span class=o>&gt;</span><span class=w> </span><span class=nf>execute</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>ShenyuPluginChain</span><span class=w> </span><span class=n>chain</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=n>ShenyuContext</span><span class=w> </span><span class=n>shenyuContext</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>CONTEXT</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>assert</span><span class=w> </span><span class=n>shenyuContext</span><span class=w> </span><span class=o>!=</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=c1>// 根据rpc类型处理结果</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=n>writerMap</span><span class=p>.</span><span class=na>get</span><span class=p>(</span><span class=n>shenyuContext</span><span class=p>.</span><span class=na>getRpcType</span><span class=p>()).</span><span class=na>writeWith</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>chain</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>处理类型由<code>MessageWriter</code>决定，类继承关系如下：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/20231006195557.png loading=lazy></p><ul><li>MessageWriter：接口，定义消息处理方法；</li><li>NettyClientMessageWriter：处理<code>Netty</code>调用结果；</li><li>RPCMessageWriter：处理<code>RPC</code>调用结果；</li><li>WebClientMessageWriter：处理<code>WebClient</code>调用结果；</li></ul><p>默认是通过<code>WebCient</code>发起<code>http</code>请求。</p><p>org.apache.shenyu.plugin.response.strategy.WebClientMessageWriter#writeWith()</p><p>在<code>writeWith()</code>方法中处理响应结果。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-java data-lang=java><span class=line><span class=cl><span class=nd>@Override</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=kd>public</span><span class=w> </span><span class=n>Mono</span><span class=o>&lt;</span><span class=n>Void</span><span class=o>&gt;</span><span class=w> </span><span class=nf>writeWith</span><span class=p>(</span><span class=kd>final</span><span class=w> </span><span class=n>ServerWebExchange</span><span class=w> </span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>ShenyuPluginChain</span><span class=w> </span><span class=n>chain</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=k>return</span><span class=w> </span><span class=n>chain</span><span class=p>.</span><span class=na>execute</span><span class=p>(</span><span class=n>exchange</span><span class=p>).</span><span class=na>then</span><span class=p>(</span><span class=n>Mono</span><span class=p>.</span><span class=na>defer</span><span class=p>(()</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 获取响应</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ServerHttpResponse</span><span class=w> </span><span class=n>response</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getResponse</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>ClientResponse</span><span class=w> </span><span class=n>clientResponse</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>exchange</span><span class=p>.</span><span class=na>getAttribute</span><span class=p>(</span><span class=n>Constants</span><span class=p>.</span><span class=na>CLIENT_RESPONSE_ATTR</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>Objects</span><span class=p>.</span><span class=na>isNull</span><span class=p>(</span><span class=n>clientResponse</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=n>Object</span><span class=w> </span><span class=n>error</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ShenyuResultWrap</span><span class=p>.</span><span class=na>error</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>ShenyuResultEnum</span><span class=p>.</span><span class=na>SERVICE_RESULT_ERROR</span><span class=p>,</span><span class=w> </span><span class=kc>null</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>WebFluxResultUtils</span><span class=p>.</span><span class=na>result</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>error</span><span class=p>);</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>//获取cookies和headers</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>response</span><span class=p>.</span><span class=na>getCookies</span><span class=p>().</span><span class=na>putAll</span><span class=p>(</span><span class=n>clientResponse</span><span class=p>.</span><span class=na>cookies</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>response</span><span class=p>.</span><span class=na>getHeaders</span><span class=p>().</span><span class=na>putAll</span><span class=p>(</span><span class=n>clientResponse</span><span class=p>.</span><span class=na>headers</span><span class=p>().</span><span class=na>asHttpHeaders</span><span class=p>());</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// image, pdf or stream does not do format processing.</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 处理特殊响应类型</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>clientResponse</span><span class=p>.</span><span class=na>headers</span><span class=p>().</span><span class=na>contentType</span><span class=p>().</span><span class=na>isPresent</span><span class=p>())</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=kd>final</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>media</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>clientResponse</span><span class=p>.</span><span class=na>headers</span><span class=p>().</span><span class=na>contentType</span><span class=p>().</span><span class=na>get</span><span class=p>().</span><span class=na>toString</span><span class=p>().</span><span class=na>toLowerCase</span><span class=p>();</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>media</span><span class=p>.</span><span class=na>matches</span><span class=p>(</span><span class=n>COMMON_BIN_MEDIA_TYPE_REGEX</span><span class=p>))</span><span class=w> </span><span class=p>{</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=k>return</span><span class=w> </span><span class=n>response</span><span class=p>.</span><span class=na>writeWith</span><span class=p>(</span><span class=n>clientResponse</span><span class=p>.</span><span class=na>body</span><span class=p>(</span><span class=n>BodyExtractors</span><span class=p>.</span><span class=na>toDataBuffers</span><span class=p>()))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                        </span><span class=p>.</span><span class=na>doOnCancel</span><span class=p>(()</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>clean</span><span class=p>(</span><span class=n>exchange</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=p>}</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=c1>// 处理一般响应类型</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=n>clientResponse</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>ResponseUtils</span><span class=p>.</span><span class=na>buildClientResponse</span><span class=p>(</span><span class=n>response</span><span class=p>,</span><span class=w> </span><span class=n>clientResponse</span><span class=p>.</span><span class=na>body</span><span class=p>(</span><span class=n>BodyExtractors</span><span class=p>.</span><span class=na>toDataBuffers</span><span class=p>()));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>clientResponse</span><span class=p>.</span><span class=na>bodyToMono</span><span class=p>(</span><span class=kt>byte</span><span class=o>[]</span><span class=p>.</span><span class=na>class</span><span class=p>)</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=na>flatMap</span><span class=p>(</span><span class=n>originData</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>WebFluxResultUtils</span><span class=p>.</span><span class=na>result</span><span class=p>(</span><span class=n>exchange</span><span class=p>,</span><span class=w> </span><span class=n>originData</span><span class=p>))</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=p>.</span><span class=na>doOnCancel</span><span class=p>(()</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>clean</span><span class=p>(</span><span class=n>exchange</span><span class=p>));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=p>}));</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=p>}</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>分析至此，关于<code>Divide</code>插件的源码分析就完成了，分析流程图如下：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/divide-execute-zh-c145705430fc3aec6e561cc4ad183a05.png loading=lazy></p><h2 id=总结><a href=#%e6%80%bb%e7%bb%93>#</a>
+总结</h2><p>本文主要分析了Apache Shenyu的服务调用过程。</p><p>本系列是自己对shenyu进行学习的系列，参考了许多博客以及官网上面的内容，完全是班门弄斧，放在自己的博客上面，如果存在错误或者侵权，请在下面评论。</p><h2 id=参考><a href=#%e5%8f%82%e8%80%83>#</a>
+参考</h2><ul><li><a class=link href=https://shenyu.apache.org/zh/blog/Plugin-SourceCode-Analysis-Divide-Plugin/ target=_blank rel=noopener>https://shenyu.apache.org/zh/blog/Plugin-SourceCode-Analysis-Divide-Plugin/</a></li><li><a class=link href=https://juejin.cn/post/7103865514258071566 target=_blank rel=noopener>https://juejin.cn/post/7103865514258071566</a></li></ul></section><footer class=article-footer><section class=article-tags><a href=/tags/apache-shenyu/>Apache Shenyu</a>
+<a href=/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/>源码阅读</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article class=has-image><a href=/p/%E6%9C%8D%E5%8A%A1%E5%90%8C%E6%AD%A5-hhtp%E9%95%BF%E8%BD%AE%E8%AF%A2/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>服务同步-hhtp长轮询</h2></div></a></article><article class=has-image><a href=/p/%E6%9C%8D%E5%8A%A1%E5%90%8C%E6%AD%A5/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>服务同步</h2></div></a></article><article class=has-image><a href=/p/apache-shenyu%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>Apache Shenyu服务注册</h2></div></a></article><article class=has-image><a href=/p/%E8%AF%B7%E6%B1%82%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>请求处理流程</h2></div></a></article><article class=has-image><a href=/p/shenyu-%E6%9E%B6%E6%9E%84%E5%88%86%E6%9E%90/><div class=article-image><img src=https://shenyu.apache.org/zh/img/logo.svg loading=lazy data-key data-hash=https://shenyu.apache.org/zh/img/logo.svg></div><div class=article-details><h2 class=article-title>shenyu 架构分析</h2></div></a></article></div></div></aside><script src=//unpkg.com/@waline/client@v2/dist/waline.js></script><link href=//unpkg.com/@waline/client@v2/dist/waline.css rel=stylesheet><div id=waline class=waline-container></div><style>.waline-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding);--waline-font-size:var(--article-font-size)}.waline-container .wl-count{color:var(--card-text-color-main)}</style><script>Waline.init({avatar:"retro",avatarcdn:"https://sdn.geekzu.org/avatar/",dark:'html[data-scheme="dark"]',el:"#waline",emoji:["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],highlight:!0,js:"https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js",lang:"zh-CN",locale:{admin:"Admin",placeholder:null},meta:["nick","mail","link"],pageSize:20,placeholder:"",requiredMeta:["name","email","url"],serverURL:"https://waline-line-git-main-zrsaber.vercel.app",uploadimage:!1,visitor:!0})</script><footer class=site-footer><section class=copyright>&copy;
+2020 -
+2024 Runqi Blog</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.25.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

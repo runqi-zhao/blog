@@ -1,0 +1,730 @@
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='在我们炼丹的时候，一般卷积神经网络是我们 不可避免 接触到的概念，就算你 使用使用时 Transformer，其实也是跟卷积神将网络中的 部分思想是相关，本文将会 解析 Pytorch 中 conv2d 中的源码，简单说明其中 的原理，只有深度了解了对应的 原理，才能更好的进行 修改。 首先的话还是老规矩，看官方链接。 从连接上面虽然可以对每个变量有深刻的理解，但是还是迷迷糊糊，为了更改好的理解，本文从一个例子说起，说明其中对应的内容，然后与 前面编写 e2cnn 的群卷积神经网络 进行对比，争取彻底理解二者之间 每一步的关联以及对应的意思。 这个例子很简单，就是下面一句代码： 1 m = nn.Conv2d(16, 33, 3, stride=2) 其中16时我们输入特征的通道数，33时我们设置的输出特征的通道数，3时卷积核的大小（$3 \\times 3$），stride是步长。然后我们看Conv2d的源码。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 class Conv2d(_ConvNd): __doc__ = r"""Applies a 2D convolution over an input signal composed of several input planes.'><title>Conv2d的简单理解</title>
+<link rel=canonical href=https://runqizhao.cn/p/conv2d%E7%9A%84%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3/><link rel=stylesheet href=/scss/style.min.8e60baf4cd3fc55968717a6e39762f4d28ed7ef6007566b6c7970ad0fe907198.css><meta property='og:title' content="Conv2d的简单理解"><meta property='og:description' content='在我们炼丹的时候，一般卷积神经网络是我们 不可避免 接触到的概念，就算你 使用使用时 Transformer，其实也是跟卷积神将网络中的 部分思想是相关，本文将会 解析 Pytorch 中 conv2d 中的源码，简单说明其中 的原理，只有深度了解了对应的 原理，才能更好的进行 修改。 首先的话还是老规矩，看官方链接。 从连接上面虽然可以对每个变量有深刻的理解，但是还是迷迷糊糊，为了更改好的理解，本文从一个例子说起，说明其中对应的内容，然后与 前面编写 e2cnn 的群卷积神经网络 进行对比，争取彻底理解二者之间 每一步的关联以及对应的意思。 这个例子很简单，就是下面一句代码： 1 m = nn.Conv2d(16, 33, 3, stride=2) 其中16时我们输入特征的通道数，33时我们设置的输出特征的通道数，3时卷积核的大小（$3 \\times 3$），stride是步长。然后我们看Conv2d的源码。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 class Conv2d(_ConvNd): __doc__ = r"""Applies a 2D convolution over an input signal composed of several input planes.'><meta property='og:url' content='https://runqizhao.cn/p/conv2d%E7%9A%84%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3/'><meta property='og:site_name' content='Runqi Blog'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='机器学习'><meta property='article:tag' content='源码阅读'><meta property='article:published_time' content='2023-12-05T14:30:19+08:00'><meta property='article:modified_time' content='2023-12-05T14:30:19+08:00'><meta name=twitter:title content="Conv2d的简单理解"><meta name=twitter:description content='在我们炼丹的时候，一般卷积神经网络是我们 不可避免 接触到的概念，就算你 使用使用时 Transformer，其实也是跟卷积神将网络中的 部分思想是相关，本文将会 解析 Pytorch 中 conv2d 中的源码，简单说明其中 的原理，只有深度了解了对应的 原理，才能更好的进行 修改。 首先的话还是老规矩，看官方链接。 从连接上面虽然可以对每个变量有深刻的理解，但是还是迷迷糊糊，为了更改好的理解，本文从一个例子说起，说明其中对应的内容，然后与 前面编写 e2cnn 的群卷积神经网络 进行对比，争取彻底理解二者之间 每一步的关联以及对应的意思。 这个例子很简单，就是下面一句代码： 1 m = nn.Conv2d(16, 33, 3, stride=2) 其中16时我们输入特征的通道数，33时我们设置的输出特征的通道数，3时卷积核的大小（$3 \\times 3$），stride是步长。然后我们看Conv2d的源码。 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 class Conv2d(_ConvNd): __doc__ = r"""Applies a 2D convolution over an input signal composed of several input planes.'><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu9b4ee4aab7d2c9a136b427e2430a0345_27821_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>Runqi Blog</a></h1><h2 class=site-description>Stay foolish stay hungry</h2></div></header><ol class=menu-social><li><a href=https://github.com/runqi-zhao target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/links/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>Links</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/>机器学习</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/conv2d%E7%9A%84%E7%AE%80%E5%8D%95%E7%90%86%E8%A7%A3/>Conv2d的简单理解</a></h2></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Dec 05, 2023</time></div><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>11 minute read</time></div></footer></div></header><section class=article-content><p>在我们炼丹的时候，一般卷积神经网络是我们 不可避免 接触到的概念，就算你 使用使用时 Transformer，其实也是跟卷积神将网络中的 部分思想是相关，本文将会 解析 Pytorch 中 conv2d 中的源码，简单说明其中 的原理，只有深度了解了对应的 原理，才能更好的进行 修改。</p><p>首先的话还是老规矩，看官方<a class=link href=https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html target=_blank rel=noopener>链接</a>。</p><p>从连接上面虽然可以对每个变量有深刻的理解，但是还是迷迷糊糊，为了更改好的理解，本文从一个例子说起，说明其中对应的内容，然后与 前面编写 e2cnn 的群卷积神经网络 进行对比，争取彻底理解二者之间 每一步的关联以及对应的意思。</p><p>这个例子很简单，就是下面一句代码：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl> <span class=n>m</span> <span class=o>=</span> <span class=n>nn</span><span class=o>.</span><span class=n>Conv2d</span><span class=p>(</span><span class=mi>16</span><span class=p>,</span> <span class=mi>33</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=n>stride</span><span class=o>=</span><span class=mi>2</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>其中16时我们输入特征的通道数，33时我们设置的输出特征的通道数，3时卷积核的大小（$3 \times 3$），stride是步长。然后我们看<code>Conv2d</code>的源码。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>  1
+</span><span class=lnt>  2
+</span><span class=lnt>  3
+</span><span class=lnt>  4
+</span><span class=lnt>  5
+</span><span class=lnt>  6
+</span><span class=lnt>  7
+</span><span class=lnt>  8
+</span><span class=lnt>  9
+</span><span class=lnt> 10
+</span><span class=lnt> 11
+</span><span class=lnt> 12
+</span><span class=lnt> 13
+</span><span class=lnt> 14
+</span><span class=lnt> 15
+</span><span class=lnt> 16
+</span><span class=lnt> 17
+</span><span class=lnt> 18
+</span><span class=lnt> 19
+</span><span class=lnt> 20
+</span><span class=lnt> 21
+</span><span class=lnt> 22
+</span><span class=lnt> 23
+</span><span class=lnt> 24
+</span><span class=lnt> 25
+</span><span class=lnt> 26
+</span><span class=lnt> 27
+</span><span class=lnt> 28
+</span><span class=lnt> 29
+</span><span class=lnt> 30
+</span><span class=lnt> 31
+</span><span class=lnt> 32
+</span><span class=lnt> 33
+</span><span class=lnt> 34
+</span><span class=lnt> 35
+</span><span class=lnt> 36
+</span><span class=lnt> 37
+</span><span class=lnt> 38
+</span><span class=lnt> 39
+</span><span class=lnt> 40
+</span><span class=lnt> 41
+</span><span class=lnt> 42
+</span><span class=lnt> 43
+</span><span class=lnt> 44
+</span><span class=lnt> 45
+</span><span class=lnt> 46
+</span><span class=lnt> 47
+</span><span class=lnt> 48
+</span><span class=lnt> 49
+</span><span class=lnt> 50
+</span><span class=lnt> 51
+</span><span class=lnt> 52
+</span><span class=lnt> 53
+</span><span class=lnt> 54
+</span><span class=lnt> 55
+</span><span class=lnt> 56
+</span><span class=lnt> 57
+</span><span class=lnt> 58
+</span><span class=lnt> 59
+</span><span class=lnt> 60
+</span><span class=lnt> 61
+</span><span class=lnt> 62
+</span><span class=lnt> 63
+</span><span class=lnt> 64
+</span><span class=lnt> 65
+</span><span class=lnt> 66
+</span><span class=lnt> 67
+</span><span class=lnt> 68
+</span><span class=lnt> 69
+</span><span class=lnt> 70
+</span><span class=lnt> 71
+</span><span class=lnt> 72
+</span><span class=lnt> 73
+</span><span class=lnt> 74
+</span><span class=lnt> 75
+</span><span class=lnt> 76
+</span><span class=lnt> 77
+</span><span class=lnt> 78
+</span><span class=lnt> 79
+</span><span class=lnt> 80
+</span><span class=lnt> 81
+</span><span class=lnt> 82
+</span><span class=lnt> 83
+</span><span class=lnt> 84
+</span><span class=lnt> 85
+</span><span class=lnt> 86
+</span><span class=lnt> 87
+</span><span class=lnt> 88
+</span><span class=lnt> 89
+</span><span class=lnt> 90
+</span><span class=lnt> 91
+</span><span class=lnt> 92
+</span><span class=lnt> 93
+</span><span class=lnt> 94
+</span><span class=lnt> 95
+</span><span class=lnt> 96
+</span><span class=lnt> 97
+</span><span class=lnt> 98
+</span><span class=lnt> 99
+</span><span class=lnt>100
+</span><span class=lnt>101
+</span><span class=lnt>102
+</span><span class=lnt>103
+</span><span class=lnt>104
+</span><span class=lnt>105
+</span><span class=lnt>106
+</span><span class=lnt>107
+</span><span class=lnt>108
+</span><span class=lnt>109
+</span><span class=lnt>110
+</span><span class=lnt>111
+</span><span class=lnt>112
+</span><span class=lnt>113
+</span><span class=lnt>114
+</span><span class=lnt>115
+</span><span class=lnt>116
+</span><span class=lnt>117
+</span><span class=lnt>118
+</span><span class=lnt>119
+</span><span class=lnt>120
+</span><span class=lnt>121
+</span><span class=lnt>122
+</span><span class=lnt>123
+</span><span class=lnt>124
+</span><span class=lnt>125
+</span><span class=lnt>126
+</span><span class=lnt>127
+</span><span class=lnt>128
+</span><span class=lnt>129
+</span><span class=lnt>130
+</span><span class=lnt>131
+</span><span class=lnt>132
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>Conv2d</span><span class=p>(</span><span class=n>_ConvNd</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=vm>__doc__</span> <span class=o>=</span> <span class=sa>r</span><span class=s2>&#34;&#34;&#34;Applies a 2D convolution over an input signal composed of several input
+</span></span></span><span class=line><span class=cl><span class=s2>    planes.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    In the simplest case, the output value of the layer with input size
+</span></span></span><span class=line><span class=cl><span class=s2>    :math:`(N, C_{\text</span><span class=si>{in}</span><span class=s2>}, H, W)` and output :math:`(N, C_{\text</span><span class=si>{out}</span><span class=s2>}, H_{\text</span><span class=si>{out}</span><span class=s2>}, W_{\text</span><span class=si>{out}</span><span class=s2>})`
+</span></span></span><span class=line><span class=cl><span class=s2>    can be precisely described as:
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. math::
+</span></span></span><span class=line><span class=cl><span class=s2>        \text</span><span class=si>{out}</span><span class=s2>(N_i, C_{\text</span><span class=si>{out}</span><span class=s2>_j}) = \text</span><span class=si>{bias}</span><span class=s2>(C_{\text</span><span class=si>{out}</span><span class=s2>_j}) +
+</span></span></span><span class=line><span class=cl><span class=s2>        \sum_{k = 0}^{C_{\text</span><span class=si>{in}</span><span class=s2>} - 1} \text</span><span class=si>{weight}</span><span class=s2>(C_{\text</span><span class=si>{out}</span><span class=s2>_j}, k) \star \text</span><span class=si>{input}</span><span class=s2>(N_i, k)
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    where :math:`\star` is the valid 2D `cross-correlation`_ operator,
+</span></span></span><span class=line><span class=cl><span class=s2>    :math:`N` is a batch size, :math:`C` denotes a number of channels,
+</span></span></span><span class=line><span class=cl><span class=s2>    :math:`H` is a height of input planes in pixels, and :math:`W` is
+</span></span></span><span class=line><span class=cl><span class=s2>    width in pixels.
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span> <span class=o>+</span> <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    This module supports :ref:`TensorFloat32&lt;tf32_on_ampere&gt;`.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    * :attr:`stride` controls the stride for the cross-correlation, a single
+</span></span></span><span class=line><span class=cl><span class=s2>      number or a tuple.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    * :attr:`padding` controls the amount of padding applied to the input. It
+</span></span></span><span class=line><span class=cl><span class=s2>      can be either a string {{&#39;valid&#39;, &#39;same&#39;}} or a tuple of ints giving the
+</span></span></span><span class=line><span class=cl><span class=s2>      amount of implicit padding applied on both sides.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    * :attr:`dilation` controls the spacing between the kernel points; also
+</span></span></span><span class=line><span class=cl><span class=s2>      known as the à trous algorithm. It is harder to describe, but this `link`_
+</span></span></span><span class=line><span class=cl><span class=s2>      has a nice visualization of what :attr:`dilation` does.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    </span><span class=si>{groups_note}</span><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    The parameters :attr:`kernel_size`, :attr:`stride`, :attr:`padding`, :attr:`dilation` can either be:
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>        - a single ``int`` -- in which case the same value is used for the height and width dimension
+</span></span></span><span class=line><span class=cl><span class=s2>        - a ``tuple`` of two ints -- in which case, the first `int` is used for the height dimension,
+</span></span></span><span class=line><span class=cl><span class=s2>          and the second `int` for the width dimension
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Note:
+</span></span></span><span class=line><span class=cl><span class=s2>        </span><span class=si>{depthwise_separable_note}</span><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Note:
+</span></span></span><span class=line><span class=cl><span class=s2>        </span><span class=si>{cudnn_reproducibility_note}</span><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Note:
+</span></span></span><span class=line><span class=cl><span class=s2>        ``padding=&#39;valid&#39;`` is the same as no padding. ``padding=&#39;same&#39;`` pads
+</span></span></span><span class=line><span class=cl><span class=s2>        the input so the output has the shape as the input. However, this mode
+</span></span></span><span class=line><span class=cl><span class=s2>        doesn&#39;t support any stride values other than 1.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Args:
+</span></span></span><span class=line><span class=cl><span class=s2>        in_channels (int): Number of channels in the input image
+</span></span></span><span class=line><span class=cl><span class=s2>        out_channels (int): Number of channels produced by the convolution
+</span></span></span><span class=line><span class=cl><span class=s2>        kernel_size (int or tuple): Size of the convolving kernel
+</span></span></span><span class=line><span class=cl><span class=s2>        stride (int or tuple, optional): Stride of the convolution. Default: 1
+</span></span></span><span class=line><span class=cl><span class=s2>        padding (int, tuple or str, optional): Padding added to all four sides of
+</span></span></span><span class=line><span class=cl><span class=s2>            the input. Default: 0
+</span></span></span><span class=line><span class=cl><span class=s2>        padding_mode (string, optional): ``&#39;zeros&#39;``, ``&#39;reflect&#39;``,
+</span></span></span><span class=line><span class=cl><span class=s2>            ``&#39;replicate&#39;`` or ``&#39;circular&#39;``. Default: ``&#39;zeros&#39;``
+</span></span></span><span class=line><span class=cl><span class=s2>        dilation (int or tuple, optional): Spacing between kernel elements. Default: 1
+</span></span></span><span class=line><span class=cl><span class=s2>        groups (int, optional): Number of blocked connections from input
+</span></span></span><span class=line><span class=cl><span class=s2>            channels to output channels. Default: 1
+</span></span></span><span class=line><span class=cl><span class=s2>        bias (bool, optional): If ``True``, adds a learnable bias to the
+</span></span></span><span class=line><span class=cl><span class=s2>            output. Default: ``True``
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=o>**</span><span class=n>reproducibility_notes</span><span class=p>,</span> <span class=o>**</span><span class=n>convolution_notes</span><span class=p>)</span> <span class=o>+</span> <span class=sa>r</span><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Shape:
+</span></span></span><span class=line><span class=cl><span class=s2>        - Input: :math:`(N, C_</span><span class=si>{in}</span><span class=s2>, H_</span><span class=si>{in}</span><span class=s2>, W_</span><span class=si>{in}</span><span class=s2>)` or :math:`(C_</span><span class=si>{in}</span><span class=s2>, H_</span><span class=si>{in}</span><span class=s2>, W_</span><span class=si>{in}</span><span class=s2>)`
+</span></span></span><span class=line><span class=cl><span class=s2>        - Output: :math:`(N, C_</span><span class=si>{out}</span><span class=s2>, H_</span><span class=si>{out}</span><span class=s2>, W_</span><span class=si>{out}</span><span class=s2>)` or :math:`(C_</span><span class=si>{out}</span><span class=s2>, H_</span><span class=si>{out}</span><span class=s2>, W_</span><span class=si>{out}</span><span class=s2>)`, where
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>          .. math::
+</span></span></span><span class=line><span class=cl><span class=s2>              H_</span><span class=si>{out}</span><span class=s2> = \left\lfloor\frac{H_</span><span class=si>{in}</span><span class=s2>  + 2 \times \text</span><span class=si>{padding}</span><span class=s2>[0] - \text</span><span class=si>{dilation}</span><span class=s2>[0]
+</span></span></span><span class=line><span class=cl><span class=s2>                        \times (\text{kernel\_size}[0] - 1) - 1}{\text</span><span class=si>{stride}</span><span class=s2>[0]} + 1\right\rfloor
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>          .. math::
+</span></span></span><span class=line><span class=cl><span class=s2>              W_</span><span class=si>{out}</span><span class=s2> = \left\lfloor\frac{W_</span><span class=si>{in}</span><span class=s2>  + 2 \times \text</span><span class=si>{padding}</span><span class=s2>[1] - \text</span><span class=si>{dilation}</span><span class=s2>[1]
+</span></span></span><span class=line><span class=cl><span class=s2>                        \times (\text{kernel\_size}[1] - 1) - 1}{\text</span><span class=si>{stride}</span><span class=s2>[1]} + 1\right\rfloor
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Attributes:
+</span></span></span><span class=line><span class=cl><span class=s2>        weight (Tensor): the learnable weights of the module of shape
+</span></span></span><span class=line><span class=cl><span class=s2>            :math:`(\text{out\_channels}, \frac{\text{in\_channels}}{\text</span><span class=si>{groups}</span><span class=s2>},`
+</span></span></span><span class=line><span class=cl><span class=s2>            :math:`\text{kernel\_size[0]}, \text{kernel\_size[1]})`.
+</span></span></span><span class=line><span class=cl><span class=s2>            The values of these weights are sampled from
+</span></span></span><span class=line><span class=cl><span class=s2>            :math:`\mathcal</span><span class=si>{U}</span><span class=s2>(-\sqrt</span><span class=si>{k}</span><span class=s2>, \sqrt</span><span class=si>{k}</span><span class=s2>)` where
+</span></span></span><span class=line><span class=cl><span class=s2>            :math:`k = \frac</span><span class=si>{groups}</span><span class=s2>{C_\text</span><span class=si>{in}</span><span class=s2> * \prod_{i=0}^</span><span class=si>{1}</span><span class=s2>\text{kernel\_size}[i]}`
+</span></span></span><span class=line><span class=cl><span class=s2>        bias (Tensor):   the learnable bias of the module of shape
+</span></span></span><span class=line><span class=cl><span class=s2>            (out_channels). If :attr:`bias` is ``True``,
+</span></span></span><span class=line><span class=cl><span class=s2>            then the values of these weights are
+</span></span></span><span class=line><span class=cl><span class=s2>            sampled from :math:`\mathcal</span><span class=si>{U}</span><span class=s2>(-\sqrt</span><span class=si>{k}</span><span class=s2>, \sqrt</span><span class=si>{k}</span><span class=s2>)` where
+</span></span></span><span class=line><span class=cl><span class=s2>            :math:`k = \frac</span><span class=si>{groups}</span><span class=s2>{C_\text</span><span class=si>{in}</span><span class=s2> * \prod_{i=0}^</span><span class=si>{1}</span><span class=s2>\text{kernel\_size}[i]}`
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Examples:
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; # With square kernels and equal stride
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; m = nn.Conv2d(16, 33, 3, stride=2)
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; # non-square kernels and unequal stride and with padding
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; m = nn.Conv2d(16, 33, (3, 5), stride=(2, 1), padding=(4, 2))
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; # non-square kernels and unequal stride and with padding and dilation
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; m = nn.Conv2d(16, 33, (3, 5), stride=(2, 1), padding=(4, 2), dilation=(3, 1))
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; input = torch.randn(20, 16, 50, 100)
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; output = m(input)
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. _cross-correlation:
+</span></span></span><span class=line><span class=cl><span class=s2>        https://en.wikipedia.org/wiki/Cross-correlation
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. _link:
+</span></span></span><span class=line><span class=cl><span class=s2>        https://github.com/vdumoulin/conv_arithmetic/blob/master/README.md
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>in_channels</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>out_channels</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>kernel_size</span><span class=p>:</span> <span class=n>_size_2_t</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>stride</span><span class=p>:</span> <span class=n>_size_2_t</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>padding</span><span class=p>:</span> <span class=n>Union</span><span class=p>[</span><span class=nb>str</span><span class=p>,</span> <span class=n>_size_2_t</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>dilation</span><span class=p>:</span> <span class=n>_size_2_t</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>groups</span><span class=p>:</span> <span class=nb>int</span> <span class=o>=</span> <span class=mi>1</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>bias</span><span class=p>:</span> <span class=nb>bool</span> <span class=o>=</span> <span class=kc>True</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>padding_mode</span><span class=p>:</span> <span class=nb>str</span> <span class=o>=</span> <span class=s1>&#39;zeros&#39;</span><span class=p>,</span>  <span class=c1># TODO: refine this type</span>
+</span></span><span class=line><span class=cl>        <span class=n>device</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=n>dtype</span><span class=o>=</span><span class=kc>None</span>
+</span></span><span class=line><span class=cl>    <span class=p>)</span> <span class=o>-&gt;</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>factory_kwargs</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;device&#39;</span><span class=p>:</span> <span class=n>device</span><span class=p>,</span> <span class=s1>&#39;dtype&#39;</span><span class=p>:</span> <span class=n>dtype</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=n>kernel_size_</span> <span class=o>=</span> <span class=n>_pair</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>stride_</span> <span class=o>=</span> <span class=n>_pair</span><span class=p>(</span><span class=n>stride</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>padding_</span> <span class=o>=</span> <span class=n>padding</span> <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>padding</span><span class=p>,</span> <span class=nb>str</span><span class=p>)</span> <span class=k>else</span> <span class=n>_pair</span><span class=p>(</span><span class=n>padding</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>dilation_</span> <span class=o>=</span> <span class=n>_pair</span><span class=p>(</span><span class=n>dilation</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=nb>super</span><span class=p>(</span><span class=n>Conv2d</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=n>in_channels</span><span class=p>,</span> <span class=n>out_channels</span><span class=p>,</span> <span class=n>kernel_size_</span><span class=p>,</span> <span class=n>stride_</span><span class=p>,</span> <span class=n>padding_</span><span class=p>,</span> <span class=n>dilation_</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=kc>False</span><span class=p>,</span> <span class=n>_pair</span><span class=p>(</span><span class=mi>0</span><span class=p>),</span> <span class=n>groups</span><span class=p>,</span> <span class=n>bias</span><span class=p>,</span> <span class=n>padding_mode</span><span class=p>,</span> <span class=o>**</span><span class=n>factory_kwargs</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>ok，在了解了我们输入的变量之后，下面一句来看其中的内容。</p><p><code>factory_kwargs = {'device': device, 'dtype': dtype}</code>这个就是指定你先使用的 设备 是什么（CPU or CUDA）。</p><p><code>kernel_size_ = _pair(kernel_size)</code>就是将对应 我们输入的卷积核大小变成对应的pair形式(3 -> $3 \times 3$)。</p><p><code>stride_ = _pair(stride)</code>这个的话同理，将数值变成 对应的pair形式(2 -> $2 \times 2$)。</p><p><code>padding_ = padding if isinstance(padding, str) else _pair(padding)</code>也是同理，不过是这里你再输入的时候可能已经是对应padding形式。</p><p><code>dilation_ = _pair(dilation)</code>这句话依然是同理，将数值变成对应的pair形式()。</p><p><code>super(Conv2d, self).__init__(in_channels, out_channels, kernel_size_, stride_, padding_, dilation_,False, _pair(0), groups, bias, padding_mode, **factory_kwargs)</code>这个函数是我们需要着重关注的 。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span><span class=lnt>71
+</span><span class=lnt>72
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>             <span class=n>in_channels</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>             <span class=n>out_channels</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>             <span class=n>kernel_size</span><span class=p>:</span> <span class=n>Tuple</span><span class=p>[</span><span class=nb>int</span><span class=p>,</span> <span class=o>...</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>             <span class=n>stride</span><span class=p>:</span> <span class=n>Tuple</span><span class=p>[</span><span class=nb>int</span><span class=p>,</span> <span class=o>...</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>             <span class=n>padding</span><span class=p>:</span> <span class=n>Tuple</span><span class=p>[</span><span class=nb>int</span><span class=p>,</span> <span class=o>...</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>             <span class=n>dilation</span><span class=p>:</span> <span class=n>Tuple</span><span class=p>[</span><span class=nb>int</span><span class=p>,</span> <span class=o>...</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>             <span class=n>transposed</span><span class=p>:</span> <span class=nb>bool</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>             <span class=n>output_padding</span><span class=p>:</span> <span class=n>Tuple</span><span class=p>[</span><span class=nb>int</span><span class=p>,</span> <span class=o>...</span><span class=p>],</span>
+</span></span><span class=line><span class=cl>             <span class=n>groups</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>             <span class=n>bias</span><span class=p>:</span> <span class=nb>bool</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>             <span class=n>padding_mode</span><span class=p>:</span> <span class=nb>str</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>             <span class=n>device</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>             <span class=n>dtype</span><span class=o>=</span><span class=kc>None</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>factory_kwargs</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;device&#39;</span><span class=p>:</span> <span class=n>device</span><span class=p>,</span> <span class=s1>&#39;dtype&#39;</span><span class=p>:</span> <span class=n>dtype</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=nb>super</span><span class=p>(</span><span class=n>_ConvNd</span><span class=p>,</span> <span class=bp>self</span><span class=p>)</span><span class=o>.</span><span class=fm>__init__</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>in_channels</span> <span class=o>%</span> <span class=n>groups</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s1>&#39;in_channels must be divisible by groups&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>out_channels</span> <span class=o>%</span> <span class=n>groups</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s1>&#39;out_channels must be divisible by groups&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>valid_padding_strings</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;same&#39;</span><span class=p>,</span> <span class=s1>&#39;valid&#39;</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>padding</span><span class=p>,</span> <span class=nb>str</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>padding</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>valid_padding_strings</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>                <span class=s2>&#34;Invalid padding string </span><span class=si>{!r}</span><span class=s2>, should be one of </span><span class=si>{}</span><span class=s2>&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>                    <span class=n>padding</span><span class=p>,</span> <span class=n>valid_padding_strings</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>padding</span> <span class=o>==</span> <span class=s1>&#39;same&#39;</span> <span class=ow>and</span> <span class=nb>any</span><span class=p>(</span><span class=n>s</span> <span class=o>!=</span> <span class=mi>1</span> <span class=k>for</span> <span class=n>s</span> <span class=ow>in</span> <span class=n>stride</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s2>&#34;padding=&#39;same&#39; is not supported for strided convolutions&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>valid_padding_modes</span> <span class=o>=</span> <span class=p>{</span><span class=s1>&#39;zeros&#39;</span><span class=p>,</span> <span class=s1>&#39;reflect&#39;</span><span class=p>,</span> <span class=s1>&#39;replicate&#39;</span><span class=p>,</span> <span class=s1>&#39;circular&#39;</span><span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>padding_mode</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>valid_padding_modes</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s2>&#34;padding_mode must be one of </span><span class=si>{}</span><span class=s2>, but got padding_mode=&#39;</span><span class=si>{}</span><span class=s2>&#39;&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=n>valid_padding_modes</span><span class=p>,</span> <span class=n>padding_mode</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>in_channels</span> <span class=o>=</span> <span class=n>in_channels</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>out_channels</span> <span class=o>=</span> <span class=n>out_channels</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>kernel_size</span> <span class=o>=</span> <span class=n>kernel_size</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>stride</span> <span class=o>=</span> <span class=n>stride</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>padding</span> <span class=o>=</span> <span class=n>padding</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>dilation</span> <span class=o>=</span> <span class=n>dilation</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>transposed</span> <span class=o>=</span> <span class=n>transposed</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>output_padding</span> <span class=o>=</span> <span class=n>output_padding</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>groups</span> <span class=o>=</span> <span class=n>groups</span>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>padding_mode</span> <span class=o>=</span> <span class=n>padding_mode</span>
+</span></span><span class=line><span class=cl>    <span class=c1># `_reversed_padding_repeated_twice` is the padding to be passed to</span>
+</span></span><span class=line><span class=cl>    <span class=c1># `F.pad` if needed (e.g., for non-zero padding types that are</span>
+</span></span><span class=line><span class=cl>    <span class=c1># implemented as two ops: padding + conv). `F.pad` accepts paddings in</span>
+</span></span><span class=line><span class=cl>    <span class=c1># reverse order than the dimension.</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>padding</span><span class=p>,</span> <span class=nb>str</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_reversed_padding_repeated_twice</span> <span class=o>=</span> <span class=p>[</span><span class=mi>0</span><span class=p>,</span> <span class=mi>0</span><span class=p>]</span> <span class=o>*</span> <span class=nb>len</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>padding</span> <span class=o>==</span> <span class=s1>&#39;same&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>for</span> <span class=n>d</span><span class=p>,</span> <span class=n>k</span><span class=p>,</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>zip</span><span class=p>(</span><span class=n>dilation</span><span class=p>,</span> <span class=n>kernel_size</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>                               <span class=nb>range</span><span class=p>(</span><span class=nb>len</span><span class=p>(</span><span class=n>kernel_size</span><span class=p>)</span> <span class=o>-</span> <span class=mi>1</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>,</span> <span class=o>-</span><span class=mi>1</span><span class=p>)):</span>
+</span></span><span class=line><span class=cl>                <span class=n>total_padding</span> <span class=o>=</span> <span class=n>d</span> <span class=o>*</span> <span class=p>(</span><span class=n>k</span> <span class=o>-</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>                <span class=n>left_pad</span> <span class=o>=</span> <span class=n>total_padding</span> <span class=o>//</span> <span class=mi>2</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>_reversed_padding_repeated_twice</span><span class=p>[</span><span class=mi>2</span> <span class=o>*</span> <span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>left_pad</span>
+</span></span><span class=line><span class=cl>                <span class=bp>self</span><span class=o>.</span><span class=n>_reversed_padding_repeated_twice</span><span class=p>[</span><span class=mi>2</span> <span class=o>*</span> <span class=n>i</span> <span class=o>+</span> <span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=p>(</span>
+</span></span><span class=line><span class=cl>                    <span class=n>total_padding</span> <span class=o>-</span> <span class=n>left_pad</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>_reversed_padding_repeated_twice</span> <span class=o>=</span> <span class=n>_reverse_repeat_tuple</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>padding</span><span class=p>,</span> <span class=mi>2</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>transposed</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>weight</span> <span class=o>=</span> <span class=n>Parameter</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>empty</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=p>(</span><span class=n>in_channels</span><span class=p>,</span> <span class=n>out_channels</span> <span class=o>//</span> <span class=n>groups</span><span class=p>,</span> <span class=o>*</span><span class=n>kernel_size</span><span class=p>),</span> <span class=o>**</span><span class=n>factory_kwargs</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>weight</span> <span class=o>=</span> <span class=n>Parameter</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>empty</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=p>(</span><span class=n>out_channels</span><span class=p>,</span> <span class=n>in_channels</span> <span class=o>//</span> <span class=n>groups</span><span class=p>,</span> <span class=o>*</span><span class=n>kernel_size</span><span class=p>),</span> <span class=o>**</span><span class=n>factory_kwargs</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>bias</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>bias</span> <span class=o>=</span> <span class=n>Parameter</span><span class=p>(</span><span class=n>torch</span><span class=o>.</span><span class=n>empty</span><span class=p>(</span><span class=n>out_channels</span><span class=p>,</span> <span class=o>**</span><span class=n>factory_kwargs</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>register_parameter</span><span class=p>(</span><span class=s1>&#39;bias&#39;</span><span class=p>,</span> <span class=kc>None</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=bp>self</span><span class=o>.</span><span class=n>reset_parameters</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个函数中仍然是相同的，最开始进行初始化，指定 <code>weight</code>，<code>bias</code>的大小。然后看 <code>reset_parameters</code>这个函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>reset_parameters</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span> <span class=o>-&gt;</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># Setting a=sqrt(5) in kaiming_uniform is the same as initializing with</span>
+</span></span><span class=line><span class=cl>    <span class=c1># uniform(-1/sqrt(k), 1/sqrt(k)), where k = weight.size(1) * prod(*kernel_size)</span>
+</span></span><span class=line><span class=cl>    <span class=c1># For more details see: https://github.com/pytorch/pytorch/issues/15314#issuecomment-477448573</span>
+</span></span><span class=line><span class=cl>    <span class=n>init</span><span class=o>.</span><span class=n>kaiming_uniform_</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>weight</span><span class=p>,</span> <span class=n>a</span><span class=o>=</span><span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=mi>5</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>bias</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>fan_in</span><span class=p>,</span> <span class=n>_</span> <span class=o>=</span> <span class=n>init</span><span class=o>.</span><span class=n>_calculate_fan_in_and_fan_out</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>weight</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>fan_in</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>bound</span> <span class=o>=</span> <span class=mi>1</span> <span class=o>/</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=n>fan_in</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>            <span class=n>init</span><span class=o>.</span><span class=n>uniform_</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>bias</span><span class=p>,</span> <span class=o>-</span><span class=n>bound</span><span class=p>,</span> <span class=n>bound</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这段代码的作用时重新初始化层的 参数（权重和偏置）。</p><p>然后我们逐步检查这个方法的功能：</p><p><code>init.kaiming_uniform_(self.weight, a=math.sqrt(5))</code>：这个的话使用了PyTorch的<code>kaiming_uniform_</code>初始化方法 ，采用Kaiming He等人提出的初始化策略，针对ReLU激活函数的权重初始化方法。然后的话看这个函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>kaiming_uniform_</span><span class=p>(</span><span class=n>tensor</span><span class=p>,</span> <span class=n>a</span><span class=o>=</span><span class=mi>0</span><span class=p>,</span> <span class=n>mode</span><span class=o>=</span><span class=s1>&#39;fan_in&#39;</span><span class=p>,</span> <span class=n>nonlinearity</span><span class=o>=</span><span class=s1>&#39;leaky_relu&#39;</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=sa>r</span><span class=s2>&#34;&#34;&#34;Fills the input `Tensor` with values according to the method
+</span></span></span><span class=line><span class=cl><span class=s2>    described in `Delving deep into rectifiers: Surpassing human-level
+</span></span></span><span class=line><span class=cl><span class=s2>    performance on ImageNet classification` - He, K. et al. (2015), using a
+</span></span></span><span class=line><span class=cl><span class=s2>    uniform distribution. The resulting tensor will have values sampled from
+</span></span></span><span class=line><span class=cl><span class=s2>    :math:`\mathcal</span><span class=si>{U}</span><span class=s2>(-\text</span><span class=si>{bound}</span><span class=s2>, \text</span><span class=si>{bound}</span><span class=s2>)` where
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. math::
+</span></span></span><span class=line><span class=cl><span class=s2>        \text</span><span class=si>{bound}</span><span class=s2> = \text</span><span class=si>{gain}</span><span class=s2> \times \sqrt{\frac</span><span class=si>{3}</span><span class=s2>{\text{fan\_mode}}}
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Also known as He initialization.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Args:
+</span></span></span><span class=line><span class=cl><span class=s2>        tensor: an n-dimensional `torch.Tensor`
+</span></span></span><span class=line><span class=cl><span class=s2>        a: the negative slope of the rectifier used after this layer (only
+</span></span></span><span class=line><span class=cl><span class=s2>            used with ``&#39;leaky_relu&#39;``)
+</span></span></span><span class=line><span class=cl><span class=s2>        mode: either ``&#39;fan_in&#39;`` (default) or ``&#39;fan_out&#39;``. Choosing ``&#39;fan_in&#39;``
+</span></span></span><span class=line><span class=cl><span class=s2>            preserves the magnitude of the variance of the weights in the
+</span></span></span><span class=line><span class=cl><span class=s2>            forward pass. Choosing ``&#39;fan_out&#39;`` preserves the magnitudes in the
+</span></span></span><span class=line><span class=cl><span class=s2>            backwards pass.
+</span></span></span><span class=line><span class=cl><span class=s2>        nonlinearity: the non-linear function (`nn.functional` name),
+</span></span></span><span class=line><span class=cl><span class=s2>            recommended to use only with ``&#39;relu&#39;`` or ``&#39;leaky_relu&#39;`` (default).
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Examples:
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; w = torch.empty(3, 5)
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; nn.init.kaiming_uniform_(w, mode=&#39;fan_in&#39;, nonlinearity=&#39;relu&#39;)
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>torch</span><span class=o>.</span><span class=n>overrides</span><span class=o>.</span><span class=n>has_torch_function_variadic</span><span class=p>(</span><span class=n>tensor</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>torch</span><span class=o>.</span><span class=n>overrides</span><span class=o>.</span><span class=n>handle_torch_function</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>            <span class=n>kaiming_uniform_</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=p>(</span><span class=n>tensor</span><span class=p>,),</span>
+</span></span><span class=line><span class=cl>            <span class=n>tensor</span><span class=o>=</span><span class=n>tensor</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=n>a</span><span class=o>=</span><span class=n>a</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=n>mode</span><span class=o>=</span><span class=n>mode</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>            <span class=n>nonlinearity</span><span class=o>=</span><span class=n>nonlinearity</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=mi>0</span> <span class=ow>in</span> <span class=n>tensor</span><span class=o>.</span><span class=n>shape</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>warnings</span><span class=o>.</span><span class=n>warn</span><span class=p>(</span><span class=s2>&#34;Initializing zero-element tensors is a no-op&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>tensor</span>
+</span></span><span class=line><span class=cl>    <span class=n>fan</span> <span class=o>=</span> <span class=n>_calculate_correct_fan</span><span class=p>(</span><span class=n>tensor</span><span class=p>,</span> <span class=n>mode</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>gain</span> <span class=o>=</span> <span class=n>calculate_gain</span><span class=p>(</span><span class=n>nonlinearity</span><span class=p>,</span> <span class=n>a</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>std</span> <span class=o>=</span> <span class=n>gain</span> <span class=o>/</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=n>fan</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>bound</span> <span class=o>=</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=mf>3.0</span><span class=p>)</span> <span class=o>*</span> <span class=n>std</span>  <span class=c1># Calculate uniform bounds from standard deviation</span>
+</span></span><span class=line><span class=cl>    <span class=k>with</span> <span class=n>torch</span><span class=o>.</span><span class=n>no_grad</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>tensor</span><span class=o>.</span><span class=n>uniform_</span><span class=p>(</span><span class=o>-</span><span class=n>bound</span><span class=p>,</span> <span class=n>bound</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这段代码的作用初始化权重的代码之一，使用均匀分布初始化权重。</p><p>计算<code>_calculate_correct_fan</code>函数计算对应 的权重张量。然后的话看这个函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span><span class=lnt>8
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>_calculate_correct_fan</span><span class=p>(</span><span class=n>tensor</span><span class=p>,</span> <span class=n>mode</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>mode</span> <span class=o>=</span> <span class=n>mode</span><span class=o>.</span><span class=n>lower</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=n>valid_modes</span> <span class=o>=</span> <span class=p>[</span><span class=s1>&#39;fan_in&#39;</span><span class=p>,</span> <span class=s1>&#39;fan_out&#39;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>mode</span> <span class=ow>not</span> <span class=ow>in</span> <span class=n>valid_modes</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s2>&#34;Mode </span><span class=si>{}</span><span class=s2> not supported, please use one of </span><span class=si>{}</span><span class=s2>&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>mode</span><span class=p>,</span> <span class=n>valid_modes</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>fan_in</span><span class=p>,</span> <span class=n>fan_out</span> <span class=o>=</span> <span class=n>_calculate_fan_in_and_fan_out</span><span class=p>(</span><span class=n>tensor</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>fan_in</span> <span class=k>if</span> <span class=n>mode</span> <span class=o>==</span> <span class=s1>&#39;fan_in&#39;</span> <span class=k>else</span> <span class=n>fan_out</span>
+</span></span></code></pre></td></tr></table></div></div><p>套娃函数，看<code>_calculate_fan_in_and_fan_out</code>这个函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>_calculate_fan_in_and_fan_out</span><span class=p>(</span><span class=n>tensor</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>dimensions</span> <span class=o>=</span> <span class=n>tensor</span><span class=o>.</span><span class=n>dim</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>dimensions</span> <span class=o>&lt;</span> <span class=mi>2</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s2>&#34;Fan in and fan out can not be computed for tensor with fewer than 2 dimensions&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=n>num_input_fmaps</span> <span class=o>=</span> <span class=n>tensor</span><span class=o>.</span><span class=n>size</span><span class=p>(</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>num_output_fmaps</span> <span class=o>=</span> <span class=n>tensor</span><span class=o>.</span><span class=n>size</span><span class=p>(</span><span class=mi>0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>receptive_field_size</span> <span class=o>=</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>tensor</span><span class=o>.</span><span class=n>dim</span><span class=p>()</span> <span class=o>&gt;</span> <span class=mi>2</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=c1># math.prod is not always available, accumulate the product manually</span>
+</span></span><span class=line><span class=cl>        <span class=c1># we could use functools.reduce but that is not supported by TorchScript</span>
+</span></span><span class=line><span class=cl>        <span class=k>for</span> <span class=n>s</span> <span class=ow>in</span> <span class=n>tensor</span><span class=o>.</span><span class=n>shape</span><span class=p>[</span><span class=mi>2</span><span class=p>:]:</span>
+</span></span><span class=line><span class=cl>            <span class=n>receptive_field_size</span> <span class=o>*=</span> <span class=n>s</span>
+</span></span><span class=line><span class=cl>    <span class=n>fan_in</span> <span class=o>=</span> <span class=n>num_input_fmaps</span> <span class=o>*</span> <span class=n>receptive_field_size</span>
+</span></span><span class=line><span class=cl>    <span class=n>fan_out</span> <span class=o>=</span> <span class=n>num_output_fmaps</span> <span class=o>*</span> <span class=n>receptive_field_size</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>fan_in</span><span class=p>,</span> <span class=n>fan_out</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个函数算是看到对应的 内容是怎么计算的了，首先，我们先获取权重，通过权重的大小计算<code>fan_in</code>和 <code>fan_out</code>。</p><p><code>dimensions = tensor.dim()</code>: 获取张量的维度数。</p><p>如果张量的维度数小于 2，则抛出异常，因为无法为少于 2 维的张量计算 fan_in 和 fan_out。</p><p>计算 <code>num_input_fmaps</code> 和 <code>num_output_fmaps</code>：</p><ul><li><p><code>num_input_fmaps</code> 是输入特征图的数量，通常对应于输入张量的第二个维度的大小（索引为 1）。</p></li><li><p><code>num_output_fmaps</code> 是输出特征图的数量，通常对应于输出张量的第一个维度的大小（索引为 0）。</p></li></ul><p>如果张量的维度大于 2：</p><ul><li>初始化 <code>receptive_field_size</code> 为 1。</li><li>对张量的除了前两个维度（通常是批量大小和通道数）之外的维度进行遍历，计算这些维度的乘积，以计算感受野的大小。</li><li>这里采用了一个循环，将除前两个维度外的所有维度大小相乘，得到 <code>receptive_field_size</code>。</li></ul><p>然后计算<code>fan_in</code>和<code>fan_out</code>：</p><ul><li><code>fan_in</code> 是输入通道数量，是输入特征图数量乘以感受野大小的结果。</li><li><code>fan_out</code> 是输出通道数量，是输出特征图数量乘以感受野大小的结果。</li></ul><p>然后计算返回计算得到的<code>fan_in</code>和<code>fan_out</code>。</p><p>ok，现在我们得到对应的权重张量，然后接着看下面的函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>gain</span> <span class=o>=</span> <span class=n>calculate_gain</span><span class=p>(</span><span class=n>nonlinearity</span><span class=p>,</span> <span class=n>a</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>std</span> <span class=o>=</span> <span class=n>gain</span> <span class=o>/</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=n>fan</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>bound</span> <span class=o>=</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=mf>3.0</span><span class=p>)</span> <span class=o>*</span> <span class=n>std</span>  <span class=c1># Calculate uniform bounds from standard deviation</span>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=n>torch</span><span class=o>.</span><span class=n>no_grad</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>tensor</span><span class=o>.</span><span class=n>uniform_</span><span class=p>(</span><span class=o>-</span><span class=n>bound</span><span class=p>,</span> <span class=n>bound</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>然后这里我们需要看计算gain(增益)的函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>calculate_gain</span><span class=p>(</span><span class=n>nonlinearity</span><span class=p>,</span> <span class=n>param</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=sa>r</span><span class=s2>&#34;&#34;&#34;Return the recommended gain value for the given nonlinearity function.
+</span></span></span><span class=line><span class=cl><span class=s2>    The values are as follows:
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    ================= ====================================================
+</span></span></span><span class=line><span class=cl><span class=s2>    nonlinearity      gain
+</span></span></span><span class=line><span class=cl><span class=s2>    ================= ====================================================
+</span></span></span><span class=line><span class=cl><span class=s2>    Linear / Identity :math:`1`
+</span></span></span><span class=line><span class=cl><span class=s2>    Conv{1,2,3}D      :math:`1`
+</span></span></span><span class=line><span class=cl><span class=s2>    Sigmoid           :math:`1`
+</span></span></span><span class=line><span class=cl><span class=s2>    Tanh              :math:`\frac</span><span class=si>{5}{3}</span><span class=s2>`
+</span></span></span><span class=line><span class=cl><span class=s2>    ReLU              :math:`\sqrt</span><span class=si>{2}</span><span class=s2>`
+</span></span></span><span class=line><span class=cl><span class=s2>    Leaky Relu        :math:`\sqrt{\frac</span><span class=si>{2}</span><span class=s2>{1 + \text{negative\_slope}^2}}`
+</span></span></span><span class=line><span class=cl><span class=s2>    SELU              :math:`\frac</span><span class=si>{3}{4}</span><span class=s2>`
+</span></span></span><span class=line><span class=cl><span class=s2>    ================= ====================================================
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. warning::
+</span></span></span><span class=line><span class=cl><span class=s2>        In order to implement `Self-Normalizing Neural Networks`_ ,
+</span></span></span><span class=line><span class=cl><span class=s2>        you should use ``nonlinearity=&#39;linear&#39;`` instead of ``nonlinearity=&#39;selu&#39;``.
+</span></span></span><span class=line><span class=cl><span class=s2>        This gives the initial weights a variance of ``1 / N``,
+</span></span></span><span class=line><span class=cl><span class=s2>        which is necessary to induce a stable fixed point in the forward pass.
+</span></span></span><span class=line><span class=cl><span class=s2>        In contrast, the default gain for ``SELU`` sacrifices the normalisation
+</span></span></span><span class=line><span class=cl><span class=s2>        effect for more stable gradient flow in rectangular layers.
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Args:
+</span></span></span><span class=line><span class=cl><span class=s2>        nonlinearity: the non-linear function (`nn.functional` name)
+</span></span></span><span class=line><span class=cl><span class=s2>        param: optional parameter for the non-linear function
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    Examples:
+</span></span></span><span class=line><span class=cl><span class=s2>        &gt;&gt;&gt; gain = nn.init.calculate_gain(&#39;leaky_relu&#39;, 0.2)  # leaky_relu with negative_slope=0.2
+</span></span></span><span class=line><span class=cl><span class=s2>
+</span></span></span><span class=line><span class=cl><span class=s2>    .. _Self-Normalizing Neural Networks: https://papers.nips.cc/paper/2017/hash/5d44ee6f2c3f71b73125876103c8f6c4-Abstract.html
+</span></span></span><span class=line><span class=cl><span class=s2>    &#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=n>linear_fns</span> <span class=o>=</span> <span class=p>[</span><span class=s1>&#39;linear&#39;</span><span class=p>,</span> <span class=s1>&#39;conv1d&#39;</span><span class=p>,</span> <span class=s1>&#39;conv2d&#39;</span><span class=p>,</span> <span class=s1>&#39;conv3d&#39;</span><span class=p>,</span> <span class=s1>&#39;conv_transpose1d&#39;</span><span class=p>,</span> <span class=s1>&#39;conv_transpose2d&#39;</span><span class=p>,</span> <span class=s1>&#39;conv_transpose3d&#39;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>nonlinearity</span> <span class=ow>in</span> <span class=n>linear_fns</span> <span class=ow>or</span> <span class=n>nonlinearity</span> <span class=o>==</span> <span class=s1>&#39;sigmoid&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mi>1</span>
+</span></span><span class=line><span class=cl>    <span class=k>elif</span> <span class=n>nonlinearity</span> <span class=o>==</span> <span class=s1>&#39;tanh&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mf>5.0</span> <span class=o>/</span> <span class=mi>3</span>
+</span></span><span class=line><span class=cl>    <span class=k>elif</span> <span class=n>nonlinearity</span> <span class=o>==</span> <span class=s1>&#39;relu&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=mf>2.0</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>elif</span> <span class=n>nonlinearity</span> <span class=o>==</span> <span class=s1>&#39;leaky_relu&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>param</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>negative_slope</span> <span class=o>=</span> <span class=mf>0.01</span>
+</span></span><span class=line><span class=cl>        <span class=k>elif</span> <span class=ow>not</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>param</span><span class=p>,</span> <span class=nb>bool</span><span class=p>)</span> <span class=ow>and</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>param</span><span class=p>,</span> <span class=nb>int</span><span class=p>)</span> <span class=ow>or</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>param</span><span class=p>,</span> <span class=nb>float</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>            <span class=c1># True/False are instances of int, hence check above</span>
+</span></span><span class=line><span class=cl>            <span class=n>negative_slope</span> <span class=o>=</span> <span class=n>param</span>
+</span></span><span class=line><span class=cl>        <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s2>&#34;negative_slope </span><span class=si>{}</span><span class=s2> not a valid number&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>param</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=mf>2.0</span> <span class=o>/</span> <span class=p>(</span><span class=mi>1</span> <span class=o>+</span> <span class=n>negative_slope</span> <span class=o>**</span> <span class=mi>2</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=k>elif</span> <span class=n>nonlinearity</span> <span class=o>==</span> <span class=s1>&#39;selu&#39;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=mf>3.0</span> <span class=o>/</span> <span class=mi>4</span>  <span class=c1># Value found empirically (https://github.com/pytorch/pytorch/pull/50664)</span>
+</span></span><span class=line><span class=cl>    <span class=k>else</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s2>&#34;Unsupported nonlinearity </span><span class=si>{}</span><span class=s2>&#34;</span><span class=o>.</span><span class=n>format</span><span class=p>(</span><span class=n>nonlinearity</span><span class=p>))</span>
+</span></span></code></pre></td></tr></table></div></div><p>LeakyReLU: 返回$\sqrt\frac{2}{1 + negative_slope}$</p><p>计算出对应的gain，然后接着往下走。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>std</span> <span class=o>=</span> <span class=n>gain</span> <span class=o>/</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=n>fan</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>bound</span> <span class=o>=</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=mf>3.0</span><span class=p>)</span> <span class=o>*</span> <span class=n>std</span>  <span class=c1># Calculate uniform bounds from standard deviation</span>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=n>torch</span><span class=o>.</span><span class=n>no_grad</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>tensor</span><span class=o>.</span><span class=n>uniform_</span><span class=p>(</span><span class=o>-</span><span class=n>bound</span><span class=p>,</span> <span class=n>bound</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个的话就是数值 计算出对应的标准差以及均匀分布的边界<code>bound</code>，这个是$\sqrt 3$乘以对应的 标准差。</p><p>计算出来这些之后，进行返回。然后接着看返回后的 下面的 函数。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>if</span> <span class=bp>self</span><span class=o>.</span><span class=n>bias</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>fan_in</span><span class=p>,</span> <span class=n>_</span> <span class=o>=</span> <span class=n>init</span><span class=o>.</span><span class=n>_calculate_fan_in_and_fan_out</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>weight</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=n>fan_in</span> <span class=o>!=</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=n>bound</span> <span class=o>=</span> <span class=mi>1</span> <span class=o>/</span> <span class=n>math</span><span class=o>.</span><span class=n>sqrt</span><span class=p>(</span><span class=n>fan_in</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        <span class=n>init</span><span class=o>.</span><span class=n>uniform_</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>bias</span><span class=p>,</span> <span class=o>-</span><span class=n>bound</span><span class=p>,</span> <span class=n>bound</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>这几句话的作用时 如果当前 偏置参数不为空，通过权重计算出对应<code>fain_in</code>（输入通道数量），如果说当前输入通道数不为0，则对方法偏执参数的均匀分布的重新初始化。</p><p>这些都计算完毕之后，就返回了。</p><p>返回的内容如下 ：</p><p><img src=https://img-1312072469.cos.ap-nanjing.myqcloud.com/202312061102227.png loading=lazy></p><p>得到了对应的内容，然后我们看官网中有这么 一个公式：
+$$
+out(N_{i},C_{out_{j}}) = bias(C_{out_{j}}) + \sum_{k = 0}^{C_m - 1} weight(C_{out_{j}},k) \star input(N_{i},k)
+$$
+其实上面的过程，就是这个公式的计算。</p><h2 id=总结><a href=#%e6%80%bb%e7%bb%93>#</a>
+总结</h2><p>其实我们在使用的 时候，一般不会看着详细的计算过程，因为这个公式已经介绍的很清楚了，但是最近在看群卷积神经网络，对于卷积这块突然间不知道对应的滤波是怎么进行设置，因此将这部分重新简单看下，这部分比较简单，但是其中也有很多细节值得深究，象何凯明大佬里面的leaky_relu这个函数的设置等等，不得不承认好的开源社区就是充满活力，代码写的真的好。</p></section><footer class=article-footer><section class=article-tags><a href=/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/>机器学习</a>
+<a href=/tags/%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB/>源码阅读</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Apache Licence 2.0</span></section></footer><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})</script></article><aside class=related-content--wrapper><h2 class=section-title>Related content</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-r2conv-%E8%AF%A6%E8%A7%A3/><div class=article-details><h2 class=article-title>e2cnn 内容理解-R2Conv 详解</h2></div></a></article><article><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E8%BE%93%E5%87%BA%E7%B1%BB%E5%9E%8B/><div class=article-details><h2 class=article-title>e2cnn 内容理解 - 群的输出类型</h2></div></a></article><article><a href=/p/e2cnn%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E8%BE%93%E5%85%A5%E7%B1%BB%E5%9E%8B/><div class=article-details><h2 class=article-title>e2cnn内容理解-群的输入类型</h2></div></a></article><article><a href=/p/e2cnn-%E5%86%85%E5%AE%B9%E7%90%86%E8%A7%A3-%E7%BE%A4%E7%9A%84%E5%88%9B%E5%BB%BA%E6%BA%90%E7%A0%81%E8%AF%A6%E8%A7%A3/><div class=article-details><h2 class=article-title>e2cnn 内容理解 - 群的创建源码详解</h2></div></a></article></div></div></aside><script src=//unpkg.com/@waline/client@v2/dist/waline.js></script><link href=//unpkg.com/@waline/client@v2/dist/waline.css rel=stylesheet><div id=waline class=waline-container></div><style>.waline-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding);--waline-font-size:var(--article-font-size)}.waline-container .wl-count{color:var(--card-text-color-main)}</style><script>Waline.init({avatar:"retro",avatarcdn:"https://sdn.geekzu.org/avatar/",dark:'html[data-scheme="dark"]',el:"#waline",emoji:["https://cdn.jsdelivr.net/gh/walinejs/emojis/weibo"],highlight:!0,js:"https://cdn.jsdelivr.net/npm/@waline/client/dist/Waline.min.js",lang:"zh-CN",locale:{admin:"Admin",placeholder:null},meta:["nick","mail","link"],pageSize:20,placeholder:"",requiredMeta:["name","email","url"],serverURL:"https://waline-line-git-main-zrsaber.vercel.app",uploadimage:!1,visitor:!0})</script><footer class=site-footer><section class=copyright>&copy;
+2020 -
+2024 Runqi Blog</section><section class=powerby>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.25.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

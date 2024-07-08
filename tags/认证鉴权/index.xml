@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>认证鉴权 on Runqi Blog</title><link>https://runqizhao.cn/tags/%E8%AE%A4%E8%AF%81%E9%89%B4%E6%9D%83/</link><description>Recent content in 认证鉴权 on Runqi Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 13 May 2024 08:34:23 +0800</lastBuildDate><atom:link href="https://runqizhao.cn/tags/%E8%AE%A4%E8%AF%81%E9%89%B4%E6%9D%83/index.xml" rel="self" type="application/rss+xml"/><item><title>SSO单点登录</title><link>https://runqizhao.cn/p/sso%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95/</link><pubDate>Mon, 13 May 2024 08:34:23 +0800</pubDate><guid>https://runqizhao.cn/p/sso%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95/</guid><description>&lt;h2 id="sso介绍">
+&lt;a href="#sso%e4%bb%8b%e7%bb%8d">#&lt;/a>
+SSO介绍
+&lt;/h2>&lt;h3 id="概念">
+&lt;a href="#%e6%a6%82%e5%bf%b5">#&lt;/a>
+概念
+&lt;/h3>&lt;p>SSO 英文全称 Single Sign On，单点登录。SSO 是在多个应用系统中，用户只需要登录一次就可以访问所有相互信任的应用系统。&lt;/p>
+&lt;h3 id="好处">
+&lt;a href="#%e5%a5%bd%e5%a4%84">#&lt;/a>
+好处
+&lt;/h3>&lt;p>&lt;strong>用户角度&lt;/strong> :用户能够做到一次登录多次使用，无需记录多套用户名和密码，省心。&lt;/p>
+&lt;p>&lt;strong>系统管理员角度&lt;/strong> : 管理员只需维护好一个统一的账号中心就可以了，方便。&lt;/p>
+&lt;p>&lt;strong>新系统开发角度:&lt;/strong> 新系统开发时只需直接对接统一的账号中心即可，简化开发流程，省时&lt;/p>
+&lt;h2 id="实现方式">
+&lt;a href="#%e5%ae%9e%e7%8e%b0%e6%96%b9%e5%bc%8f">#&lt;/a>
+实现方式
+&lt;/h2>&lt;p>设计方式：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/sso-system.png-kblb.png"
+loading="lazy"
+alt="单点登录（SSO）设计"
+>&lt;/p>
+&lt;h3 id="用户登录状态的存储与校验">
+&lt;a href="#%e7%94%a8%e6%88%b7%e7%99%bb%e5%bd%95%e7%8a%b6%e6%80%81%e7%9a%84%e5%ad%98%e5%82%a8%e4%b8%8e%e6%a0%a1%e9%aa%8c">#&lt;/a>
+用户登录状态的存储与校验
+&lt;/h3>&lt;p>常见的 Web 框架对于 Session 的实现都是生成一个 SessionId 存储在浏览器 Cookie 中。然后将 Session 内容存储在服务器端内存中。&lt;/p>
+&lt;p>用户登录成功之后，生成 AuthToken 交给客户端保存。如果是浏览器，就保存在 Cookie 中。如果是手机 App 就保存在 App 本地缓存中。本篇主要探讨基于 Web 站点的 SSO。&lt;/p>
+&lt;p>用户在浏览需要登录的页面时，客户端将 AuthToken 提交给 SSO 服务校验登录状态/获取用户登录信息&lt;/p>
+&lt;p>对于登录信息的存储，建议采用 Redis，使用 Redis 集群来存储登录信息，既可以保证高可用，又可以线性扩充。同时也可以让 SSO 服务满足负载均衡/可伸缩的需求。&lt;/p>
+&lt;table>
+&lt;thead>
+&lt;tr>
+&lt;th>对象&lt;/th>
+&lt;th>说明&lt;/th>
+&lt;/tr>
+&lt;/thead>
+&lt;tbody>
+&lt;tr>
+&lt;td>AuthToken&lt;/td>
+&lt;td>直接使用 UUID/GUID 即可，如果有验证 AuthToken 合法性需求，可以将 UserName+时间戳加密生成，服务端解密之后验证合法性&lt;/td>
+&lt;/tr>
+&lt;tr>
+&lt;td>登录信息&lt;/td>
+&lt;td>通常是将 UserId，UserName 缓存起来&lt;/td>
+&lt;/tr>
+&lt;/tbody>
+&lt;/table>
+&lt;h3 id="用户登录登录校验">
+&lt;a href="#%e7%94%a8%e6%88%b7%e7%99%bb%e5%bd%95%e7%99%bb%e5%bd%95%e6%a0%a1%e9%aa%8c">#&lt;/a>
+用户登录/登录校验
+&lt;/h3>&lt;p>登陆时序图&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/sso-login-sequence.png-kbrb.png"
+loading="lazy"
+alt="SSO系统设计-登录时序图"
+>&lt;/p>
+&lt;p>按照上图，用户登录后 AuthToken 保存在 Cookie 中。 &lt;a class="link" href="http://domain=test.com" target="_blank" rel="noopener"
+>domain=test.comopen in new window&lt;/a>
+浏览器会将 domain 设置成 .test.com，&lt;/p>
+&lt;p>这样访问所有 *.test.com 的 web 站点，都会将 AuthToken 携带到服务器端。然后通过 SSO 服务，完成对用户状态的校验/用户登录信息的获取&lt;/p>
+&lt;p>&lt;strong>登录信息获取/登录状态校验&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/sso-logincheck-sequence.png-kbrb.png"
+loading="lazy"
+alt="SSO系统设计-登录信息获取/登录状态校验"
+>&lt;/p>
+&lt;h3 id="用户登出">
+&lt;a href="#%e7%94%a8%e6%88%b7%e7%99%bb%e5%87%ba">#&lt;/a>
+用户登出
+&lt;/h3>&lt;p>用户登出时要做的事情很简单：&lt;/p>
+&lt;ol>
+&lt;li>服务端清除缓存（Redis）中的登录状态&lt;/li>
+&lt;li>客户端清除存储的 AuthToken&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>登出时序图&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/sso-logout-sequence.png-kbrb.png"
+loading="lazy"
+alt="SSO系统设计-用户登出"
+>&lt;/p>
+&lt;h3 id="跨域登录登出">
+&lt;a href="#%e8%b7%a8%e5%9f%9f%e7%99%bb%e5%bd%95%e7%99%bb%e5%87%ba">#&lt;/a>
+跨域登录、登出
+&lt;/h3>&lt;p>前面提到过，核心思路是客户端存储 AuthToken，服务器端通过 Redis 存储登录信息。由于客户端是将 AuthToken 存储在 Cookie 中的。所以跨域要解决的问题，就是如何解决 Cookie 的跨域读写问题。&lt;/p>
+&lt;p>解决跨域的核心思路就是：&lt;/p>
+&lt;ul>
+&lt;li>登录完成之后通过回调的方式，将 AuthToken 传递给主域名之外的站点，该站点自行将 AuthToken 保存在当前域下的 Cookie 中。&lt;/li>
+&lt;li>登出完成之后通过回调的方式，调用非主域名站点的登出页面，完成设置 Cookie 中的 AuthToken 过期的操作。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>跨域登录（主域名已登录）&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/sso-crossdomain-login-loggedin-sequence.png-kbrb.png"
+loading="lazy"
+alt="SSO系统设计-跨域登录（主域名已登录）"
+>&lt;/p>
+&lt;p>&lt;strong>跨域登录（主域名未登录）&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/sso-crossdomain-login-unlogin-sequence.png-kbrb.png"
+loading="lazy"
+alt="SSO系统设计-跨域登录（主域名未登录）"
+>&lt;/p>
+&lt;p>&lt;strong>跨域登出&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/sso-crossdomain-logout-sequence.png-kbrb.png"
+loading="lazy"
+alt="SSO系统设计-跨域登出"
+>&lt;/p></description></item><item><title>Jwt详解</title><link>https://runqizhao.cn/p/jwt%E8%AF%A6%E8%A7%A3/</link><pubDate>Mon, 13 May 2024 07:40:30 +0800</pubDate><guid>https://runqizhao.cn/p/jwt%E8%AF%A6%E8%A7%A3/</guid><description>&lt;h2 id="什么是jwt">
+&lt;a href="#%e4%bb%80%e4%b9%88%e6%98%afjwt">#&lt;/a>
+什么是JWT
+&lt;/h2>&lt;p>JWT （JSON Web Token） 是目前最流行的跨域认证解决方案，是一种基于 Token 的认证授权机制。 从 JWT 的全称可以看出，JWT 本身也是 Token，一种规范化之后的 JSON 结构的 Token。&lt;/p>
+&lt;p>JWT 自身包含了身份验证所需要的所有信息，因此，我们的服务器不需要存储 Session 信息。这显然增加了系统的可用性和伸缩性，大大减轻了服务端的压力。&lt;/p>
+&lt;p>&lt;strong>JWT 更符合设计 RESTful API 时的「Stateless（无状态）」原则&lt;/strong> 。&lt;/p>
+&lt;h2 id="jwt由哪些部分组成">
+&lt;a href="#jwt%e7%94%b1%e5%93%aa%e4%ba%9b%e9%83%a8%e5%88%86%e7%bb%84%e6%88%90">#&lt;/a>
+JWT由哪些部分组成
+&lt;/h2>&lt;p>如下图所示：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/what-is-jwt.png"
+loading="lazy"
+alt="What_is_JWT"
+>&lt;/p>
+&lt;p>JWT 本质上就是一组字串，通过（&lt;code>.&lt;/code>）切分成三个为 Base64 编码的部分：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Header&lt;/strong> : 描述 JWT 的元数据，定义了生成签名的算法以及 &lt;code>Token&lt;/code> 的类型。&lt;/li>
+&lt;li>&lt;strong>Payload&lt;/strong> : 用来存放实际需要传递的数据&lt;/li>
+&lt;li>&lt;strong>Signature（签名）&lt;/strong>：服务器通过 Payload、Header 和一个密钥(Secret)使用 Header 里面指定的签名算法（默认是 HMAC SHA256）生成。&lt;/li>
+&lt;/ul>
+&lt;p>JWT 通常是这样的：&lt;code>xxxxx.yyyyy.zzzzz&lt;/code>。&lt;/p>
+&lt;p>下面分别讲解每个部分。&lt;/p>
+&lt;h3 id="header">
+&lt;a href="#header">#&lt;/a>
+Header
+&lt;/h3>&lt;p>Header 通常由两部分组成：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>typ&lt;/code>（Type）：令牌类型，也就是 JWT。&lt;/li>
+&lt;li>&lt;code>alg&lt;/code>（Algorithm）：签名算法，比如 HS256。&lt;/li>
+&lt;/ul>
+&lt;h3 id="payload">
+&lt;a href="#payload">#&lt;/a>
+Payload
+&lt;/h3>&lt;p>Payload 也是 JSON 格式数据，其中包含了 Claims(声明，包含 JWT 的相关信息)。&lt;/p>
+&lt;p>Claims 分为三种类型：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Registered Claims（注册声明）&lt;/strong>：预定义的一些声明，建议使用，但不是强制性的。&lt;/li>
+&lt;li>&lt;strong>Public Claims（公有声明）&lt;/strong>：JWT 签发方可以自定义的声明，但是为了避免冲突，应该在 &lt;a class="link" href="https://www.iana.org/assignments/jwt/jwt.xhtml" target="_blank" rel="noopener"
+>IANA JSON Web Token Registryopen in new window&lt;/a> 中定义它们。&lt;/li>
+&lt;li>&lt;strong>Private Claims（私有声明）&lt;/strong>：JWT 签发方因为项目需要而自定义的声明，更符合实际项目场景使用。&lt;/li>
+&lt;/ul>
+&lt;p>下面是一些常见的注册声明：&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>iss&lt;/code>（issuer）：JWT 签发方。&lt;/li>
+&lt;li>&lt;code>iat&lt;/code>（issued at time）：JWT 签发时间。&lt;/li>
+&lt;li>&lt;code>sub&lt;/code>（subject）：JWT 主题。&lt;/li>
+&lt;li>&lt;code>aud&lt;/code>（audience）：JWT 接收方。&lt;/li>
+&lt;li>&lt;code>exp&lt;/code>（expiration time）：JWT 的过期时间。&lt;/li>
+&lt;li>&lt;code>nbf&lt;/code>（not before time）：JWT 生效时间，早于该定义的时间的 JWT 不能被接受处理。&lt;/li>
+&lt;li>&lt;code>jti&lt;/code>（JWT ID）：JWT 唯一标识。&lt;/li>
+&lt;/ul>
+&lt;p>Playload是没有加密的，&lt;strong>一定不要将隐私信息存放在 Payload 当中！！！&lt;/strong>&lt;/p>
+&lt;h3 id="signature">
+&lt;a href="#signature">#&lt;/a>
+Signature
+&lt;/h3>&lt;p>Signature 部分是对前两部分的签名，作用是防止 JWT（主要是 payload） 被篡改。&lt;/p>
+&lt;p>这个签名的生成需要用到：&lt;/p>
+&lt;ul>
+&lt;li>Header + Payload。&lt;/li>
+&lt;li>存放在服务端的密钥(一定不要泄露出去)。&lt;/li>
+&lt;li>签名算法。&lt;/li>
+&lt;/ul>
+&lt;p>签名的计算公式如下：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-gdscript3" data-lang="gdscript3">&lt;span class="line">&lt;span class="cl">&lt;span class="n">HMACSHA256&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">base64UrlEncode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">header&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="s2">&amp;#34;.&amp;#34;&lt;/span> &lt;span class="o">+&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">base64UrlEncode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">payload&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">secret&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="jwt使用">
+&lt;a href="#jwt%e4%bd%bf%e7%94%a8">#&lt;/a>
+JWT使用
+&lt;/h2>&lt;p>在基于 JWT 进行身份验证的的应用程序中，服务器通过 Payload、Header 和 Secret(密钥)创建 JWT 并将 JWT 发送给客户端。客户端接收到 JWT 之后，会将其保存在 Cookie 或者 localStorage 里面，以后客户端发出的所有请求都会携带这个令牌。&lt;/p>
+&lt;p>简化后的步骤如下：&lt;/p>
+&lt;ol>
+&lt;li>用户向服务器发送用户名、密码以及验证码用于登陆系统。&lt;/li>
+&lt;li>如果用户用户名、密码以及验证码校验正确的话，服务端会返回已经签名的 Token，也就是 JWT。&lt;/li>
+&lt;li>用户以后每次向后端发请求都在 Header 中带上这个 JWT 。&lt;/li>
+&lt;li>服务端检查 JWT 并从中获取用户相关信息。&lt;/li>
+&lt;/ol>
+&lt;p>两点建议：&lt;/p>
+&lt;ol>
+&lt;li>建议将 JWT 存放在 localStorage 中，放在 Cookie 中会有 CSRF 风险。&lt;/li>
+&lt;li>请求服务端并携带 JWT 的常见做法是将其放在 HTTP Header 的 &lt;code>Authorization&lt;/code> 字段中（&lt;code>Authorization: Bearer Token&lt;/code>）。&lt;/li>
+&lt;/ol>
+&lt;h2 id="如何防止jwt被篡改">
+&lt;a href="#%e5%a6%82%e4%bd%95%e9%98%b2%e6%ad%a2jwt%e8%a2%ab%e7%af%a1%e6%94%b9">#&lt;/a>
+如何防止JWT被篡改
+&lt;/h2>&lt;p>有了签名之后，服务端拿到JWT，会解析出其中包含的Header、Payload以及Signature。服务端会根据Header、Payload、密钥再次生成一个Signature。拿新生成Signature和JWT中的Signature进行对比，如果一样说明Header和Payload没有被修改。&lt;/p>
+&lt;p>因此，密钥一定一定要保护好，JWT的安全核心在于签名，签名安全的核心在密钥。&lt;/p>
+&lt;h2 id="如何加强jwt的安全性">
+&lt;a href="#%e5%a6%82%e4%bd%95%e5%8a%a0%e5%bc%bajwt%e7%9a%84%e5%ae%89%e5%85%a8%e6%80%a7">#&lt;/a>
+如何加强JWT的安全性
+&lt;/h2>&lt;ol>
+&lt;li>使用安全系数高的加密算法。&lt;/li>
+&lt;li>使用成熟的开源库，没必要造轮子。&lt;/li>
+&lt;li>JWT 存放在 localStorage 中而不是 Cookie 中，避免 CSRF 风险。&lt;/li>
+&lt;li>一定不要将隐私信息存放在 Payload 当中。&lt;/li>
+&lt;li>密钥一定保管好，一定不要泄露出去。JWT 安全的核心在于签名，签名安全的核心在密钥。&lt;/li>
+&lt;li>Payload 要加入 &lt;code>exp&lt;/code> （JWT 的过期时间），永久有效的 JWT 不合理。并且，JWT 的过期时间不易过长。&lt;/li>
+&lt;/ol>
+&lt;h2 id="jwt的优点">
+&lt;a href="#jwt%e7%9a%84%e4%bc%98%e7%82%b9">#&lt;/a>
+JWT的优点
+&lt;/h2>&lt;p>有下面4个优势：&lt;/p>
+&lt;h3 id="无状态">
+&lt;a href="#%e6%97%a0%e7%8a%b6%e6%80%81">#&lt;/a>
+无状态
+&lt;/h3>&lt;p>JWT 自身包含了身份验证所需要的所有信息，因此，我们的服务器不需要存储 Session 信息。这显然增加了系统的可用性和伸缩性，大大减轻了服务端的压力。&lt;/p>
+&lt;p>不过，也正是由于 JWT 的无状态，也导致了它最大的缺点：&lt;strong>不可控！&lt;/strong>&lt;/p>
+&lt;p>就比如说，我们想要在 JWT 有效期内废弃一个 JWT 或者更改它的权限的话，并不会立即生效，通常需要等到有效期过后才可以。再比如说，当用户 Logout 的话，JWT 也还有效。除非，我们在后端增加额外的处理逻辑比如将失效的 JWT 存储起来，后端先验证 JWT 是否有效再进行处理。具体的解决办法，我们会在后面的内容中详细介绍到，这里只是简单提一下。&lt;/p>
+&lt;h3 id="有效避免了csrf攻击">
+&lt;a href="#%e6%9c%89%e6%95%88%e9%81%bf%e5%85%8d%e4%ba%86csrf%e6%94%bb%e5%87%bb">#&lt;/a>
+有效避免了CSRF攻击
+&lt;/h3>&lt;p>&lt;strong>CSRF（Cross Site Request Forgery）&lt;/strong> 一般被翻译为 &lt;strong>跨站请求伪造&lt;/strong>。举个例子：&lt;/p>
+&lt;p>这一天，小明同学百无聊赖地刷着Gmail邮件。大部分都是没营养的通知、验证码、聊天记录之类。但有一封邮件引起了小明的注意：&lt;/p>
+&lt;blockquote>
+&lt;p>甩卖比特币，一个只要998！！&lt;/p>
+&lt;/blockquote>
+&lt;p>聪明的小明当然知道这种肯定是骗子，但还是抱着好奇的态度点了进去（请勿模仿）。果然，这只是一个什么都没有的空白页面，小明失望的关闭了页面。一切似乎什么都没有发生……&lt;/p>
+&lt;p>在这平静的外表之下，黑客的攻击已然得手。小明的Gmail中，被偷偷设置了一个过滤规则，这个规则使得所有的邮件都会被自动转发到hacker@hackermail.com。小明还在继续刷着邮件，殊不知他的邮件正在一封封地，如脱缰的野马一般地，持续不断地向着黑客的邮箱转发而去。&lt;/p>
+&lt;p>不久之后的一天，小明发现自己的域名已经被转让了。懵懂的小明以为是域名到期自己忘了续费，直到有一天，对方开出了 $650 的赎回价码，小明才开始觉得不太对劲。&lt;/p>
+&lt;p>小明仔细查了下域名的转让，对方是拥有自己的验证码的，而域名的验证码只存在于自己的邮箱里面。小明回想起那天奇怪的链接，打开后重新查看了“空白页”的源码：&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-html" data-lang="html">&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">form&lt;/span> &lt;span class="na">method&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;POST&amp;#34;&lt;/span> &lt;span class="na">action&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;https://mail.google.com/mail/h/ewt1jmuj4ddv/?v=prf&amp;#34;&lt;/span> &lt;span class="na">enctype&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;multipart/form-data&amp;#34;&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">input&lt;/span> &lt;span class="na">type&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;hidden&amp;#34;&lt;/span> &lt;span class="na">name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;cf2_emc&amp;#34;&lt;/span> &lt;span class="na">value&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;true&amp;#34;&lt;/span>&lt;span class="p">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">input&lt;/span> &lt;span class="na">type&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;hidden&amp;#34;&lt;/span> &lt;span class="na">name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;cf2_email&amp;#34;&lt;/span> &lt;span class="na">value&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;hacker@hakermail.com&amp;#34;&lt;/span>&lt;span class="p">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> .....
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">input&lt;/span> &lt;span class="na">type&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;hidden&amp;#34;&lt;/span> &lt;span class="na">name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;irf&amp;#34;&lt;/span> &lt;span class="na">value&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;on&amp;#34;&lt;/span>&lt;span class="p">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">input&lt;/span> &lt;span class="na">type&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;hidden&amp;#34;&lt;/span> &lt;span class="na">name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;nvp_bu_cftb&amp;#34;&lt;/span> &lt;span class="na">value&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s">&amp;#34;Create Filter&amp;#34;&lt;/span>&lt;span class="p">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">form&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;&lt;/span>&lt;span class="nt">script&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">document&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">forms&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="mi">0&lt;/span>&lt;span class="p">].&lt;/span>&lt;span class="nx">submit&lt;/span>&lt;span class="p">();&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">&amp;lt;/&lt;/span>&lt;span class="nt">script&lt;/span>&lt;span class="p">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;blockquote>
+&lt;p>这个页面只要打开，就会向Gmail发送一个post请求。请求中，执行了“Create Filter”命令，将所有的邮件，转发到“hacker@hackermail.com”。&lt;/p>
+&lt;p>小明由于刚刚就登陆了Gmail，所以这个请求发送时，携带着小明的登录凭证（Cookie），Gmail的后台接收到请求，验证了确实有小明的登录凭证，于是成功给小明配置了过滤器。&lt;/p>
+&lt;p>黑客可以查看小明的所有邮件，包括邮件里的域名验证码等隐私信息。拿到验证码之后，黑客就可以要求域名服务商把域名重置给自己。&lt;/p>
+&lt;/blockquote>
+&lt;p>小明很快打开Gmail，找到了那条过滤器，将其删除。然而，已经泄露的邮件，已经被转让的域名，再也无法挽回了……&lt;/p>
+&lt;h4 id="jwt是如何进行避免的">
+&lt;a href="#jwt%e6%98%af%e5%a6%82%e4%bd%95%e8%bf%9b%e8%a1%8c%e9%81%bf%e5%85%8d%e7%9a%84">#&lt;/a>
+JWT是如何进行避免的
+&lt;/h4>&lt;p>一般情况下我们使用JWT的话，会在我们登陆成功获得JWT之后，一般会选择存放在localStorage中。前端的每一个请求后续都会附带这个JWT，整个过程压根不会涉及到Cookie。因此，即使你点击了非法链接发送了请求到服务端，这个非法请求也是不会携带JWT，所以这个请求将是非法的。&lt;/p>
+&lt;p>总结：&lt;strong>使用JWT进行身份验证不需要依赖Cookie，因此可以避免CSRF攻击&lt;/strong>。&lt;/p>
+&lt;p>但是会存在XSS攻击。常见的避免 XSS 攻击的方式是过滤掉请求中存在 XSS 攻击风险的可疑字符串。&lt;/p>
+&lt;h3 id="适用于移动端">
+&lt;a href="#%e9%80%82%e7%94%a8%e4%ba%8e%e7%a7%bb%e5%8a%a8%e7%ab%af">#&lt;/a>
+适用于移动端
+&lt;/h3>&lt;p>使用 Session 进行身份认证的话，需要保存一份信息在服务器端，而且这种方式会依赖到 Cookie（需要 Cookie 保存 &lt;code>SessionId&lt;/code>），所以不适合移动端。&lt;/p>
+&lt;p>但是，使用 JWT 进行身份认证就不会存在这种问题，因为只要 JWT 可以被客户端存储就能够使用，而且 JWT 还可以跨语言使用。&lt;/p>
+&lt;blockquote>
+&lt;p>为什么使用 Session 进行身份认证的话不适合移动端 ？&lt;/p>
+&lt;ol>
+&lt;li>状态管理: Session 基于服务器端的状态管理，而移动端应用通常是无状态的。移动设备的连接可能不稳定或中断，因此难以维护长期的会话状态。如果使用 Session 进行身份认证，移动应用需要频繁地与服务器进行会话维护，增加了网络开销和复杂性;&lt;/li>
+&lt;li>兼容性: 移动端应用通常会面向多个平台，如 iOS、Android 和 Web。每个平台对于 Session 的管理和存储方式可能不同，可能导致跨平台兼容性的问题;&lt;/li>
+&lt;li>安全性: 移动设备通常处于不受信任的网络环境，存在数据泄露和攻击的风险。将敏感的会话信息存储在移动设备上增加了被攻击的潜在风险。&lt;/li>
+&lt;/ol>
+&lt;/blockquote>
+&lt;h3 id="单点登录友好">
+&lt;a href="#%e5%8d%95%e7%82%b9%e7%99%bb%e5%bd%95%e5%8f%8b%e5%a5%bd">#&lt;/a>
+单点登录友好
+&lt;/h3>&lt;p>使用 Session 进行身份认证的话，实现单点登录，需要我们把用户的 Session 信息保存在一台电脑上，并且还会遇到常见的 Cookie 跨域的问题。但是，使用 JWT 进行认证的话， JWT 被保存在客户端，不会存在这些问题。&lt;/p>
+&lt;h2 id="jwt-身份认证常见问题及解决办法">
+&lt;a href="#jwt-%e8%ba%ab%e4%bb%bd%e8%ae%a4%e8%af%81%e5%b8%b8%e8%a7%81%e9%97%ae%e9%a2%98%e5%8f%8a%e8%a7%a3%e5%86%b3%e5%8a%9e%e6%b3%95">#&lt;/a>
+JWT 身份认证常见问题及解决办法
+&lt;/h2>&lt;h3 id="注销登录场景下jwt还有效">
+&lt;a href="#%e6%b3%a8%e9%94%80%e7%99%bb%e5%bd%95%e5%9c%ba%e6%99%af%e4%b8%8bjwt%e8%bf%98%e6%9c%89%e6%95%88">#&lt;/a>
+注销登录场景下JWT还有效
+&lt;/h3>&lt;p>与之类似的具体相关场景有：&lt;/p>
+&lt;ul>
+&lt;li>退出登录;&lt;/li>
+&lt;li>修改密码;&lt;/li>
+&lt;li>服务端修改了某个用户具有的权限或者角色；&lt;/li>
+&lt;li>用户的帐户被封禁/删除；&lt;/li>
+&lt;li>用户被服务端强制注销；&lt;/li>
+&lt;li>用户被踢下线；&lt;/li>
+&lt;li>……&lt;/li>
+&lt;/ul>
+&lt;p>这个问题不存在于 Session 认证方式中，因为在 Session 认证方式中，遇到这种情况的话服务端删除对应的 Session 记录即可。但是，使用 JWT 认证的方式就不好解决了。我们也说过了，JWT 一旦派发出去，如果后端不增加其他逻辑的话，它在失效之前都是有效的。&lt;/p>
+&lt;p>那我们如何解决这个问题呢？&lt;/p>
+&lt;p>&lt;strong>1. 将 JWT 存入数据库&lt;/strong>&lt;/p>
+&lt;p>将有效的 JWT 存入数据库中，更建议使用内存数据库比如 Redis。如果需要让某个 JWT 失效就直接从 Redis 中删除这个 JWT 即可。但是，这样会导致每次使用 JWT 都要先从 Redis 中查询 JWT 是否存在的步骤，而且违背了 JWT 的无状态原则。&lt;/p>
+&lt;p>&lt;strong>2. 黑名单机制&lt;/strong>&lt;/p>
+&lt;p>和上面的方式类似，使用内存数据库比如 Redis 维护一个黑名单，如果想让某个 JWT 失效的话就直接将这个 JWT 加入到 &lt;strong>黑名单&lt;/strong> 即可。然后，每次使用 JWT 进行请求的话都会先判断这个 JWT 是否存在于黑名单中。&lt;/p>
+&lt;p>前两种方案的核心在于将有效的 JWT 存储起来或者将指定的 JWT 拉入黑名单。&lt;/p>
+&lt;p>虽然这两种方案都违背了 JWT 的无状态原则，但是一般实际项目中我们通常还是会使用这两种方案。&lt;/p>
+&lt;p>&lt;strong>3. 修改密钥 (Secret)&lt;/strong> :&lt;/p>
+&lt;p>我们为每个用户都创建一个专属密钥，如果我们想让某个 JWT 失效，我们直接修改对应用户的密钥即可。但是，这样相比于前两种引入内存数据库带来了危害更大：&lt;/p>
+&lt;ul>
+&lt;li>如果服务是分布式的，则每次发出新的 JWT 时都必须在多台机器同步密钥。为此，你需要将密钥存储在数据库或其他外部服务中，这样和 Session 认证就没太大区别了。&lt;/li>
+&lt;li>如果用户同时在两个浏览器打开系统，或者在手机端也打开了系统，如果它从一个地方将账号退出，那么其他地方都要重新进行登录，这是不可取的。&lt;/li>
+&lt;/ul>
+&lt;p>&lt;strong>4. 保持令牌的有效期限短并经常轮换&lt;/strong>&lt;/p>
+&lt;p>很简单的一种方式。但是，会导致用户登录状态不会被持久记录，而且需要用户经常登录。&lt;/p>
+&lt;p>另外，对于修改密码后 JWT 还有效问题的解决还是比较容易的。说一种我觉得比较好的方式：&lt;strong>使用用户的密码的哈希值对 JWT 进行签名。因此，如果密码更改，则任何先前的令牌将自动无法验证。&lt;/strong>&lt;/p>
+&lt;h3 id="jwt续签问题">
+&lt;a href="#jwt%e7%bb%ad%e7%ad%be%e9%97%ae%e9%a2%98">#&lt;/a>
+JWT续签问题
+&lt;/h3>&lt;p>JWT 有效期一般都建议设置的不太长，那么 JWT 过期后如何认证，如何实现动态刷新 JWT，避免用户经常需要重新登录？&lt;/p>
+&lt;p>我们先来看看在 Session 认证中一般的做法：&lt;strong>假如 Session 的有效期 30 分钟，如果 30 分钟内用户有访问，就把 Session 有效期延长 30 分钟。&lt;/strong>&lt;/p>
+&lt;p>JWT 认证的话，我们应该如何解决续签问题呢？&lt;/p>
+&lt;p>&lt;strong>1、类似于 Session 认证中的做法（不推荐）&lt;/strong>&lt;/p>
+&lt;p>这种方案满足于大部分场景。假设服务端给的 JWT 有效期设置为 30 分钟，服务端每次进行校验时，如果发现 JWT 的有效期马上快过期了，服务端就重新生成 JWT 给客户端。客户端每次请求都检查新旧 JWT，如果不一致，则更新本地的 JWT。这种做法的问题是仅仅在快过期的时候请求才会更新 JWT ，对客户端不是很友好。&lt;/p>
+&lt;p>&lt;strong>2、每次请求都返回新 JWT（不推荐）&lt;/strong>&lt;/p>
+&lt;p>这种方案的的思路很简单，但是，开销会比较大，尤其是在服务端要存储维护 JWT 的情况下。&lt;/p>
+&lt;p>&lt;strong>3、JWT 有效期设置到半夜（不推荐）&lt;/strong>&lt;/p>
+&lt;p>这种方案是一种折衷的方案，保证了大部分用户白天可以正常登录，适用于对安全性要求不高的系统。&lt;/p>
+&lt;p>&lt;strong>4、用户登录返回两个 JWT（推荐）&lt;/strong>&lt;/p>
+&lt;p>第一个是 accessJWT ，它的过期时间 JWT 本身的过期时间比如半个小时，另外一个是 refreshJWT 它的过期时间更长一点比如为 1 天。refreshJWT 只用来获取 accessJWT，不容易被泄露。&lt;/p>
+&lt;p>客户端登录后，将 accessJWT 和 refreshJWT 保存在本地，每次访问将 accessJWT 传给服务端。服务端校验 accessJWT 的有效性，如果过期的话，就将 refreshJWT 传给服务端。如果有效，服务端就生成新的 accessJWT 给客户端。否则，客户端就重新登录即可。&lt;/p>
+&lt;p>这种方案的不足是：&lt;/p>
+&lt;ul>
+&lt;li>需要客户端来配合；&lt;/li>
+&lt;li>用户注销的时候需要同时保证两个 JWT 都无效；&lt;/li>
+&lt;li>重新请求获取 JWT 的过程中会有短暂 JWT 不可用的情况（可以通过在客户端设置定时器，当 accessJWT 快过期的时候，提前去通过 refreshJWT 获取新的 accessJWT）;&lt;/li>
+&lt;li>存在安全问题，只要拿到了未过期的 refreshJWT 就一直可以获取到 accessJWT。不过，由于 refreshJWT 只用来获取 accessJWT，不容易被泄露。&lt;/li>
+&lt;/ul>
+&lt;h2 id="总结">
+&lt;a href="#%e6%80%bb%e7%bb%93">#&lt;/a>
+总结
+&lt;/h2>&lt;p>介绍了JWT的概念，结构，使用场景，以及对应的优点，存在的缺陷，身份认证存在的问题等。&lt;/p></description></item></channel></rss>

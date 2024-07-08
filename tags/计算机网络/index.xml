@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>计算机网络 on Runqi Blog</title><link>https://runqizhao.cn/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/</link><description>Recent content in 计算机网络 on Runqi Blog</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 12 May 2024 23:21:52 +0800</lastBuildDate><atom:link href="https://runqizhao.cn/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/index.xml" rel="self" type="application/rss+xml"/><item><title>认证与鉴权</title><link>https://runqizhao.cn/p/%E8%AE%A4%E8%AF%81%E4%B8%8E%E9%89%B4%E6%9D%83/</link><pubDate>Sun, 12 May 2024 23:21:52 +0800</pubDate><guid>https://runqizhao.cn/p/%E8%AE%A4%E8%AF%81%E4%B8%8E%E9%89%B4%E6%9D%83/</guid><description>&lt;h2 id="认证和鉴权">
+&lt;a href="#%e8%ae%a4%e8%af%81%e5%92%8c%e9%89%b4%e6%9d%83">#&lt;/a>
+认证和鉴权
+&lt;/h2>&lt;p>说简单点：&lt;/p>
+&lt;ul>
+&lt;li>认证（Authentication）：你是谁。&lt;/li>
+&lt;li>鉴权（Authorization）：你有权限干什么。&lt;/li>
+&lt;/ul>
+&lt;p>正式点的：&lt;/p>
+&lt;ul>
+&lt;li>认证：是验证身份的凭据（例如用户名/用户ID和密码），通过这个凭据，系统得以知道你的身份，也就是这个用户的身份，也就是相当于你的身份凭证。&lt;/li>
+&lt;li>鉴权：发生在认证之后。分配给用户能够使用的资源，如果是系统管理员，这个时候就有增删改查的权限，诸如此类。&lt;/li>
+&lt;/ul>
+&lt;p>这两个一般在我们的系统中被结合在一起使用，目的就是为了保护我们系统的安全性。&lt;/p>
+&lt;h2 id="rbac模型">
+&lt;a href="#rbac%e6%a8%a1%e5%9e%8b">#&lt;/a>
+RBAC模型
+&lt;/h2>&lt;p>RBAC是基于角色的权限访问控制。这是一种通过角色关联权限，角色同时有关联用户的授权方式。&lt;/p>
+&lt;p>简单来说：一个用户可以拥有若干角色，每一个角色又可以被分配若干权限，这样构造成“用户-角色-权限“的授权模型。这种模型中，用户与角色、角色与权限之间构成了多对多的关系。&lt;/p>
+&lt;p>通常来说，如果系统对于权限控制要求比较严格的话，一般都会选择使用 RBAC 模型来做权限控制。&lt;/p>
+&lt;h2 id="cookie">
+&lt;a href="#cookie">#&lt;/a>
+Cookie
+&lt;/h2>&lt;p>&lt;code>Cookie&lt;/code> 和 &lt;code>Session&lt;/code> 都是用来跟踪浏览器用户身份的会话方式，但是两者的应用场景不太一样。&lt;/p>
+&lt;p>简单来说：&lt;strong>&lt;code>Cookie&lt;/code> 存放在客户端，一般用来保存用户信息&lt;/strong>。&lt;/p>
+&lt;p>下面是 &lt;code>Cookie&lt;/code> 的一些应用案例：&lt;/p>
+&lt;ol>
+&lt;li>我们在 &lt;code>Cookie&lt;/code> 中保存已经登录过的用户信息，下次访问网站的时候页面可以自动帮你登录的一些基本信息给填了。除此之外，&lt;code>Cookie&lt;/code> 还能保存用户首选项，主题和其他设置信息。&lt;/li>
+&lt;li>使用 &lt;code>Cookie&lt;/code> 保存 &lt;code>SessionId&lt;/code> 或者 &lt;code>Token&lt;/code> ，向后端发送请求的时候带上 &lt;code>Cookie&lt;/code>，这样后端就能取到 &lt;code>Session&lt;/code> 或者 &lt;code>Token&lt;/code> 了。这样就能记录用户当前的状态了，因为 HTTP 协议是无状态的。&lt;/li>
+&lt;li>&lt;code>Cookie&lt;/code> 还可以用来记录和分析用户行为。举个简单的例子你在网上购物的时候，因为 HTTP 协议是没有状态的，如果服务器想要获取你在某个页面的停留状态或者看了哪些商品，一种常用的实现方式就是将这些信息存放在 &lt;code>Cookie&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;h3 id="cookie-和-session-有什么区别">
+&lt;a href="#cookie-%e5%92%8c-session-%e6%9c%89%e4%bb%80%e4%b9%88%e5%8c%ba%e5%88%ab">#&lt;/a>
+Cookie 和 Session 有什么区别？
+&lt;/h3>&lt;p>&lt;strong>&lt;code>Session&lt;/code> 的主要作用就是通过服务端记录用户的状态。&lt;/strong> 典型的场景是购物车，当你要添加商品到购物车的时候，系统不知道是哪个用户操作的，因为 HTTP 协议是无状态的。服务端给特定的用户创建特定的 &lt;code>Session&lt;/code> 之后就可以标识这个用户并且跟踪这个用户了。&lt;/p>
+&lt;p>&lt;code>Cookie&lt;/code> 数据保存在客户端(浏览器端)，&lt;code>Session&lt;/code> 数据保存在服务器端。相对来说 &lt;code>Session&lt;/code> 安全性更高。如果使用 &lt;code>Cookie&lt;/code> 的一些敏感信息不要写入 &lt;code>Cookie&lt;/code> 中，最好能将 &lt;code>Cookie&lt;/code> 信息加密然后使用到的时候再去服务器端解密。&lt;/p>
+&lt;h3 id="如何使用cookie-session进行身份验证">
+&lt;a href="#%e5%a6%82%e4%bd%95%e4%bd%bf%e7%94%a8cookie-session%e8%bf%9b%e8%a1%8c%e8%ba%ab%e4%bb%bd%e9%aa%8c%e8%af%81">#&lt;/a>
+如何使用cookie-session进行身份验证
+&lt;/h3>&lt;p>很多时候都是使用&lt;code>SessionID&lt;/code>来实现特定的用户，&lt;code>SessionID&lt;/code>一般会存放在Redis中。&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>用户成功登陆系统，然后返回用户端具有SessionID的Cooike。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>当用户向后端发起请求的时候会把SessionID带上，这样后端就知道你的身份状态了。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>用户向服务器发送用户名、密码、验证码用于登陆系统。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>服务器验证通过后，服务器为用户创建一个 &lt;code>Session&lt;/code>，并将 &lt;code>Session&lt;/code> 信息存储起来。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>服务器向用户返回一个 &lt;code>SessionID&lt;/code>，写入用户的 &lt;code>Cookie&lt;/code>。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>当用户保持登录状态时，&lt;code>Cookie&lt;/code> 将与每个后续请求一起被发送出去。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>服务器可以将存储在 &lt;code>Cookie&lt;/code> 上的 &lt;code>SessionID&lt;/code> 与存储在内存中或者数据库中的 &lt;code>Session&lt;/code> 信息进行比较，以验证用户的身份，返回给用户客户端响应信息的时候会附带用户当前的状态。&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;p>使用 &lt;code>Session&lt;/code> 的时候需要注意下面几个点：&lt;/p>
+&lt;ul>
+&lt;li>依赖 &lt;code>Session&lt;/code> 的关键业务一定要确保客户端开启了 &lt;code>Cookie&lt;/code>。&lt;/li>
+&lt;li>注意 &lt;code>Session&lt;/code> 的过期时间。&lt;/li>
+&lt;/ul>
+&lt;h3 id="多服务节点下cookie-session">
+&lt;a href="#%e5%a4%9a%e6%9c%8d%e5%8a%a1%e8%8a%82%e7%82%b9%e4%b8%8bcookie-session">#&lt;/a>
+多服务节点下cookie-session
+&lt;/h3>&lt;p>存在问题：加入部署了两份相同的服务A，B，用户第一次登陆的时候，使用的是A服务器，这个时候用户的Session信息保存在A服务器。第二次访问的时候负载均衡访问的是B服务器，由于B服务器没有保存用户的Session信息，这个时候需要重新进行登录。&lt;/p>
+&lt;p>解决办法：&lt;/p>
+&lt;ol>
+&lt;li>某个用户的所有请求都通过特性的哈希策略分配给同一个服务器处理。这样的话，每个服务器都保存了一部分用户的 Session 信息。服务器宕机，其保存的所有 Session 信息就完全丢失了。&lt;/li>
+&lt;li>每一个服务器保存的 Session 信息都是互相同步的，也就是说每一个服务器都保存了全量的 Session 信息。每当一个服务器的 Session 信息发生变化，我们就将其同步到其他服务器。这种方案成本太大，并且，节点越多时，同步成本也越高。&lt;/li>
+&lt;li>单独使用一个所有服务器都能访问到的数据节点（比如缓存）来存放 Session 信息。为了保证高可用，数据节点尽量要避免是单点。&lt;/li>
+&lt;li>Spring Session 是一个用于在多个服务器之间管理会话的项目。它可以与多种后端存储（如 Redis、MongoDB 等）集成，从而实现分布式会话管理。通过 Spring Session，可以将会话数据存储在共享的外部存储中，以实现跨服务器的会话同步和共享。&lt;/li>
+&lt;/ol>
+&lt;h3 id="如果没有cookiesession可以使用吗">
+&lt;a href="#%e5%a6%82%e6%9e%9c%e6%b2%a1%e6%9c%89cookiesession%e5%8f%af%e4%bb%a5%e4%bd%bf%e7%94%a8%e5%90%97">#&lt;/a>
+如果没有cookie，session可以使用吗
+&lt;/h3>&lt;p>如果客户端禁用了 &lt;code>Cookie&lt;/code>，那么 &lt;code>Session&lt;/code> 就无法正常工作。&lt;/p>
+&lt;p>但是，并不是没有 &lt;code>Cookie&lt;/code> 之后就不能用 &lt;code>Session&lt;/code> 了，比如你可以将 &lt;code>SessionID&lt;/code> 放在请求的 &lt;code>url&lt;/code> 里面&lt;code>https://runqizhao.cn/?Session_id=xxx&lt;/code> 。这种方案的话可行，但是安全性和用户体验感降低。当然，为了安全你也可以对 &lt;code>SessionID&lt;/code> 进行一次加密之后再传入后端。&lt;/p>
+&lt;h2 id="如何防止csrf攻击">
+&lt;a href="#%e5%a6%82%e4%bd%95%e9%98%b2%e6%ad%a2csrf%e6%94%bb%e5%87%bb">#&lt;/a>
+如何防止CSRF攻击？
+&lt;/h2>&lt;p>&lt;strong>CSRF(Cross Site Request Forgery)&lt;/strong> 一般被翻译为 &lt;strong>跨站请求伪造&lt;/strong> 。举个例子：&lt;/p>
+&lt;p>小壮登录了某网上银行，他来到了网上银行的帖子区，看到一个帖子下面有一个链接写着“科学理财，年盈利率过万”，小壮好奇的点开了这个链接，结果发现自己的账户少了 10000 元。这是这么回事呢？原来黑客在链接中藏了一个请求，这个请求直接利用小壮的身份给银行发送了一个转账请求,也就是通过你的 Cookie 向银行发出请求。&lt;/p>
+&lt;p>上面也提到过，进行 &lt;code>Session&lt;/code> 认证的时候，我们一般使用 &lt;code>Cookie&lt;/code> 来存储 &lt;code>SessionId&lt;/code>,当我们登陆后后端生成一个 &lt;code>SessionId&lt;/code> 放在 Cookie 中返回给客户端，服务端通过 Redis 或者其他存储工具记录保存着这个 &lt;code>SessionId&lt;/code>，客户端登录以后每次请求都会带上这个 &lt;code>SessionId&lt;/code>，服务端通过这个 &lt;code>SessionId&lt;/code> 来标示你这个人。如果别人通过 &lt;code>Cookie&lt;/code> 拿到了 &lt;code>SessionId&lt;/code> 后就可以代替你的身份访问系统了。&lt;/p>
+&lt;p>&lt;code>Session&lt;/code> 认证中 &lt;code>Cookie&lt;/code> 中的 &lt;code>SessionId&lt;/code> 是由浏览器发送到服务端的，借助这个特性，攻击者就可以通过让用户误点攻击链接，达到攻击效果。&lt;/p>
+&lt;p>但是，我们使用 &lt;code>Token&lt;/code> 的话就不会存在这个问题，在我们登录成功获得 &lt;code>Token&lt;/code> 之后，一般会选择存放在 &lt;code>localStorage&lt;/code> （浏览器本地存储）中。然后我们在前端通过某些方式会给每个发到后端的请求加上这个 &lt;code>Token&lt;/code>,这样就不会出现 CSRF 漏洞的问题。因为，即使你点击了非法链接发送了请求到服务端，这个非法请求是不会携带 &lt;code>Token&lt;/code> 的，所以这个请求将是非法的。&lt;/p>
+&lt;p>需要注意的是：不论是 &lt;code>Cookie&lt;/code> 还是 &lt;code>Token&lt;/code> 都无法避免 &lt;strong>跨站脚本攻击（Cross Site Scripting）XSS&lt;/strong> 。&lt;/p>
+&lt;blockquote>
+&lt;p>跨站脚本攻击（Cross Site Scripting）缩写为 CSS 但这会与层叠样式表（Cascading Style Sheets，CSS）的缩写混淆。因此，有人将跨站脚本攻击缩写为 XSS。&lt;/p>
+&lt;/blockquote>
+&lt;p>XSS 中攻击者会用各种方式将恶意代码注入到其他用户的页面中。就可以通过脚本盗用信息比如 &lt;code>Cookie&lt;/code> 。&lt;/p></description></item><item><title>CDN详解</title><link>https://runqizhao.cn/p/cdn%E8%AF%A6%E8%A7%A3/</link><pubDate>Sat, 11 May 2024 16:42:42 +0800</pubDate><guid>https://runqizhao.cn/p/cdn%E8%AF%A6%E8%A7%A3/</guid><description>&lt;h2 id="什么是cdn">
+&lt;a href="#%e4%bb%80%e4%b9%88%e6%98%afcdn">#&lt;/a>
+什么是CDN
+&lt;/h2>&lt;p>&lt;strong>CDN&lt;/strong> 全称是 Content Delivery Network/Content Distribution Network，翻译过的意思是 &lt;strong>内容分发网络&lt;/strong> 。&lt;/p>
+&lt;p>这个概念个人觉得可以跟DNS进行比较，也就是咱们再找对应目标（数据）的时候，从不同DNS上查找，减少总域名服务器的压力。总体来说，CDN可以分为两个部分：&lt;/p>
+&lt;ol>
+&lt;li>内容：指的是静态资源比如图片、视频、文档、JS、CSS、HTML。&lt;/li>
+&lt;li>分发网络：指的是将这些静态资源分发到位于多个不同的地理位置机房中的服务器上，这样，就可以实现静态资源的就近访问比如北京的用户直接访问北京机房的数据。&lt;/li>
+&lt;/ol>
+&lt;p>&lt;strong>CDN 就是将静态资源分发到多个不同的地方以实现就近访问，进而加快静态资源的访问速度，减轻服务器以及带宽的负担。&lt;/strong>&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/640"
+loading="lazy"
+alt="图片"
+>&lt;/p>
+&lt;p>我们经常拿全站加速和内容分发网络做对比，不要把两者搞混了！全站加速（不同云服务商叫法不同，腾讯云叫 ECDN、阿里云叫 DCDN）既可以加速静态资源又可以加速动态资源，内容分发网络（CDN）主要针对的是 &lt;strong>静态资源&lt;/strong> 。&lt;/p>
+&lt;h2 id="cdn工作原理">
+&lt;a href="#cdn%e5%b7%a5%e4%bd%9c%e5%8e%9f%e7%90%86">#&lt;/a>
+CDN工作原理
+&lt;/h2>&lt;p>咱们再请求资源的时候，如果没有CDN，会经过以下步骤：&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/1715419331824.jpg"
+loading="lazy"
+alt="1715419331824"
+>&lt;/p>
+&lt;p>而在使用CDN后，源站域名解析将配置为Cname，即将域名解析到CDN域名，并最终由CDN厂商的GSLB分配IP。此时，整体的访问流程变成如下所示，浏览器将到CDN节点请求资源。&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/1715419348731.jpg"
+loading="lazy"
+alt="1715419348731"
+>&lt;/p>
+&lt;h3 id="gslb">
+&lt;a href="#gslb">#&lt;/a>
+GSLB
+&lt;/h3>&lt;p>GSLB系统可以基于智能的DNS技术来实现，相比于传统DNS具有功能更加强大、更加智能的特点。GSLB根据预先配置好的策略，为用户分配最适合的节点地址。&lt;/p>
+&lt;p>以下几种为GSLB常见的调度策略：&lt;/p>
+&lt;p>&lt;strong>. 基于Local DNS的静态调度&lt;/strong>&lt;/p>
+&lt;p>该策略会根据Local DNS的IP地址（或者终端机器的IP地址），然后在配置里面找到IP所对应的区域，返回该区域最适合的CDN节点地址给到客户端。&lt;/p>
+&lt;p>&lt;strong>. 基于RTT的调度&lt;/strong>&lt;/p>
+&lt;p>RTT（Round-Trip Time）指节点到目标之间数据的往返时延，该策略会根据Local DNS的IP地址，将候选的CDN节点与该地址的RTT进行比较，并将其中RTT小的节点调度给用户。&lt;/p>
+&lt;p>&lt;strong>. 基于成本和带宽的调度&lt;/strong>&lt;/p>
+&lt;p>成本方面主要从CDN厂商角度考虑，比如在某些业务少的地区，调度器会将部分请求调度给到其他区域的节点处理，这样可以减少在该区域的节点部署 。而基于带宽的调度则会根据CDN节点的出口带宽大小计算权重，分配访问请求。&lt;/p>
+&lt;p>&lt;strong>. 基于服务等级的调度&lt;/strong>&lt;/p>
+&lt;p>该策略基于目标域名的企业服务等级，通常会将质量更好节点分配给等级更高的企业客户，以便提供给高级别用户更好的服务。&lt;/p>
+&lt;p>以上几种为常见的调度策略，CDN厂商通常会将这几种方式结合使用，在成本和带宽满足的情况下，尽量提供就近选择的节点资源。当然，不排除部分CDN厂商还会有自身的定制化策略。&lt;/p>
+&lt;h3 id="缓存系统">
+&lt;a href="#%e7%bc%93%e5%ad%98%e7%b3%bb%e7%bb%9f">#&lt;/a>
+缓存系统
+&lt;/h3>&lt;p>缓存系统最基本的工作单元就是许许多多的Cache节点(缓存服务器），Cache节点负责直接响应最终用户的访问请求，把缓存在本地的内容快速提供给用户。同时 ，Cache节点也会与源站进行内容同步，把更新的内容以及本地没有的内容从源站点获取并保存在本地。&lt;/p>
+&lt;p>缓存系统可能存在着多层级的架构，如典型的三层架构：边缘节点作为最接近用户的节点，提供给到用户进行就近访问。当边缘节点未命中资源时，会向上层节点请求。如果在中心节点仍未命中，则会回源到源站进行获取。&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/1715419477618.jpg"
+loading="lazy"
+alt="1715419477618"
+>&lt;/p>
+&lt;p>这个其实就是：咱们将对应经常使用的，放在对应的边缘节点，然后不经常使用的放在中心节点。&lt;/p>
+&lt;h3 id="静态资源是如何加载到cdn中的">
+&lt;a href="#%e9%9d%99%e6%80%81%e8%b5%84%e6%ba%90%e6%98%af%e5%a6%82%e4%bd%95%e5%8a%a0%e8%bd%bd%e5%88%b0cdn%e4%b8%ad%e7%9a%84">#&lt;/a>
+静态资源是如何加载到CDN中的
+&lt;/h3>&lt;p>可以使用预热与回源两种方法进行加载：&lt;/p>
+&lt;ul>
+&lt;li>预热是指在 CDN 上提前将内容缓存到 CDN 节点上。这样当用户在请求这些资源时，能够快速地从最近的 CDN 节点获取到而不需要回源，进而减少了对源站的访问压力，提高了访问速度。&lt;/li>
+&lt;li>回源：当 CDN 节点上没有用户请求的资源或该资源的缓存已经过期时，CDN 节点需要从原始服务器获取最新的资源内容，这个过程就是回源。当用户请求发生回源的话，会导致该请求的响应速度比未使用 CDN 还慢，因为相比于未使用 CDN 还多了一层 CDN 的调用流程。&lt;/li>
+&lt;/ul>
+&lt;h2 id="如何防止资源被盗">
+&lt;a href="#%e5%a6%82%e4%bd%95%e9%98%b2%e6%ad%a2%e8%b5%84%e6%ba%90%e8%a2%ab%e7%9b%97">#&lt;/a>
+如何防止资源被盗
+&lt;/h2>&lt;p>如果我们的资源被其他用户或者网站非法盗刷的话，将会是一笔不小的开支。&lt;/p>
+&lt;p>解决这个问题最常用最简单的办法设置 &lt;strong>Referer 防盗链&lt;/strong>，具体来说就是根据 HTTP 请求的头信息里面的 Referer 字段对请求进行限制。我们可以通过 Referer 字段获取到当前请求页面的来源页面的网站地址，这样我们就能确定请求是否来自合法的网站。&lt;/p>
+&lt;p>&lt;img src="https://img-1312072469.cos.ap-nanjing.myqcloud.com/cnd-tencent-cloud-anti-theft.png"
+loading="lazy"
+alt="腾讯云 CDN Referer 防盗链配置"
+>&lt;/p>
+&lt;p>这种方式比较基础，如果站点的防盗链配置允许 Referer 为空的话，通过隐藏 Referer，可以直接绕开防盗链。&lt;/p>
+&lt;p>因此，通常情况下，我们会配合其他机制来确保静态资源被盗用，一种常用的机制是 &lt;strong>时间戳防盗链&lt;/strong> 。相比之下，&lt;strong>时间戳防盗链&lt;/strong> 的安全性更强一些。时间戳防盗链加密的 URL 具有时效性，过期之后就无法再被允许访问。&lt;/p>
+&lt;p>时间戳防盗链的 URL 通常会有两个参数一个是签名字符串，一个是过期时间。签名字符串一般是通过对用户设定的加密字符串、请求路径、过期时间通过 MD5 哈希算法取哈希的方式获得。&lt;/p>
+&lt;h2 id="总结">
+&lt;a href="#%e6%80%bb%e7%bb%93">#&lt;/a>
+总结
+&lt;/h2>&lt;p>CDN 就是将静态资源分发到多个不同的地方以实现就近访问，进而加快静态资源的访问速度，减轻服务器以及带宽的负担。&lt;/p>
+&lt;p>基于成本、稳定性和易用性考虑，建议直接选择专业的云厂商（比如阿里云、腾讯云、华为云、青云）或者 CDN 厂商（比如网宿、蓝汛）提供的开箱即用的 CDN 服务。&lt;/p>
+&lt;p>GSLB （Global Server Load Balance，全局负载均衡）是 CDN 的大脑，负责多个 CDN 节点之间相互协作，最常用的是基于 DNS 的 GSLB。CDN 会通过 GSLB 找到最合适的 CDN 节点。&lt;/p>
+&lt;p>为了防止静态资源被盗用，我们可以利用 &lt;strong>Referer 防盗链&lt;/strong> + &lt;strong>时间戳防盗链&lt;/strong> 。&lt;/p></description></item></channel></rss>
