@@ -1,6 +1,6 @@
 ---
 title: "Seata Client端启动流程"
-description: 讲述Seata的Client的启动流程
+description:
 date: 2024-07-04T22:35:24+08:00
 image: https://seata.apache.org/img/seata_logo.png
 math: true
